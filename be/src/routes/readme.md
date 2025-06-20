@@ -1,0 +1,1 @@
+Folder routes nơi định nghĩa các router, các file router có nhiệm vụ import các file controller để sử dụng.
