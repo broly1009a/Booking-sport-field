@@ -27,5 +27,8 @@ export const matchmakingService = {
     joinMatchmaking: async (id, representativeId) => {
         return handleApiCall(() => api.post(`/matchmaking/${id}/join`, { representativeId }));  
     },
-    };
+    getMatchmakingsByUser: async (userId) => {
+        return handleApiCall(() => api.get(`/matchmaking/user/${userId}`));
+    }
+}
 export default matchmakingService;

@@ -191,8 +191,8 @@ const BookingList = ({ userId }) => {
                         bookings.map(booking => (
                             <TableRow key={booking._id}>
                                 <TableCell>{booking.fieldId?.name || ''}</TableCell>
-                                <TableCell>{dayjs(booking.startTime).format('HH:mm DD/MM/YYYY')}</TableCell>
-                                <TableCell>{dayjs(booking.endTime).format('HH:mm DD/MM/YYYY')}</TableCell>
+                                <TableCell>{booking.startTime}</TableCell>
+                                <TableCell>{booking.endTime}</TableCell>
                                 <TableCell>{booking.totalPrice?.toLocaleString('vi-VN')} VNĐ</TableCell>
                                 <TableCell>
                                     <Box

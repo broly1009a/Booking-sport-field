@@ -77,6 +77,15 @@ class MatchmakingController {
         next(error);
     }
 }
+async getMatchmakingsByUser(req, res, next) {
+    try {
+        const { userId } = req.params;
+        const matchmakings = await MatchmakingService.getMatchmakingsByUser(userId);
+        res.status(200).json({ success: true, data: matchmakings });
+    } catch (error) {
+        next(error);
+    }
+}
 }
 
 module.exports = new MatchmakingController();

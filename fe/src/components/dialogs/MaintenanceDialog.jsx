@@ -6,7 +6,7 @@ import {
 import dayjs from 'dayjs';
 import { formatTimeVN } from '../../utils/handleFormat';
 import maintenanceService from '../../services/api/maintenanceService';
-
+import { toast } from 'react-toastify';
 const MaintenanceDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) => {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,16 +27,23 @@ const MaintenanceDialog = ({ open, onClose, selectedSlots, sportField, onConfirm
         description,
         status: 'scheduled'
       });
+      toast.success('Đặt lịch bảo trì thành công!');
       if (onConfirm) onConfirm();
+      setDescription('');
       onClose();
     } catch (err) {
-      alert('Đặt lịch bảo trì thất bại!');
+      toast.error('Đặt lịch bảo trì thất bại!');
     }
     setLoading(false);
   };
 
+  const handleClose = () => {
+    setDescription('');
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ bgcolor: '#388e3c', color: 'white', textAlign: 'center' }}>
         Đặt lịch bảo trì sân
       </DialogTitle>
@@ -78,7 +85,7 @@ const MaintenanceDialog = ({ open, onClose, selectedSlots, sportField, onConfirm
         />
       </DialogContent>
       <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-        <Button onClick={onClose} sx={{ color: '#388e3c' }}>Hủy</Button>
+        <Button onClick={handleClose} sx={{ color: '#388e3c' }}>Hủy</Button>
         <Button
           variant="contained"
           onClick={handleConfirm}

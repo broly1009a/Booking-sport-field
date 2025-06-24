@@ -22,8 +22,6 @@ import { useLocation } from 'react-router-dom';
 import { formatBookingTimeUTC } from '../../utils/handleFormat';
 import MatchmakingDialog from '../../components/dialogs/matchmakingDialog';
 import { useAuth } from '../../contexts/authContext';
-import consumablePurchaseService from '../../services/api/consumablePurchaseService';
-import equipmentRentalService from '../../services/api/equipmentRentalController';
 const fakeBookingData = {
   _id: 'booking123',
   fieldName: 'Sân A - Pickleball',
@@ -61,16 +59,27 @@ const BookingSuccess = () => {
   //       ? initialItems
   //       : fakeItems.map(item => ({ ...item, quantity: 0 }))
   //   );
-  const [selectedItems, setSelectedItems] = useState(
-    initialItems.length > 0
-      ? initialItems
-      : fakeSelectedItems // Dùng fake data nếu không có
-  );
 
-  const [bookingData, setBookingData] = useState(
-    location.state?.bookingData || fakeBookingData
-    // Dùng fake data nếu không có
+
+
+   if (!location.state?.bookingData) {
+    alert('Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau!');
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography variant="h5" color="error">
+          Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau!
+        </Typography>
+      </Box>
+    );
+  }
+
+  const bookingData = location.state.bookingData;
+  const [selectedItems, setSelectedItems] = useState(
+    bookingData.selectedItems && bookingData.selectedItems.length > 0
+      ? bookingData.selectedItems
+      : (location.state?.selectedItems || fakeSelectedItems)
   );
+  console.log('Booking data:', bookingData);
   useEffect(() => {
     // Mở popup nếu chưa có mục nào được chọn
     if (!selectedItems.some(item => item.quantity > 0)) {
@@ -90,48 +99,6 @@ const BookingSuccess = () => {
     );
   };
 
- const handleConfirmItems = async () => {
-  const itemsToOrder = selectedItems.filter(item => item.quantity > 0);
-  if (itemsToOrder.length === 0) {
-    toast.warn('Vui lòng chọn ít nhất một món hàng');
-    return;
-  }
-
-  const equipmentItems = itemsToOrder.filter(item => item.type === 'equipment');
-  const consumableItems = itemsToOrder.filter(item => item.type === 'consumable');
-
-  try {
-    if (equipmentItems.length > 0) {
-      await equipmentRentalService.createEquipmentRental({
-        userId: currentUser?._id,
-        bookingId: bookingData._id,
-        equipments: equipmentItems.map(item => ({
-          equipmentId: item._id,
-          quantity: item.quantity
-        })),
-        totalPrice: equipmentItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      });
-    }
-
-    if (consumableItems.length > 0) {
-      await consumablePurchaseService.createConsumablePurchase({
-        userId: currentUser?._id,
-        bookingId: bookingData._id,
-        consumables: consumableItems.map(item => ({
-          consumableId: item._id,
-          quantity: item.quantity
-        })),
-        totalPrice: consumableItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      });
-    }
-
-    toast.success('Đặt hàng thiết bị và đồ tiêu thụ thành công');
-    setOpenAddItemsDialog(false);
-  } catch (error) {
-    console.error('Error creating item order:', error);
-    toast.error('Đặt hàng thất bại');
-  }
-};
 
   const totalItemPrice = selectedItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -151,7 +118,7 @@ const BookingSuccess = () => {
         <Typography variant="h6" sx={{ color: '#388e3c' }}>Thông tin đặt sân</Typography>
         <Typography>Sân: {bookingData.fieldName}</Typography>
         <Typography>
-        Thời gian: {formatBookingTimeUTC(bookingData.startTime)} - {formatBookingTimeUTC(bookingData.endTime)}
+          Thời gian: {formatBookingTimeUTC(bookingData.startTime)} - {formatBookingTimeUTC(bookingData.endTime)}
         </Typography>
         <Typography>Tổng tiền sân: {bookingData.totalPrice.toLocaleString()}đ</Typography>
         <Typography>Tên người đặt: {bookingData.customerName}</Typography>
@@ -227,77 +194,14 @@ const BookingSuccess = () => {
         onClose={() => setOpenAddItemsDialog(false)}
         userId={currentUser?._id}
       />
-      <Dialog
+        {/* <AddItemsDialog
         open={openAddItemsDialog}
         onClose={() => setOpenAddItemsDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Thuê thêm thiết bị hoặc mua đồ tiêu thụ</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mb: 2 }}>
-            Bạn muốn thuê thêm thiết bị hoặc mua nước không?
-          </Typography>
-          <Table sx={{ bgcolor: 'white', border: '1px solid #e0e0e0' }}>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#e3f2fd' }}>
-                <TableCell>Tên</TableCell>
-                <TableCell>Loại</TableCell>
-                <TableCell>Giá</TableCell>
-                <TableCell>Số lượng</TableCell>
-                <TableCell>Tổng</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {selectedItems.map(item => (
-                <TableRow key={item._id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.type === 'equipment' ? 'Thiết bị' : 'Đồ tiêu thụ'}</TableCell>
-                  <TableCell>{item.price.toLocaleString()}đ</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <IconButton onClick={() => handleQuantityChange(item._id, -1)}>
-                        <RemoveIcon />
-                      </IconButton>
-                      <TextField
-                        value={item.quantity}
-                        size="small"
-                        sx={{ width: 60, mx: 1 }}
-                        inputProps={{ style: { textAlign: 'center' } }}
-                        onChange={e =>
-                          handleQuantityChange(item._id, parseInt(e.target.value) - item.quantity)
-                        }
-                      />
-                      <IconButton onClick={() => handleQuantityChange(item._id, 1)}>
-                        <AddIcon />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{(item.price * item.quantity).toLocaleString()}đ</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Typography sx={{ mt: 2, fontWeight: 'bold' }}>
-            Tổng tiền: {totalItemPrice.toLocaleString()}đ
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setOpenAddItemsDialog(false)}
-            sx={{ color: '#f44336' }}
-          >
-            Bỏ qua
-          </Button>
-          <Button
-            variant="contained"
-            sx={{ bgcolor: '#388e3c', '&:hover': { bgcolor: '#2e7d32' } }}
-            onClick={handleConfirmItems}
-          >
-            Xác nhận
-          </Button>
-        </DialogActions>
-      </Dialog>
+        selectedItems={selectedItems}
+        handleQuantityChange={handleQuantityChange}
+        totalItemPrice={totalItemPrice}
+        onConfirm={() => setOpenAddItemsDialog(false)}
+      /> */}
       <Dialog open={openMatchingQuestion} onClose={() => setOpenMatchingQuestion(false)}>
         <DialogTitle>Bạn có muốn ghép trận không?</DialogTitle>
         <DialogActions>

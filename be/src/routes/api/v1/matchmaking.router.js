@@ -4,6 +4,7 @@ const MatchmakingController = require('../../../controllers/matchmaking.controll
 
 router.get('/', MatchmakingController.getAllMatchmakings);
 router.get('/open', MatchmakingController.getOpenMatchmakings);
+router.get('/user/:userId', MatchmakingController.getMatchmakingsByUser);
 router.post('/:id/join', MatchmakingController.joinMatchmaking);
 router.get('/:id', MatchmakingController.getMatchmakingById);
 router.post('/', MatchmakingController.createMatchmaking);

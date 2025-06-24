@@ -5,7 +5,7 @@ const paymentSchema = new Schema({
     bookingId: {
         type: Schema.Types.ObjectId,
         ref: 'Booking',
-        required: [true, "Booking ID is required!"]
+         required: false
     },
     userId: {
         type: Schema.Types.ObjectId,
@@ -19,7 +19,7 @@ const paymentSchema = new Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['cash', 'card', 'mobile', 'bank_transfer'],
+        enum: ['vnpay', 'wallet', 'cash'],
         required: [true, "Payment method is required!"]
     },
     status: {
@@ -29,6 +29,12 @@ const paymentSchema = new Schema({
     },
     transactionId: {
         type: String,
-        unique: true
-    }
+        required: false // Chỉ cần khi thanh toán qua cổng thanh toán
+    },
+    paymentTime: {
+        type: Date,
+        default: Date.now
+    },
 }, { timestamps: true });
+
+module.exports = mongoose.model('Payment', paymentSchema);

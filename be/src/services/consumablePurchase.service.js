@@ -1,4 +1,4 @@
-const ConsumablePurchase = require('../models/consumablePurchase');
+const ConsumablePurchase = require('../models/consumablePurchase.model');
 
 class ConsumablePurchaseService {
     async create(data) {

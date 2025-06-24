@@ -102,6 +102,24 @@ async getOpenMatchmakings() {
         .populate('userId')
         .populate('representativeId');
 }
+async getMatchmakingsByUser(userId) {
+    // Lấy tất cả phòng ghép trận mà user là người tạo hoặc đã tham gia
+    return await matchmakingModel.find({
+        $or: [
+            { userId },
+            { joinedPlayers: userId },
+            { representativeId: userId }
+        ]
+    })
+    .populate({
+        path: 'bookingId',
+        populate: { path: 'fieldId', select: 'name type' }
+    })
+    .populate('userId')
+    .populate('joinedPlayers')
+    .populate('representativeId')
+    .sort({ createdAt: -1 });
+}
 }
 
 module.exports = new MatchmakingService();

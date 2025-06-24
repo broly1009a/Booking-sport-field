@@ -7,6 +7,7 @@ import sportFieldService from '../../../services/api/sportFieldService';
 import typeService from "../../../services/api/typeService";
 import { PublicContext } from "../../../contexts/publicContext";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 const SportsVenueDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -15,6 +16,7 @@ const SportsVenueDashboard = () => {
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
   const { types, sportFields, setSportFields } = useContext(PublicContext);
+  const navigate = useNavigate();
   const itemsPerPage = 5;
   const getStatusColor = (status) => {
     switch (status) {
@@ -203,6 +205,13 @@ const SportsVenueDashboard = () => {
                         </button>
                         <button className="text-red-600 hover:text-red-900">
                           <FaTrash className="h-5 w-5" />
+                        </button>
+                        <button className="text-green-600 hover:text-green-900" 
+                          onClick={() => {
+                            navigate(`/manager/maintenance-schedule/${venue.type._id}`);
+                          }}
+                        >
+                          <MdSportsSoccer className="h-5 w-5" />
                         </button>
                       </div>
                     </td>

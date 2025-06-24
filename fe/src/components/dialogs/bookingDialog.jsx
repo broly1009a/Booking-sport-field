@@ -24,22 +24,21 @@ import EditProfileDialog from './editProfileDialog';
 import sportFieldService from '../../services/api/sportFieldService';
 import { useState, useEffect } from 'react';
 import { formatTimeVN } from '../../utils/handleFormat';
-import bookingService from '../../services/api/bookingService';
+import { paymentService } from '../../services/api/paymentService';
 import consumableService from '../../services/api/consumableService';
 import equipmentService from '../../services/api/equipmentService';
-
+import { useAuth } from '../../contexts/authContext';
 export default function BookingDialog({ open, onClose, selectedSlots, sportField, userId, onConfirm }) {
-  const [customerName, setCustomerName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+ 
   const [note, setNote] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
-  const [openThankDialog, setOpenThankDialog] = useState(false);
-  const [openEditProfileDialog, setOpenEditProfileDialog] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
   const [messageNotification, setMessageNotification] = useState('');
   const [severityNotification, setSeverityNotification] = useState('info');
   const [loading, setLoading] = useState(false);
-
+  const { currentUser } = useAuth();
+     const [customerName, setCustomerName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   useEffect(() => {
     const fetchItems = async () => {
       if (!sportField?._id) return;
@@ -57,29 +56,20 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
     };
 
     if (open) {
-      setCustomerName('');
-      setPhoneNumber('');
+      setCustomerName(
+        currentUser
+          ? `${currentUser.fname || ''} ${currentUser.lname || ''}`.trim()
+          : ''
+      );
+      setPhoneNumber(currentUser?.phoneNumber || '');
       setNote('');
       fetchItems();
     }
-  }, [open, sportField?._id]);
+  }, [open, sportField?._id, currentUser]);
 
   if (!sportField || !selectedSlots || selectedSlots.length === 0) {
     return null;
   }
-
-  const calculateTotal = () => {
-    const times = selectedSlots.map(slot => dayjs(slot.time)).sort((a, b) => a - b);
-    const startTime = times[0];
-    const endTime = times[times.length - 1].add(30, 'minute');
-    const hours = endTime.diff(startTime, 'hour', true);
-    const fieldTotal = hours * sportField.pricePerHour;
-    const itemsTotal = selectedItems.reduce(
-      (sum, item) => sum + (item.pricePerUnit || item.price) * item.quantity,
-      0
-    );
-    return fieldTotal + itemsTotal;
-  };
 
   const calculateFieldTotal = () => {
     const times = selectedSlots.map(slot => dayjs(slot.time)).sort((a, b) => a - b);
@@ -88,6 +78,14 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
     const hours = endTime.diff(startTime, 'hour', true);
     return hours * sportField.pricePerHour;
   };
+
+  const calculateItemsTotal = () =>
+    selectedItems.reduce(
+      (sum, item) => sum + (item.pricePerUnit || item.price) * item.quantity,
+      0
+    );
+
+  const calculateTotal = () => calculateFieldTotal() + calculateItemsTotal();
 
   const handleQuantityChange = (itemId, delta) => {
     setSelectedItems(prev =>
@@ -99,57 +97,67 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
     );
   };
 
-  const confirmBooking = async (bookingData) => {
+  const handleConfirm = async () => {
+    if (!customerName || !phoneNumber) {
+      setMessageNotification('Vui lòng nhập đầy đủ tên và số điện thoại');
+      setSeverityNotification('error');
+      setOpenNotification(true);
+      return;
+    }
     setLoading(true);
     try {
-      const res = await bookingService.createBooking(bookingData);
-      if (res) {
-        setMessageNotification('Đặt lịch thành công!');
-        setSeverityNotification('success');
-        setOpenNotification(true);
-        setOpenThankDialog(true);
-        if (onConfirm) onConfirm(res.data, selectedItems);
-        onClose();
-      }
+      // Sắp xếp các slot theo thời gian tăng dần
+      const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
+      const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      const totalPrice = calculateFieldTotal();
+      const items = selectedItems
+        .filter(item => item.quantity > 0)
+        .map(item => ({
+          productId: item._id,
+          type: item.type,
+          name: item.name,
+          price: item.pricePerUnit || item.price,
+          quantity: item.quantity
+        }));
+
+      const bookingData = {
+        userId,
+        fieldId: sportField._id,
+        fieldName: sportField.name,
+        startTime,
+        endTime,
+        status: 'pending',
+        totalPrice,
+        participants: [],
+        customerName,
+        phoneNumber,
+        note,
+        items // gửi lên BE để lưu thiết bị/đồ tiêu thụ nếu cần
+      };
+
+      // Gọi API thanh toán online
+      const res = await paymentService.createBookingAndPayment(bookingData);
+      console.log('Payment response:', res?.data?.vnpUrl);
+         console.log('Payment response res:', res); 
+          console.log('Payment response res vnp:', res?.vnpUrl); 
+         
+   if (res?.vnpUrl) {
+  window.location.href = res.vnpUrl; // Đúng!
+} else {
+  setMessageNotification('Không lấy được link thanh toán!');
+  setSeverityNotification('error');
+  setOpenNotification(true);
+}
+      if (onConfirm) onConfirm(res.data, selectedItems);
     } catch (error) {
-      setMessageNotification('Đặt lịch thất bại!');
+      setMessageNotification('Đặt sân thất bại!');
       setSeverityNotification('error');
       setOpenNotification(true);
     }
     setLoading(false);
   };
 
- const handleConfirm = () => {
-  if (!customerName || !phoneNumber) {
-    setMessageNotification('Vui lòng nhập đầy đủ tên và số điện thoại');
-    setSeverityNotification('error');
-    setOpenNotification(true);
-    return;
-  }
-  // Sắp xếp các slot theo thời gian tăng dần
-  const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
-  // Cộng thêm 7 tiếng trước khi format ISO
-  const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-  const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-  const totalPrice = calculateFieldTotal();
-
-  const bookingData = {
-    userId,
-    fieldId: sportField._id,
-    fieldName: sportField.name,
-    startTime,
-    endTime,
-    status: 'pending',
-    totalPrice,
-    participants: [],
-    customerName,
-    phoneNumber,
-    note: note,
-  };
-
-  confirmBooking(bookingData);
-};
-  console.log('Selected Slots:', selectedSlots);
   return (
     <React.Fragment>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -235,7 +243,7 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
               </TableBody>
             </Table>
             <Typography sx={{ mt: 1 }}>
-              Tổng tiền thiết bị/đồ tiêu thụ: {selectedItems.reduce((sum, item) => sum + (item.pricePerUnit || item.price) * item.quantity, 0).toLocaleString()}đ
+              Tổng tiền thiết bị/đồ tiêu thụ: {calculateItemsTotal().toLocaleString()}đ
             </Typography>
           </Box>
 
@@ -300,8 +308,6 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
         message={messageNotification}
         severity={severityNotification}
       />
-      <ThankForBooking open={openThankDialog} setOpen={setOpenThankDialog} />
-      <EditProfileDialog open={openEditProfileDialog} setOpen={setOpenEditProfileDialog} />
     </React.Fragment>
   );
 }

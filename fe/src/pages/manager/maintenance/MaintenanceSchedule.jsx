@@ -8,12 +8,15 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import LockIcon from '@mui/icons-material/Lock';
 import CloseIcon from '@mui/icons-material/Close';
+import StarIcon from '@mui/icons-material/Star';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
-import maintenanceService from '../../services/api/maintenanceService';
-import scheduleService from '../../services/api/scheduleService';
-import MaintenanceDialog from './MaintenanceDialog';
+import maintenanceService from '../../../services/api/maintenanceService';
+
+
 import { useParams } from "react-router-dom";
+import scheduleService from '../../../services/api/scheduleService';
+import MaintenanceDialog from '../../../components/dialogs/MaintenanceDialog';
 const MaintenanceSchedule = () => {
     const { typeId } = useParams(); 
   const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -63,6 +66,7 @@ const MaintenanceSchedule = () => {
       const end = new Date(slot.endTime);
       if (slotDateTime >= start && slotDateTime < end) {
         if (slot.status === 'maintenance') return 'maintenance';
+        if (slot.status === 'booked') return 'booked';
       }
     }
     return 'available';
@@ -203,6 +207,10 @@ const MaintenanceSchedule = () => {
           <Box sx={{ width: 20, height: 20, bgcolor: '#9e9e9e', mr: 1 }} />
           <Typography fontSize={isMobile ? 12 : 14}>Bảo trì</Typography>
         </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                  <Box sx={{ width: 20, height: 20, bgcolor: '#f44336', mr: 1 }} />
+                  <Typography fontSize={isMobile ? 12 : 14}>Đã đặt</Typography>
+                </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{
             width: 20,
@@ -284,6 +292,7 @@ const MaintenanceSchedule = () => {
                   );
                   let cellBg;
                   if (status === 'maintenance') cellBg = '#9e9e9e';
+                  else if (status === 'booked') cellBg =  '#f44336'
                   else if (status === 'past') cellBg = '#e0e0e0';
                   else if (isSelected) cellBg = '#4caf50';
                   else cellBg = 'white';
@@ -304,6 +313,7 @@ const MaintenanceSchedule = () => {
                       onClick={() => handleSlotClick(field._id, time)}
                     >
                       {status === 'maintenance' && <LockIcon sx={{ color: 'white', fontSize: isMobile ? 16 : 20 }} />}
+                        {status === 'booked' && <StarIcon sx={{ color: 'yellow', fontSize: isMobile ? 16 : 20 }} />}
                       {status === 'past' && <CloseIcon sx={{ color: '#bdbdbd', fontSize: isMobile ? 16 : 20 }} />}
                     </TableCell>
                   );
