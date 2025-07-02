@@ -29,7 +29,7 @@ import consumableService from '../../services/api/consumableService';
 import equipmentService from '../../services/api/equipmentService';
 import { useAuth } from '../../contexts/authContext';
 export default function BookingDialog({ open, onClose, selectedSlots, sportField, userId, onConfirm }) {
- 
+
   const [note, setNote] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [openNotification, setOpenNotification] = useState(false);
@@ -37,7 +37,7 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
   const [severityNotification, setSeverityNotification] = useState('info');
   const [loading, setLoading] = useState(false);
   const { currentUser } = useAuth();
-     const [customerName, setCustomerName] = useState('');
+  const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   useEffect(() => {
     const fetchItems = async () => {
@@ -139,16 +139,16 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
       // Gọi API thanh toán online
       const res = await paymentService.createBookingAndPayment(bookingData);
       console.log('Payment response:', res?.data?.vnpUrl);
-         console.log('Payment response res:', res); 
-          console.log('Payment response res vnp:', res?.vnpUrl); 
-         
-   if (res?.vnpUrl) {
-  window.location.href = res.vnpUrl; // Đúng!
-} else {
-  setMessageNotification('Không lấy được link thanh toán!');
-  setSeverityNotification('error');
-  setOpenNotification(true);
-}
+      console.log('Payment response res:', res);
+      console.log('Payment response res vnp:', res?.vnpUrl);
+
+      if (res?.vnpUrl) {
+        window.location.href = res.vnpUrl; // Đúng!
+      } else {
+        setMessageNotification('Không lấy được link thanh toán!');
+        setSeverityNotification('error');
+        setOpenNotification(true);
+      }
       if (onConfirm) onConfirm(res.data, selectedItems);
     } catch (error) {
       setMessageNotification('Đặt sân thất bại!');

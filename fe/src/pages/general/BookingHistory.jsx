@@ -62,7 +62,7 @@ const BookingHistory = () => {
                   <TableCell>{b.field?.name}</TableCell>
                   <TableCell>{b.field?.location}</TableCell>
                   <TableCell>
-                    {dayjs(b.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs(b.endTime).format('HH:mm DD/MM/YYYY')}
+                    {b.startTime} - {b.endTime}
                   </TableCell>
                   <TableCell>
                     <Chip
