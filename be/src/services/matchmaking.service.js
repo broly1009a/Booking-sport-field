@@ -69,57 +69,57 @@ class MatchmakingService {
     async deleteMatchmaking(id) {
         return await matchmakingModel.findByIdAndDelete(id);
     }
-async getOpenMatchmakings() {
-    return await matchmakingModel.find({ status: 'open', representativeId: { $exists: false } })
-        .populate({
-            path: 'bookingId',
-            populate: {
-                path: 'fieldId',
-                select: 'name type'
-            }
-        })
-        .populate('userId');
-}
- async joinMatchmaking(matchmakingId, representativeId) {
-    const matchmaking = await matchmakingModel.findById(matchmakingId);
-    if (!matchmaking) throw { status: 404, message: 'Matchmaking không tồn tại.' };
-    if (matchmaking.status !== 'open') throw { status: 400, message: 'Phòng đã đủ hoặc đã đóng.' };
-    if (matchmaking.representativeId) throw { status: 400, message: 'Đã có người đại diện ghép.' };
+    async getOpenMatchmakings() {
+        return await matchmakingModel.find({ status: 'open', representativeId: { $exists: false } })
+            .populate({
+                path: 'bookingId',
+                populate: {
+                    path: 'fieldId',
+                    select: 'name type'
+                }
+            })
+            .populate('userId');
+    }
+    async joinMatchmaking(matchmakingId, representativeId) {
+        const matchmaking = await matchmakingModel.findById(matchmakingId);
+        if (!matchmaking) throw { status: 404, message: 'Matchmaking không tồn tại.' };
+        if (matchmaking.status !== 'open') throw { status: 400, message: 'Phòng đã đủ hoặc đã đóng.' };
+        if (matchmaking.representativeId) throw { status: 400, message: 'Đã có người đại diện ghép.' };
 
-    matchmaking.representativeId = representativeId;
-    matchmaking.status = 'full';
-    await matchmaking.save();
+        matchmaking.representativeId = representativeId;
+        matchmaking.status = 'full';
+        await matchmaking.save();
 
-    // Lấy lại document đã populate đầy đủ
-    return await matchmakingModel.findById(matchmakingId)
-        .populate({
-            path: 'bookingId',
-            populate: {
-                path: 'fieldId',
-                select: 'name type'
-            }
+        // Lấy lại document đã populate đầy đủ
+        return await matchmakingModel.findById(matchmakingId)
+            .populate({
+                path: 'bookingId',
+                populate: {
+                    path: 'fieldId',
+                    select: 'name type'
+                }
+            })
+            .populate('userId')
+            .populate('representativeId');
+    }
+    async getMatchmakingsByUser(userId) {
+        // Lấy tất cả phòng ghép trận mà user là người tạo hoặc đã tham gia
+        return await matchmakingModel.find({
+            $or: [
+                { userId },
+                { joinedPlayers: userId },
+                { representativeId: userId }
+            ]
         })
-        .populate('userId')
-        .populate('representativeId');
-}
-async getMatchmakingsByUser(userId) {
-    // Lấy tất cả phòng ghép trận mà user là người tạo hoặc đã tham gia
-    return await matchmakingModel.find({
-        $or: [
-            { userId },
-            { joinedPlayers: userId },
-            { representativeId: userId }
-        ]
-    })
-    .populate({
-        path: 'bookingId',
-        populate: { path: 'fieldId', select: 'name type' }
-    })
-    .populate('userId')
-    .populate('joinedPlayers')
-    .populate('representativeId')
-    .sort({ createdAt: -1 });
-}
+            .populate({
+                path: 'bookingId',
+                populate: { path: 'fieldId', select: 'name type' }
+            })
+            .populate('userId')
+            .populate('joinedPlayers')
+            .populate('representativeId')
+            .sort({ createdAt: -1 });
+    }
 }
 
 module.exports = new MatchmakingService();
