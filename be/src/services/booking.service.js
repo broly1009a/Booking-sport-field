@@ -5,79 +5,79 @@ const Schedule = require('../models/schedule.model');
 const mongoose = require('mongoose');
 class BookingService {
     async createBooking(bookingData) {
-    const { startTime, endTime, fieldId, userId, participants = [], customerName, phoneNumber } = bookingData;
-    if (!startTime || !endTime) {
-        throw { status: 400, message: 'Start time và end time là bắt buộc.' };
-    }
-    // Chuyển sang Date object
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-
-    const now = new Date();
-    if (start >= end) {
-        throw { status: 400, message: 'Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.' };
-    }
-    if (start < now || end < now) {
-        throw { status: 400, message: 'Không thể đặt sân cho thời gian trong quá khứ.' };
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-        throw { status: 404, message: 'Người dùng không tồn tại.' };
-    }
-    const field = await SportField.findById(fieldId);
-    if (!field) {
-        throw { status: 404, message: 'Sân không tồn tại.' };
-    }
-    if (participants.length + 1 > field.capacity) {
-        throw { status: 400, message: 'Số lượng người tham gia vượt quá sức chứa của sân.' };
-    }
-
-    // Kiểm tra trùng lịch đặt sân
-    const overlap = await bookingModel.findOne({
-        fieldId,
-        status: { $in: ['pending', 'confirmed'] },
-        $or: [
-            {
-                startTime: { $lt: end },
-                endTime: { $gt: start }
-            }
-        ]
-    });
-    if (overlap) {
-        throw { status: 409, message: 'Sân đã được đặt trong khoảng thời gian này.' };
-    }
-
-    // Nếu mọi thứ hợp lệ, tạo booking
-    const booking = await new bookingModel(bookingData).save();
-
-    // Cập nhật trạng thái các timeSlot trong Schedule thành 'booked'
-    // Tìm schedule theo fieldId và ngày (00:00 UTC)
-    const bookingDate = new Date(startTime);
-    const scheduleDate = new Date(Date.UTC(
-        bookingDate.getUTCFullYear(),
-        bookingDate.getUTCMonth(),
-        bookingDate.getUTCDate(),
-        0, 0, 0, 0
-    ));
-    const schedule = await Schedule.findOne({ fieldId, date: scheduleDate });
-    if (schedule) {
-        let updated = false;
-        for (const slot of schedule.timeSlots) {
-            // Nếu slot giao với khoảng booking thì cập nhật
-            if (
-                slot.startTime < end &&
-                slot.endTime > start
-            ) {
-                slot.status = 'booked';
-                updated = true;
-            }
+        const { startTime, endTime, fieldId, userId, participants = [], customerName, phoneNumber } = bookingData;
+        if (!startTime || !endTime) {
+            throw { status: 400, message: 'Start time và end time là bắt buộc.' };
         }
-        if (updated) await schedule.save();
-    }
+        // Chuyển sang Date object
+        const start = new Date(startTime);
+        const end = new Date(endTime);
 
-    return booking;
-}
+        const now = new Date();
+        if (start >= end) {
+            throw { status: 400, message: 'Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.' };
+        }
+        if (start < now || end < now) {
+            throw { status: 400, message: 'Không thể đặt sân cho thời gian trong quá khứ.' };
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            throw { status: 404, message: 'Người dùng không tồn tại.' };
+        }
+        const field = await SportField.findById(fieldId);
+        if (!field) {
+            throw { status: 404, message: 'Sân không tồn tại.' };
+        }
+        if (participants.length + 1 > field.capacity) {
+            throw { status: 400, message: 'Số lượng người tham gia vượt quá sức chứa của sân.' };
+        }
+
+        // Kiểm tra trùng lịch đặt sân
+        const overlap = await bookingModel.findOne({
+            fieldId,
+            status: { $in: ['pending', 'confirmed'] },
+            $or: [
+                {
+                    startTime: { $lt: end },
+                    endTime: { $gt: start }
+                }
+            ]
+        });
+        if (overlap) {
+            throw { status: 409, message: 'Sân đã được đặt trong khoảng thời gian này.' };
+        }
+
+        // Nếu mọi thứ hợp lệ, tạo booking
+        const booking = await new bookingModel(bookingData).save();
+
+        // Cập nhật trạng thái các timeSlot trong Schedule thành 'booked'
+        // Tìm schedule theo fieldId và ngày (00:00 UTC)
+        const bookingDate = new Date(startTime);
+        const scheduleDate = new Date(Date.UTC(
+            bookingDate.getUTCFullYear(),
+            bookingDate.getUTCMonth(),
+            bookingDate.getUTCDate(),
+            0, 0, 0, 0
+        ));
+        const schedule = await Schedule.findOne({ fieldId, date: scheduleDate });
+        if (schedule) {
+            let updated = false;
+            for (const slot of schedule.timeSlots) {
+                // Nếu slot giao với khoảng booking thì cập nhật
+                if (
+                    slot.startTime < end &&
+                    slot.endTime > start
+                ) {
+                    slot.status = 'booked';
+                    updated = true;
+                }
+            }
+            if (updated) await schedule.save();
+        }
+
+        return booking;
+    }
 
     async getAllBookings() {
         return await bookingModel.find()
@@ -91,11 +91,17 @@ class BookingService {
     }
 
     async updateBooking(bookingId, bookingData) {
-        return await bookingModel.findByIdAndUpdate(bookingId, bookingData, { new: true })
-            .populate('userId')
-            .populate('fieldId')
-            .populate('participants');
+    const updatedBooking = await bookingModel.findByIdAndUpdate(bookingId, bookingData, { new: true })
+        .populate('userId')
+        .populate('fieldId')
+        .populate('participants');
+
+    if (bookingData.status === 'cancelled' && updatedBooking) {
+        await this.releaseScheduleSlots(updatedBooking);
     }
+
+    return updatedBooking;
+}
 
     async deleteBooking(bookingId) {
         return await bookingModel.findByIdAndDelete(bookingId);
@@ -160,8 +166,8 @@ class BookingService {
         return { success: true, message: 'Đã làm tròn thời gian và cập nhật endTime cho tất cả booking.' };
     }
     async getBookingsByUser(userId) {
-       return await bookingModel.aggregate([
-        { $match: { userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId } },
+        return await bookingModel.aggregate([
+            { $match: { userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId } },
             {
                 $lookup: {
                     from: 'matchmakings', // collection name in MongoDB
@@ -190,6 +196,32 @@ class BookingService {
                 }
             }
         ]);
+    }
+    async releaseScheduleSlots(booking) {
+        const { startTime, endTime, fieldId } = booking;
+        const bookingDate = new Date(startTime);
+        const scheduleDate = new Date(Date.UTC(
+            bookingDate.getUTCFullYear(),
+            bookingDate.getUTCMonth(),
+            bookingDate.getUTCDate(),
+            0, 0, 0, 0
+        ));
+        const schedule = await Schedule.findOne({ fieldId, date: scheduleDate });
+        if (schedule) {
+            let updated = false;
+            for (const slot of schedule.timeSlots) {
+                // Nếu slot giao với khoảng booking thì cập nhật lại về available
+                if (
+                    slot.startTime < endTime &&
+                    slot.endTime > startTime &&
+                    slot.status === 'booked'
+                ) {
+                    slot.status = 'available';
+                    updated = true;
+                }
+            }
+            if (updated) await schedule.save();
+        }
     }
 }
 

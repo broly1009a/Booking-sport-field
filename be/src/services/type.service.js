@@ -6,8 +6,8 @@ class TypeService {
         return await type.save();
     }
 
-    async getAllTypes() {
-        return await Type.find();
+   async getAllTypes() {
+        return await Type.find({});
     }
 
     async getTypeById(typeId) {

@@ -28,6 +28,7 @@ import MaintenanceSchedule from './pages/manager/maintenance/MaintenanceSchedule
 import VnpayReturn from './pages/general/VnpayReturn';
 import MatchmakingHistory from './pages/general/MatchmakingHistory';
 import WalletHistory from './pages/general/WalletHistory';
+import AnalyticsDashboard from './pages/manager/statistics/AnalyticsDashboard';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -147,6 +148,14 @@ const router = createBrowserRouter([
       {
         path: "manager",
         children: [
+          {
+            path: "dashboard",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER']}>
+                <AnalyticsDashboard />
+              </ProtectedRoute>
+            ),
+          },
           {
             path: "user-list",
             element: (

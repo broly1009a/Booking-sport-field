@@ -38,6 +38,15 @@ const ManagerLayout = () => {
           <Typography variant="h6" sx={{ px: 2, mb: 1, fontWeight: 'bold' }}>QUẢN LÝ</Typography>
           <List>
             <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/dashboard">
+                <ListItemIcon sx={{ color: 'white' }}>
+                  {/* icon for sport */}
+                  <Book />
+                </ListItemIcon>
+                <ListItemText primary="Dashboard" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
               <ListItemButton component={Link} to="manager/booking-list">
                 <ListItemIcon sx={{ color: 'white' }}>
                   {/* icon for sport */}

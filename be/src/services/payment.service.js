@@ -16,34 +16,34 @@ class PaymentService {
     async createBookingAndPayment(bookingData, req) {
         // 1. Tạo booking (pending)
         const booking = await BookingService.createBooking(bookingData);
-         if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
-        // Thiết bị
-        const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
-        if (equipmentItems.length > 0) {
-            await EquipmentRental.create({
-                userId: bookingData.userId,
-                bookingId: booking._id,
-                equipments: equipmentItems.map(item => ({
-                    equipmentId: item.productId,
-                    quantity: item.quantity
-                })),
-                totalPrice: equipmentItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
-            });
+        if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
+            // Thiết bị
+            const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
+            if (equipmentItems.length > 0) {
+                await EquipmentRental.create({
+                    userId: bookingData.userId,
+                    bookingId: booking._id,
+                    equipments: equipmentItems.map(item => ({
+                        equipmentId: item.productId,
+                        quantity: item.quantity
+                    })),
+                    totalPrice: equipmentItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
+                });
+            }
+            // Đồ tiêu thụ
+            const consumableItems = bookingData.items.filter(i => i.type === 'consumable' && i.quantity > 0);
+            if (consumableItems.length > 0) {
+                await ConsumablePurchase.create({
+                    userId: bookingData.userId,
+                    bookingId: booking._id,
+                    consumables: consumableItems.map(item => ({
+                        consumableId: item.productId,
+                        quantity: item.quantity
+                    })),
+                    totalPrice: consumableItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
+                });
+            }
         }
-        // Đồ tiêu thụ
-        const consumableItems = bookingData.items.filter(i => i.type === 'consumable' && i.quantity > 0);
-        if (consumableItems.length > 0) {
-            await ConsumablePurchase.create({
-                userId: bookingData.userId,
-                bookingId: booking._id,
-                consumables: consumableItems.map(item => ({
-                    consumableId: item.productId,
-                    quantity: item.quantity
-                })),
-                totalPrice: consumableItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
-            });
-        }
-    }
         // 2. Tạo payment (pending)
         const payment = await Payment.create({
             bookingId: booking._id,
@@ -60,7 +60,7 @@ class PaymentService {
     }
 
     // Tạo URL thanh toán VNPAY cho payment (dùng cho cả booking và nạp ví)
-     async createPaymentUrl(payment, req) {
+    async createPaymentUrl(payment, req) {
         const ipAddr = req.headers['x-forwarded-for'] ||
             req.connection.remoteAddress ||
             req.socket.remoteAddress ||
@@ -98,9 +98,9 @@ class PaymentService {
             'vnp_IpAddr': ipAddr,
             'vnp_CreateDate': createDate,
         };
-    if (bankCode !== null && bankCode !== '') {
-                vnp_Params['vnp_BankCode'] = bankCode;
-            }
+        if (bankCode !== null && bankCode !== '') {
+            vnp_Params['vnp_BankCode'] = bankCode;
+        }
 
         vnp_Params = this.sortObject(vnp_Params);
         const signData = querystring.stringify(vnp_Params, { encode: false });
@@ -164,6 +164,14 @@ class PaymentService {
                 payment.bookingId,
                 { status: responseData.vnp_ResponseCode === '00' ? 'confirmed' : 'cancelled' }
             );
+
+            // Nếu thanh toán thất bại, trả lại slot về available
+            if (responseData.vnp_ResponseCode !== '00') {
+                const booking = await Booking.findById(payment.bookingId);
+                if (booking) {
+                    await BookingService.releaseScheduleSlots(booking);
+                }
+            }
         } else {
             // Nếu là nạp ví
             if (responseData.vnp_ResponseCode === '00') {
@@ -247,58 +255,58 @@ class PaymentService {
         }
         return sorted;
     }
-   async getBookingByPaymentId(paymentId) {
-    const payment = await Payment.findById(paymentId);
-    if (!payment || !payment.bookingId) throw new Error('Không tìm thấy payment hoặc bookingId');
-    // Lấy booking và populate fieldId để lấy tên sân
-    const booking = await Booking.findById(payment.bookingId).populate('fieldId');
-    if (!booking) throw new Error('Không tìm thấy booking');
+    async getBookingByPaymentId(paymentId) {
+        const payment = await Payment.findById(paymentId);
+        if (!payment || !payment.bookingId) throw new Error('Không tìm thấy payment hoặc bookingId');
+        // Lấy booking và populate fieldId để lấy tên sân
+        const booking = await Booking.findById(payment.bookingId).populate('fieldId');
+        if (!booking) throw new Error('Không tìm thấy booking');
 
-    // Lấy thiết bị đã thuê
-    const equipmentRental = await EquipmentRental.findOne({ bookingId: booking._id }).populate('equipments.equipmentId');
-    // Lấy đồ tiêu thụ đã mua
-    const consumablePurchase = await ConsumablePurchase.findOne({ bookingId: booking._id }).populate('consumables.consumableId');
+        // Lấy thiết bị đã thuê
+        const equipmentRental = await EquipmentRental.findOne({ bookingId: booking._id }).populate('equipments.equipmentId');
+        // Lấy đồ tiêu thụ đã mua
+        const consumablePurchase = await ConsumablePurchase.findOne({ bookingId: booking._id }).populate('consumables.consumableId');
 
-    // Build danh sách items
-    let selectedItems = [];
-    if (equipmentRental && equipmentRental.equipments) {
-        selectedItems = selectedItems.concat(
-            equipmentRental.equipments.map(e => ({
-                _id: e.equipmentId?._id,
-                name: e.equipmentId?.name,
-                type: 'equipment',
-                price: e.equipmentId?.pricePerUnit,
-                quantity: e.quantity
-            }))
-        );
+        // Build danh sách items
+        let selectedItems = [];
+        if (equipmentRental && equipmentRental.equipments) {
+            selectedItems = selectedItems.concat(
+                equipmentRental.equipments.map(e => ({
+                    _id: e.equipmentId?._id,
+                    name: e.equipmentId?.name,
+                    type: 'equipment',
+                    price: e.equipmentId?.pricePerUnit,
+                    quantity: e.quantity
+                }))
+            );
+        }
+        if (consumablePurchase && consumablePurchase.consumables) {
+            selectedItems = selectedItems.concat(
+                consumablePurchase.consumables.map(c => ({
+                    _id: c.consumableId?._id,
+                    name: c.consumableId?.name,
+                    type: 'consumable',
+                    price: c.consumableId?.pricePerUnit,
+                    quantity: c.quantity
+                }))
+            );
+        }
+
+        // Build bookingData object
+        const bookingData = {
+            _id: booking._id,
+            fieldName: booking.fieldId?.name,
+            startTime: booking.startTime,
+            endTime: booking.endTime,
+            totalPrice: booking.totalPrice,
+            customerName: booking.customerName,
+            phoneNumber: booking.phoneNumber,
+            note: booking.notes,
+            selectedItems
+        };
+
+        return bookingData;
     }
-    if (consumablePurchase && consumablePurchase.consumables) {
-        selectedItems = selectedItems.concat(
-            consumablePurchase.consumables.map(c => ({
-                _id: c.consumableId?._id,
-                name: c.consumableId?.name,
-                type: 'consumable',
-                price: c.consumableId?.pricePerUnit,
-                quantity: c.quantity
-            }))
-        );
-    }
-
-    // Build bookingData object
-    const bookingData = {
-        _id: booking._id,
-        fieldName: booking.fieldId?.name,
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-        totalPrice: booking.totalPrice,
-        customerName: booking.customerName,
-        phoneNumber: booking.phoneNumber,
-        note: booking.notes,
-        selectedItems
-    };
-
-    return bookingData;
-}
 }
 
 module.exports = new PaymentService();

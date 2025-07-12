@@ -14,6 +14,7 @@ const consumablePurchaseRouter = require('./consumablePurchase.router');
 const equipmentRentalRouter = require('./equipmentRental.router');
 const paymentRouter = require('./payment.router');
 const walletRouter = require('./wallet.router');
+const statisticRouter = require('./statistic.router');
 const fakeRouter = require('./fake.router');
 
 router.use('/guest', guestRouter);
@@ -30,5 +31,6 @@ router.use('/consumable-purchase', consumablePurchaseRouter);
 router.use('/equipment-rental', equipmentRentalRouter);
 router.use('/payment', paymentRouter);
 router.use('/wallet', walletRouter);
+router.use('/statistic', statisticRouter);
 router.use('/fake', fakeRouter);
 module.exports = router;

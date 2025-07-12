@@ -28,6 +28,8 @@ import { paymentService } from '../../services/api/paymentService';
 import consumableService from '../../services/api/consumableService';
 import equipmentService from '../../services/api/equipmentService';
 import { useAuth } from '../../contexts/authContext';
+import PayByWalletButton from '../buttons/PayByWalletButton';
+import bookingService from '../../services/api/bookingService';
 export default function BookingDialog({ open, onClose, selectedSlots, sportField, userId, onConfirm }) {
 
   const [note, setNote] = useState('');
@@ -39,6 +41,7 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
   const { currentUser } = useAuth();
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+   const [createdBookingId, setCreatedBookingId] = useState(null);
   useEffect(() => {
     const fetchItems = async () => {
       if (!sportField?._id) return;
@@ -157,7 +160,79 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
     }
     setLoading(false);
   };
+const handleCreateBooking = async () => {
+    if (!customerName || !phoneNumber) {
+      setMessageNotification('Vui lòng nhập đầy đủ tên và số điện thoại');
+      setSeverityNotification('error');
+      setOpenNotification(true);
+      return;
+    }
+    setLoading(true);
+    try {
+      const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
+      const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      const totalPrice = calculateFieldTotal();
+      const items = selectedItems
+        .filter(item => item.quantity > 0)
+        .map(item => ({
+          productId: item._id,
+          type: item.type,
+          name: item.name,
+          price: item.pricePerUnit || item.price,
+          quantity: item.quantity
+        }));
 
+      const bookingData = {
+        userId,
+        fieldId: sportField._id,
+        fieldName: sportField.name,
+        startTime,
+        endTime,
+        status: 'pending',
+        totalPrice,
+        participants: [],
+        customerName,
+        phoneNumber,
+        note,
+        items
+      };
+
+      const res = await bookingService.createBooking(bookingData);
+      if (res?.data?._id) {
+        setCreatedBookingId(res.data._id);
+        setMessageNotification('Tạo booking thành công, vui lòng thanh toán bằng ví!');
+        setSeverityNotification('success');
+        setOpenNotification(true);
+      } else {
+        setMessageNotification('Tạo booking thất bại!');
+        setSeverityNotification('error');
+        setOpenNotification(true);
+      }
+    } catch (error) {
+      setMessageNotification('Tạo booking thất bại!');
+      setSeverityNotification('error');
+      setOpenNotification(true);
+    }
+    setLoading(false);
+  };
+const handleCancel = async () => {
+  if (createdBookingId) {
+    try {
+      await bookingService.updateBooking(createdBookingId, { status: 'cancelled' });
+      setMessageNotification('Hủy đặt lịch thành công');
+      setSeverityNotification('success');
+      setOpenNotification(true);
+      onClose();
+    } catch (error) {
+      setMessageNotification('Hủy đặt lịch thất bại');
+      setSeverityNotification('error');
+      setOpenNotification(true);
+    }
+  } else {
+    onClose();
+  }
+};
   return (
     <React.Fragment>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -291,16 +366,43 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-          <Button onClick={onClose} sx={{ color: '#388e3c' }}>Hủy</Button>
-          <Button
-            variant="contained"
-            onClick={handleConfirm}
-            sx={{ bgcolor: '#ffca28', color: 'black', '&:hover': { bgcolor: '#ffb300' } }}
-            disabled={loading}
-          >
-            {loading ? 'Đang gửi...' : 'Xác nhận & Thanh toán'}
-          </Button>
-        </DialogActions>
+  <Button onClick={handleCancel} sx={{ color: '#388e3c' }}>Hủy</Button>
+  {!createdBookingId && (
+    <>
+      <Button
+        variant="contained"
+        onClick={handleConfirm}
+        sx={{ bgcolor: '#ffca28', color: 'black', '&:hover': { bgcolor: '#ffb300' } }}
+        disabled={loading}
+      >
+        {loading ? 'Đang gửi...' : 'Xác nhận & Thanh toán'}
+      </Button>
+      <Button
+        variant="contained"
+        color="success"
+        onClick={handleCreateBooking}
+        disabled={loading}
+        sx={{ ml: 1 }}
+      >
+        {loading ? 'Đang tạo booking...' : 'Tạo booking & Thanh toán ví'}
+      </Button>
+    </>
+  )}
+  {createdBookingId && (
+    <PayByWalletButton
+      bookingId={createdBookingId}
+      userId={userId}
+      amount={calculateTotal()}
+      onSuccess={(data) => {
+        setMessageNotification('Thanh toán thành công bằng ví!');
+        setSeverityNotification('success');
+        setOpenNotification(true);
+        if (onConfirm) onConfirm(data, selectedItems);
+        onClose();
+      }}
+    />
+  )}
+</DialogActions>
       </Dialog>
       <NotificationSnackbar
         open={openNotification}
