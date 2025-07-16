@@ -14,24 +14,26 @@ export default function VnpayReturn() {
     paymentService.getVnpayReturn(params)
       .then(async res => {
         setMessage(res?.message || 'Thanh toán thành công!');
-        if (paymentId) {
-          // Lấy thông tin booking từ paymentId
-             try {
-          const bookingRes = await paymentService.getBookingByPaymentId(paymentId);
-          const bookingData = bookingRes?.data;
-          setTimeout(() => {
-            if (bookingData?._id) {
-              navigate(`/booking-success/${bookingData._id}`, { state: { bookingData } });
-            } else {
-              navigate('/booking-history');
+        if (res?.message === 'Payment successful') {
+          if (paymentId) {
+            try {
+              const bookingRes = await paymentService.getBookingByPaymentId(paymentId);
+              const bookingData = bookingRes?.data;
+              setTimeout(() => {
+                if (bookingData?._id) {
+                  navigate(`/booking-success/${bookingData._id}`, { state: { bookingData } });
+                } else {
+                  navigate('/booking-history');
+                }
+              }, 2000);
+            } catch {
+              setTimeout(() => navigate('/'), 2000);
             }
-          }, 2000);
-       } catch {
-            // Nếu lỗi (không có booking), chuyển về trang ví
-            setTimeout(() => navigate('/'), 2000);
+          } else {
+            setTimeout(() => navigate('/booking-history'), 2000);
           }
         } else {
-          setTimeout(() => navigate('/booking-history'), 2000);
+          setTimeout(() => navigate('/'), 2000);
         }
       })
       .catch(() => {

@@ -29,6 +29,10 @@ import VnpayReturn from './pages/general/VnpayReturn';
 import MatchmakingHistory from './pages/general/MatchmakingHistory';
 import WalletHistory from './pages/general/WalletHistory';
 import AnalyticsDashboard from './pages/manager/statistics/AnalyticsDashboard';
+import Voucher from './pages/general/voucher';
+import Event from './pages/general/Event';
+import EventDashboard from './pages/manager/event/EventDashboard';
+import About from './pages/general/About';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -146,6 +150,30 @@ const router = createBrowserRouter([
         )
       },
       {
+        path: "/voucher",
+        element: (
+          <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
+            <Voucher />
+          </ProtectedRoute>
+        )
+      },
+          {
+        path: "/event",
+        element: (
+          <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
+            <Event />
+          </ProtectedRoute>
+        )
+      },
+          {
+        path: "/about",
+        element: (
+          <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
+            <About />
+          </ProtectedRoute>
+        )
+      },
+      {
         path: "manager",
         children: [
           {
@@ -209,6 +237,14 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute requiredRoles={['MANAGER']}>
                 <MaintenanceSchedule />
+              </ProtectedRoute>
+            ),
+          },
+              {
+            path: "event-list",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER']}>
+                <EventDashboard />
               </ProtectedRoute>
             ),
           },

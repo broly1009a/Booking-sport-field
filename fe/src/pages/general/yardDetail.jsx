@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { FaRestroom, FaParking, FaWifi, FaShower } from "react-icons/fa";
 import { MdSecurity, MdSportsSoccer } from "react-icons/md";
 import sportFieldService from "../../services/api/sportFieldService";
+import { feedbackService } from '../../services/api/feedbackService';
+import Feedback from '../../components/Feedback/Feedback';
 import { useNavigate } from "react-router-dom";
 const amenityIcons = {
     restrooms: FaRestroom,
@@ -157,41 +159,12 @@ const YardDetail = () => {
                 </div>
 
                 {/* Reviews Section */}
-                <div className="mb-8 bg-white rounded-xl shadow-md p-6">
-                    <h3 className="text-2xl font-semibold mb-6">Customer Reviews</h3>
-                    <div className="space-y-6">
-                        {[
-                            {
-                                name: "John Doe",
-                                rating: 5,
-                                comment: "Excellent field condition and great amenities!",
-                                date: "2023-08-15"
-                            },
-                            {
-                                name: "Jane Smith",
-                                rating: 4,
-                                comment: "Very good facility, but parking can be challenging during peak hours.",
-                                date: "2023-08-10"
-                            }
-                        ].map((review, index) => (
-                            <div key={index} className="border-b border-gray-200 pb-6 last:border-0">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="font-semibold text-lg">{review.name}</span>
-                                    <div className="flex items-center">
-                                        {[...Array(5)].map((_, i) => (
-                                            <span key={i} className={`text-xl ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}>★</span>
-                                        ))}
-                                    </div>
-                                </div>
-                                <p className="text-gray-600 mb-2">{review.comment}</p>
-                                <span className="text-sm text-gray-500">{review.date}</span>
-                            </div>
-                        ))}
-                    </div>
-                    <button className="mt-6 w-full py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors">
-                        Write a Review
-                    </button>
-                </div>
+             <div className="mb-8 bg-white rounded-xl shadow-md p-6">
+    <h3 className="text-2xl font-semibold mb-6">Đánh giá khách hàng</h3>
+    {fieldData?._id && (
+        <Feedback fieldId={fieldData._id} />
+    )}
+</div>
 
                 {/* Related Fields Section */}
                 <div className="mb-8">

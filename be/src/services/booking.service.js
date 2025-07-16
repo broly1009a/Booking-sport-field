@@ -2,6 +2,7 @@ const { User } = require('../models');
 const bookingModel = require('../models/booking.model');
 const SportField = require('../models/sportField.model');
 const Schedule = require('../models/schedule.model');
+const Feedback = require('../models/feedback.model');
 const mongoose = require('mongoose');
 class BookingService {
     async createBooking(bookingData) {
@@ -91,17 +92,17 @@ class BookingService {
     }
 
     async updateBooking(bookingId, bookingData) {
-    const updatedBooking = await bookingModel.findByIdAndUpdate(bookingId, bookingData, { new: true })
-        .populate('userId')
-        .populate('fieldId')
-        .populate('participants');
+        const updatedBooking = await bookingModel.findByIdAndUpdate(bookingId, bookingData, { new: true })
+            .populate('userId')
+            .populate('fieldId')
+            .populate('participants');
 
-    if (bookingData.status === 'cancelled' && updatedBooking) {
-        await this.releaseScheduleSlots(updatedBooking);
+        if (bookingData.status === 'cancelled' && updatedBooking) {
+            await this.releaseScheduleSlots(updatedBooking);
+        }
+
+        return updatedBooking;
     }
-
-    return updatedBooking;
-}
 
     async deleteBooking(bookingId) {
         return await bookingModel.findByIdAndDelete(bookingId);
@@ -193,6 +194,14 @@ class BookingService {
                     localField: 'participants',
                     foreignField: '_id',
                     as: 'participants'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'feedbacks',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'feedbacks'
                 }
             }
         ]);

@@ -6,6 +6,7 @@ const EquipmentController = require('./equipment.controller');
 const ConsumableController = require('./consumable.controller');
 const BookingController = require('./booking.controller');
 const MatchmakingController = require('./matchmaking.controller');
+const FeedbackController = require('./feedback.controller');
 module.exports = {
     GuestController,
     UserController,
@@ -14,5 +15,6 @@ module.exports = {
     EquipmentController,
     ConsumableController,
     BookingController,
-    MatchmakingController
+    MatchmakingController,
+    FeedbackController
 }
