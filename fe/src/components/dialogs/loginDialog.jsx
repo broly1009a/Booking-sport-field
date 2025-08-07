@@ -12,7 +12,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import { useAuth } from "../../contexts/authContext";
 import LoadingOverlay from '../general/loadingOverlay';
 import NotificationSnackbar from '../snackbars/notificationSnackbar';
-import ForgotPasswordDialog from './ForgotPasswordDialog';
+import ForgotPasswordDialog from './forgotPasswordDialog';
 import { useNavigate } from 'react-router-dom';
 export default function LoginDialog({ open, setOpen }) {
     const navigate = useNavigate();
