@@ -44,9 +44,8 @@ const Event = () => {
               events.map((event) => (
                 <div
                   key={event._id}
-                  className={`bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 relative overflow-hidden border-2 ${
-                    event.status === "completed" ? "opacity-60 border-gray-300" : "border-blue-400"
-                  }`}
+                  className={`bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 relative overflow-hidden border-2 ${event.status === "completed" ? "opacity-60 border-gray-300" : "border-blue-400"
+                    }`}
                 >
                   {event.image ? (
                     <img

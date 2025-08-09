@@ -268,7 +268,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                       <TableCell>
                         {formatTimeVN(time)} - {formatTimeVN(time.add(30, 'minute'))}
                       </TableCell>
-                      <TableCell>{sportField.pricePerHour.toLocaleString()}đ</TableCell>
+                      <TableCell>{(sportField.pricePerHour * 0.5).toLocaleString()}đ</TableCell>
                     </TableRow>
                   );
                 })}

@@ -1,14 +1,20 @@
 import React, { useState, useContext } from "react";
-import { FaFutbol, FaBasketballBall, FaVolleyballBall, FaSwimmer, 
-        FaRunning, FaTableTennis, FaRestroom, FaChair, 
+import {
+    FaHeart, FaRegHeart, FaFutbol, FaBasketballBall, FaVolleyballBall, FaSwimmer,
+    FaRunning, FaTableTennis, FaRestroom, FaChair,
 } from "react-icons/fa";
 import { MdSportsTennis, MdOutlineLocalParking, MdShower, MdWifi } from "react-icons/md";
 import { GiCricketBat } from "react-icons/gi";
 import ReactPaginate from "react-paginate";
 import { PublicContext } from "../../contexts/publicContext";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import { favoriteService } from "../../services/api/favoriteService";
+import { useAuth } from "../../contexts/authContext";
+import { useEffect } from "react";
 const Yard = () => {
-       const navigate = useNavigate();
+    const navigate = useNavigate();
+    const { currentUser } = useAuth();
+    const [favorites, setFavorites] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [selectedField, setSelectedField] = useState(null);
     const [priceRange, setPriceRange] = useState([0, 300000]);
@@ -16,20 +22,29 @@ const Yard = () => {
     const { types, sportFields } = useContext(PublicContext);
     const itemsPerPage = 8;
 
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            try {
+                if (currentUser?._id) {
+                    const res = await favoriteService.getFavorites(currentUser._id);
+                    setFavorites(res?.data || []);
+                }
+            } catch (err) {
+                console.error("Lỗi khi tải danh sách yêu thích:", err);
+            }
+        };
+
+        fetchFavorites();
+    }, [currentUser]);
+
     const categories = [
         { id: "all", name: "All Sports", icon: FaRunning },
-        { id: "football", name: "Football", icon: FaFutbol },
-        { id: "basketball", name: "Basketball", icon: FaBasketballBall },
-        { id: "volleyball", name: "Volleyball", icon: FaVolleyballBall },
-        { id: "swimming", name: "Swimming", icon: FaSwimmer },
-        { id: "tennis", name: "Tennis", icon: MdSportsTennis },
-        { id: "cricket", name: "Cricket", icon: GiCricketBat },
-        { id: "tableTennis", name: "Table Tennis", icon: FaTableTennis },
         { id: "bóng đá", name: "Bóng đá", icon: FaFutbol },
+        { id: "bóng rổ", name: "Bóng rổ", icon: FaBasketballBall },
         { id: "pickleball", name: "Pickleball", icon: FaTableTennis },
-        { id: "tenis", name: "Tenis", icon: MdSportsTennis },
+        { id: "tennis", name: "Tennis", icon: MdSportsTennis },
+        { id: "cầu lông", name: "Cầu lông", icon: GiCricketBat },
     ];
-
 
     const filteredFields = sportFields
         .filter(field =>
@@ -62,6 +77,27 @@ const Yard = () => {
         }
     };
 
+    const toggleFavorite = async (fieldId) => {
+        try {
+            if (!currentUser?._id) {
+                alert("Bạn cần đăng nhập để thực hiện thao tác này.");
+                return;
+            }
+            await favoriteService.toggleFavorite({
+                userId: currentUser._id,
+                fieldId,
+            });
+            const res = await favoriteService.getFavorites(currentUser._id);
+            setFavorites(res?.data || []);
+        }
+        catch (err) {
+            console.error("Lỗi toggle yêu thích:", err);
+        }
+    };
+
+    const isFavorite = (fieldId) => {
+        return favorites.some(fav => fav.fieldId?._id === fieldId);
+    };
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected);
     };
@@ -123,6 +159,20 @@ const Yard = () => {
                                 <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-white text-sm font-semibold ${getStatusColor(field.status)}`}>
                                     {field.status}
                                 </div>
+                                <div
+                                    className="absolute bottom-2 right-2 text-xl cursor-pointer z-10"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleFavorite(field._id);
+                                    }}
+                                >
+                                    {isFavorite(field._id) ? (
+                                        <FaHeart className="text-red-500 hover:scale-110 transition-transform" />
+                                    ) : (
+                                        <FaRegHeart className="text-white hover:text-red-500 hover:scale-110 transition-transform" />
+                                    )}
+                                </div>
+
                             </div>
                             <div className="p-4">
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{field.name}</h3>
@@ -138,7 +188,7 @@ const Yard = () => {
                                         </div>
                                     ))}
                                 </div>
-                                 <button
+                                <button
                                     className="mt-4 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
                                     onClick={(e) => {
                                         e.stopPropagation();

@@ -1,8 +1,15 @@
-
+import React, { useState } from "react";
+import {
+  FaInstagram,
+  FaTwitter,
+  FaFacebook
+} from "react-icons/fa";
 
 const Footer = () => {
-    return (
-        <>
+  const [email, setEmail] = useState("");
+
+  return (
+    <>
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -43,11 +50,11 @@ const Footer = () => {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>© 2024 Football Pitch Booking. All rights reserved.</p>
+            <p>© 2025 FSF. All rights reserved.</p>
           </div>
         </div>
       </footer>
-      </>
-    );
-    }
+    </>
+  );
+}
 export default Footer;

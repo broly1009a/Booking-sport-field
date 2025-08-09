@@ -1,22 +1,10 @@
 import React, { useState } from "react";
 import { FaInstagram, FaTwitter, FaFacebook, FaClock, FaMoneyBillWave, FaFootballBall, FaCalendarCheck } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
-
-    const features = [
-        { icon: <FaCalendarCheck />, title: "Instant Booking", description: "Book your pitch in under 2 minutes" },
-        { icon: <FaFootballBall />, title: "Multiple Pitch Options", description: "Choose from grass, turf or indoor pitches" },
-        { icon: <FaMoneyBillWave />, title: "Transparent Pricing", description: "Clear pricing with no hidden fees" },
-        { icon: <FaClock />, title: "24/7 Availability", description: "Book anytime, day or night" }
-    ];
-
-    const testimonials = [
-        { name: "John Smith", quote: "Best booking experience ever! Got my preferred pitch instantly.", rating: 5, image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e" },
-        { name: "Sarah Johnson", quote: "Fantastic facilities and super easy booking process.", rating: 5, image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330" },
-        { name: "Mike Wilson", quote: "Great value for money and excellent customer service.", rating: 4, image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" }
-    ];
-
     const partners = [
         { name: "Stadium A", logo: "https://images.unsplash.com/photo-1522778119026-d647f0596c20" },
         { name: "Stadium B", logo: "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9" },
@@ -37,51 +25,64 @@ const Home = () => {
                 />
                 <div className="absolute inset-0 bg-black/50 z-10"></div>
                 <div className="relative z-20 text-center px-4">
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">Book your football pitch in seconds</h1>
-                    <p className="text-xl md:text-2xl text-white mb-8">Experience seamless booking for the best football pitches in your area</p>
-                    <button className="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-full transition duration-300">Book Now</button>
+                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">Đặt sân trong tích tắc</h1>
+                    <p className="text-xl md:text-2xl text-white mb-8">Trải nghiệm các sân thể thao tốt nhất trong khu vực của bạn</p>
+                    <button className="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-full transition duration-300">Đặt Sân Ngay</button>
                 </div>
             </div>
 
-            {/* Features Section */}
-            <div className="py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                        {features.map((feature, index) => (
-                            <div key={index} className="text-center p-6 rounded-lg hover:shadow-xl transition duration-300">
-                                <div className="text-4xl text-green-500 mb-4 flex justify-center">{feature.icon}</div>
-                                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                                <p className="text-gray-600">{feature.description}</p>
-                            </div>
-                        ))}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+                <div
+                    onClick={() => navigate('/yard')}
+                    className="cursor-pointer bg-[#d66986] text-white rounded-[15px] p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                    <div className="flex flex-col items-center text-center">
+                        <img
+                            src="https://booking-sports.com/wp-content/uploads/2024/11/12-white-300x300.png"
+                            alt="Tìm kiếm sân chơi"
+                            className="w-[113px] mb-4"
+                        />
+                        <h3 className="text-xl font-bold mb-2">Tìm kiếm sân chơi</h3>
+                        <p className="text-[0.95rem] text-[#dedede]">
+                            Giúp bạn dễ dàng tìm và chọn sân thể thao trong khuôn viên FPT, với danh sách sân và vị trí cụ thể.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    className="cursor-pointer bg-[#f3f0e3] text-gray-800 rounded-[15px] p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                    onClick={() => navigate("/matchmaking-list")}
+                >
+                    <div className="flex flex-col items-center text-center">
+                        <img
+                            src="https://booking-sports.com/wp-content/uploads/2024/11/10-300x300.png"
+                            alt="Tìm bạn cùng chơi"
+                            className="w-[113px] mb-4"
+                        />
+                        <h3 className="text-xl font-bold mb-2">Tìm bạn cùng chơi</h3>
+                        <p className="text-[0.95rem] text-[#444444]">
+                            Người chơi có thể nhanh chóng tìm đối tác phù hợp trên ứng dụng dựa trên bộ lọc các loại hình thể thao, và vị trí mong muốn.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Feature 3 */}
+                <div className="bg-[#f3e6e6] text-gray-800 rounded-[15px] p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div className="flex flex-col items-center text-center">
+                        <img
+                            src="https://booking-sports.com/wp-content/uploads/2024/11/11-300x300.png"
+                            alt="Đặt giờ thuê sân"
+                            className="w-[113px] mb-4"
+                        />
+                        <h3 className="text-xl font-bold mb-2">Đặt giờ thuê sân</h3>
+                        <p className="text-[0.95rem] text-[#444444]">
+                            Người chơi dễ dàng đặt sân bằng cách chọn bộ môn, sân, ngày và giờ mong muốn với 1 nút bấm, giúp việc đặt sân nhanh chóng và tiện lợi hơn.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            {/* Testimonials Section */}
-            <div className="py-20 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-6">
-                    <h2 className="text-4xl font-bold text-center mb-12">What Our Customers Say</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {testimonials.map((testimonial, index) => (
-                            <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
-                                <div className="flex items-center mb-4">
-                                    <img src={testimonial.image} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover" />
-                                    <div className="ml-4">
-                                        <h4 className="font-bold">{testimonial.name}</h4>
-                                        <div className="flex text-yellow-400">
-                                            {[...Array(testimonial.rating)].map((_, i) => (
-                                                <span key={i}>★</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="text-gray-600 italic">"{testimonial.quote}"</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
 
             {/* Partners Section */}
             <div className="py-20 bg-white">

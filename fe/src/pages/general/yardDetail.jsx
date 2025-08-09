@@ -159,42 +159,42 @@ const YardDetail = () => {
                 </div>
 
                 {/* Reviews Section */}
-             <div className="mb-8 bg-white rounded-xl shadow-md p-6">
-    <h3 className="text-2xl font-semibold mb-6">Đánh giá khách hàng</h3>
-    {fieldData?._id && (
-        <Feedback fieldId={fieldData._id} />
-    )}
-</div>
+                <div className="mb-8 bg-white rounded-xl shadow-md p-6">
+                    <h3 className="text-2xl font-semibold mb-6">Đánh giá khách hàng</h3>
+                    {fieldData?._id && (
+                        <Feedback fieldId={fieldData._id} />
+                    )}
+                </div>
 
                 {/* Related Fields Section */}
                 <div className="mb-8">
-    <h3 className="text-2xl font-semibold mb-6">Similar Fields Nearby</h3>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {(fieldData?.similarFields || []).map((field, index) => (
-            <div key={field._id || index} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <img
-                    src={field.images && field.images.length > 0
-                        ? field.images[0]
-                        : "https://images.unsplash.com/photo-1518604666860-9ed391f76460?ixlib=rb-4.0.3"}
-                    alt={field.name}
-                    className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                    <h4 className="font-semibold text-lg mb-2">{field.name}</h4>
-                    <div className="flex justify-between items-center">
-                        <span className="text-green-600 font-bold">{field.pricePerHour?.toLocaleString()}đ/hr</span>
-                        {/* Nếu có rating thì hiển thị, không thì bỏ qua */}
-                        {field.rating && (
-                            <span className="flex items-center text-yellow-400">
-                                ★ {field.rating}
-                            </span>
-                        )}
+                    <h3 className="text-2xl font-semibold mb-6">Similar Fields Nearby</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {(fieldData?.similarFields || []).map((field, index) => (
+                            <div key={field._id || index} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                                <img
+                                    src={field.images && field.images.length > 0
+                                        ? field.images[0]
+                                        : "https://images.unsplash.com/photo-1518604666860-9ed391f76460?ixlib=rb-4.0.3"}
+                                    alt={field.name}
+                                    className="w-full h-48 object-cover"
+                                />
+                                <div className="p-4">
+                                    <h4 className="font-semibold text-lg mb-2">{field.name}</h4>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-green-600 font-bold">{field.pricePerHour?.toLocaleString()}đ/hr</span>
+                                        {/* Nếu có rating thì hiển thị, không thì bỏ qua */}
+                                        {field.rating && (
+                                            <span className="flex items-center text-yellow-400">
+                                                ★ {field.rating}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
-        ))}
-    </div>
-</div>
 
                 {/* Booking Section */}
                 {isBookingModalOpen && (

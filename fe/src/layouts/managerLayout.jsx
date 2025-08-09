@@ -5,11 +5,12 @@ import {
   Box, Container, CssBaseline, Toolbar, Drawer, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, Divider, Typography
 } from '@mui/material';
-import { TableChart, Book } from '@mui/icons-material';
+import { TableChart, Book, Newspaper } from '@mui/icons-material';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import ManagerHeader from '../components/headers/ManagerHeader';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { GiChampions } from 'react-icons/gi';
 
 const drawerWidth = 240;
 
@@ -79,6 +80,30 @@ const ManagerLayout = () => {
               <ListItemButton component={Link} to="manager/consumable-list">
                 <ListItemIcon sx={{ color: 'white' }}><Book /></ListItemIcon>
                 <ListItemText primary="Vật Tư Tiêu Hao" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/new-list">
+                <ListItemIcon sx={{ color: 'white' }}><Newspaper /></ListItemIcon>
+                <ListItemText primary="Tin Tức" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/category-policy-list">
+                <ListItemIcon sx={{ color: 'white' }}><Book /></ListItemIcon>
+                <ListItemText primary="Danh mục chính sách" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/policy-list">
+                <ListItemIcon sx={{ color: 'white' }}><Book /></ListItemIcon>
+                <ListItemText primary="Danh sách chính sách" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/tournament-dashboard">
+                <ListItemIcon sx={{ color: 'white' }}><GiChampions /></ListItemIcon>
+                <ListItemText primary="Giải đấu" />
               </ListItemButton>
             </ListItem>
           </List>

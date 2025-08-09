@@ -30,17 +30,17 @@ const About = () => (
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item xs={12} sm={6}>
           <Typography variant="subtitle1" fontWeight="bold">Liên hệ hỗ trợ:</Typography>
-          <Typography>Email: support@sandatsport.vn</Typography>
+          <Typography>Email: support@fsf.vn</Typography>
           <Typography>Hotline: 0374.857.068</Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
           <Typography variant="subtitle1" fontWeight="bold">Địa chỉ:</Typography>
-          <Typography>Trường Đại học CNTT, ĐHQG TP.HCM</Typography>
+          <Typography>Trường Đại học FPT Hà Nội</Typography>
         </Grid>
       </Grid>
       <Divider sx={{ my: 2 }} />
       <Typography variant="body2" color="text.secondary" align="center">
-        &copy; {new Date().getFullYear()} Hệ thống đặt sân thể thao. All rights reserved.
+        &copy; {new Date().getFullYear()} FPT Sports Field. All rights reserved.
       </Typography>
     </Paper>
   </Container>

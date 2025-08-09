@@ -26,11 +26,6 @@ const menuItems = [
     path: "/admin/user-list",
   },
   {
-    text: "Quản lí Loại Sân",
-    icon: <TableBarIcon />,
-    path: "/admin/type-list",
-  },
-  {
     text: "Quản lí Sân",
     icon: <TableBarIcon />,
     path: "/admin/sport-field-list",
