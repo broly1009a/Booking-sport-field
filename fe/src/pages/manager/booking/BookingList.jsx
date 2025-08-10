@@ -18,11 +18,11 @@ const STATUS_OPTIONS = [
 ];
 
 const BookingList = ({ userId }) => {
-    const [selectedDate, setSelectedDate] = useState(dayjs());
+    // const [selectedDate, setSelectedDate] = useState(dayjs());
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
-    const [fieldId, setFieldId] = useState('');
+    // const [fieldId, setFieldId] = useState('');
     const [page, setPage] = useState(1);
     const [meta, setMeta] = useState({ total: 0, totalPages: 1, currentPage: 1, perPage: 5 });
     const [fromDate, setFromDate] = useState(dayjs().startOf('day'));

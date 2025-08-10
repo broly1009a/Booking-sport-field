@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 import { useAuth } from '../../contexts/authContext';
 import bookingService from '../../services/api/bookingService';
 import AddFeedbackForm from '../../components/Feedback/AddFeedbackForm';
@@ -78,7 +80,7 @@ const BookingHistory = () => {
                   <TableCell>{b.field?.name}</TableCell>
                   <TableCell>{b.field?.location}</TableCell>
                   <TableCell>
-                    {dayjs(b.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs(b.endTime).format('HH:mm DD/MM/YYYY')}
+                    {dayjs.utc(b.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs.utc(b.endTime).format('HH:mm DD/MM/YYYY')}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -159,14 +161,14 @@ const BookingHistory = () => {
                 </Box>
               )}
               <Divider sx={{ my: 2 }} />
-              <Typography>Thời gian: {dayjs(selectedBooking.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs(selectedBooking.endTime).format('HH:mm DD/MM/YYYY')}</Typography>
+              <Typography>Thời gian: {dayjs.utc(selectedBooking.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs.utc(selectedBooking.endTime).format('HH:mm DD/MM/YYYY')}</Typography>
               <Typography>Trạng thái booking: <Chip label={statusMap[selectedBooking.status]?.label || selectedBooking.status} color={statusMap[selectedBooking.status]?.color || 'default'} size="small" /></Typography>
               <Typography>Tổng tiền: {selectedBooking.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
               <Typography>Tên người đặt: {selectedBooking.customerName}</Typography>
               <Typography>Số điện thoại: {selectedBooking.phoneNumber}</Typography>
               {selectedBooking.notes && <Typography>Ghi chú: {selectedBooking.notes}</Typography>}
-              <Typography>Ngày tạo: {dayjs(selectedBooking.createdAt).format('HH:mm DD/MM/YYYY')}</Typography>
-              <Typography>Ngày cập nhật: {dayjs(selectedBooking.updatedAt).format('HH:mm DD/MM/YYYY')}</Typography>
+              <Typography>Ngày tạo: {dayjs.utc(selectedBooking.createdAt).format('HH:mm DD/MM/YYYY')}</Typography>
+              <Typography>Ngày cập nhật: {dayjs.utc(selectedBooking.updatedAt).format('HH:mm DD/MM/YYYY')}</Typography>
               <Typography>
                 Người tham gia: {selectedBooking.participants && selectedBooking.participants.length > 0
                   ? selectedBooking.participants.map(p => p?.fname ? `${p.fname} ${p.lname}` : p).join(', ')
@@ -188,7 +190,7 @@ const BookingHistory = () => {
                       </Typography>
                       <Typography sx={{ mt: 1 }}><b>Bình luận:</b> {fb.comment}</Typography>
                       <Typography sx={{ mt: 1, fontSize: 12, color: 'gray' }}>
-                        {dayjs(fb.createdAt).format('HH:mm DD/MM/YYYY')}
+                        {dayjs.utc(fb.createdAt).format('HH:mm DD/MM/YYYY')}
                       </Typography>
                     </Box>
                   ))}

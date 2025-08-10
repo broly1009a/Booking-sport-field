@@ -4,7 +4,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import dayjs from 'dayjs';
 import { useAuth } from '../../contexts/authContext';
 import matchmakingService from '../../services/api/matchmakingService';
-
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 const statusMap = {
   open: { label: 'Đang mở', color: 'info' },
   full: { label: 'Đã đủ', color: 'success' },
@@ -59,7 +60,7 @@ const MatchmakingHistory = () => {
                   <TableCell>{m.bookingId?.fieldId?.name}</TableCell>
                   <TableCell>
                     {m.bookingId?.startTime && m.bookingId?.endTime
-                      ? `${dayjs(m.bookingId.startTime).format('HH:mm DD/MM/YYYY')} - ${dayjs(m.bookingId.endTime).format('HH:mm DD/MM/YYYY')}`
+                      ? `${dayjs.utc(m.bookingId.startTime).format('HH:mm DD/MM/YYYY')} - ${dayjs.utc(m.bookingId.endTime).format('HH:mm DD/MM/YYYY')}`
                       : ''}
                   </TableCell>
                   <TableCell>{m.requiredPlayers}</TableCell>
@@ -90,7 +91,7 @@ const MatchmakingHistory = () => {
             <Box>
               <Typography variant="subtitle1" fontWeight="bold">Sân: {selectedMatchmaking.bookingId?.fieldId?.name}</Typography>
               <Typography>Thời gian: {selectedMatchmaking.bookingId?.startTime && selectedMatchmaking.bookingId?.endTime
-                ? `${dayjs(selectedMatchmaking.bookingId.startTime).format('HH:mm DD/MM/YYYY')} - ${dayjs(selectedMatchmaking.bookingId.endTime).format('HH:mm DD/MM/YYYY')}`
+                ? `${dayjs.utc(selectedMatchmaking.bookingId.startTime).format('HH:mm DD/MM/YYYY')} - ${dayjs.utc(selectedMatchmaking.bookingId.endTime).format('HH:mm DD/MM/YYYY')}`
                 : ''}</Typography>
               <Typography>Số người cần thêm: {selectedMatchmaking.requiredPlayers}</Typography>
               <Typography>Trạng thái: <Chip label={statusMap[selectedMatchmaking.status]?.label || selectedMatchmaking.status} color={statusMap[selectedMatchmaking.status]?.color || 'default'} size="small" /></Typography>
@@ -99,7 +100,7 @@ const MatchmakingHistory = () => {
               <Typography>Người đã tham gia: {selectedMatchmaking.joinedPlayers && selectedMatchmaking.joinedPlayers.length > 0
                 ? selectedMatchmaking.joinedPlayers.map(p => p?.fname ? `${p.fname} ${p.lname}` : p).join(', ')
                 : 'Chưa có'}</Typography>
-              <Typography>Ngày tạo: {dayjs(selectedMatchmaking.createdAt).format('HH:mm DD/MM/YYYY')}</Typography>
+              <Typography>Ngày tạo: {dayjs.utc(selectedMatchmaking.createdAt).format('HH:mm DD/MM/YYYY')}</Typography>
             </Box>
           )}
         </DialogContent>
