@@ -290,7 +290,6 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "/manager/new-list",
             path: "new-list",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER']}>
