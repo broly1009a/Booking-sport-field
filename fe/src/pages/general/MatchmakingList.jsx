@@ -28,22 +28,22 @@ const MatchmakingList = () => {
     // eslint-disable-next-line
   }, []);
 
-const handleJoin = async (id) => {
-  if (!currentUser?._id) {
-    toast.error('Bạn cần đăng nhập để ghép trận');
-    return;
-  }
-  const confirmed = window.confirm('Bạn chắc chắn muốn ghép vào phòng này?');
-  if (!confirmed) return;
+  const handleJoin = async (id) => {
+    if (!currentUser?._id) {
+      toast.error('Bạn cần đăng nhập để ghép trận');
+      return;
+    }
+    const confirmed = window.confirm('Bạn chắc chắn muốn ghép vào phòng này?');
+    if (!confirmed) return;
 
-  const res = await matchmakingService.joinMatchmaking(id, currentUser._id);
-  if (res && res.data) {
-    toast.success('Ghép trận thành công!');
-    fetchOpenMatchmakings();
-  } else {
-    toast.error(res?.message || 'Ghép trận thất bại!');
-  }
-};
+    const res = await matchmakingService.joinMatchmaking(id, currentUser._id);
+    if (res && res.data) {
+      toast.success('Ghép trận thành công!');
+      fetchOpenMatchmakings();
+    } else {
+      toast.error(res?.message || 'Ghép trận thất bại!');
+    }
+  };
 
   const handleFieldClick = (fieldId) => {
     if (fieldId) {
@@ -97,18 +97,18 @@ const handleJoin = async (id) => {
                       : ''}
                   </TableCell>
                   <TableCell>{m.requiredPlayers}</TableCell>
-             <TableCell>
-  {currentUser?._id !== m.userId?._id && (
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={() => handleJoin(m._id)}
-      disabled={!!m.representativeId}
-    >
-      Ghép trận
-    </Button>
-  )}
-</TableCell>
+                  <TableCell>
+                    {currentUser?._id !== m.userId?._id && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleJoin(m._id)}
+                        disabled={!!m.representativeId}
+                      >
+                        Ghép trận
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))
             )}
