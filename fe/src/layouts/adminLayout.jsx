@@ -16,7 +16,7 @@ import {
 import AdminHeader from "../components/headers/adminHeader";
 import People from "@mui/icons-material/People";
 import TableBarIcon from "@mui/icons-material/TableBar";
- 
+import VoucherIcon from "@mui/icons-material/CardGiftcard";
 const drawerWidth = 240;
 
 const menuItems = [
@@ -30,6 +30,11 @@ const menuItems = [
     icon: <TableBarIcon />,
     path: "/admin/sport-field-list",
   },
+    {
+    text: "Quản lí ưu đãi",
+    icon: <VoucherIcon />,
+    path: "/admin/coupon-list",
+  }
 ];
 
 const AdminLayout = () => {

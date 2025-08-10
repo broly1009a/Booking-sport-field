@@ -29,13 +29,13 @@ const RoleBasedLayout = () => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (currentUser?.role === 'MANAGER') {
+        if (currentUser?.role === 'MANAGER' && window.location.pathname === '/') {
             navigate('/manager/booking-list');
         }
     }, [currentUser]);
 
     useEffect(() => {
-        if (currentUser?.role === 'ADMIN') {
+        if (currentUser?.role === 'ADMIN' && window.location.pathname === '/') {
             navigate("/admin")
         }
     }, [currentUser]);

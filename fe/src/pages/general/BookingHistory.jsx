@@ -23,8 +23,8 @@ const BookingHistory = () => {
     const fetchBookings = async () => {
       if (!currentUser?._id) return;
       setLoading(true);
-      const res = await bookingService.getBookingsByUser(currentUser._id);
-      setBookings(res?.data || []);
+  const res = await bookingService.getBookingsByUser(currentUser._id);
+  setBookings((res?.data || []).reverse());
       setLoading(false);
     };
     fetchBookings();
@@ -39,7 +39,7 @@ const BookingHistory = () => {
     // Reload bookings to update feedback status
     if (currentUser?._id) {
       bookingService.getBookingsByUser(currentUser._id).then(res => {
-        setBookings(res?.data || []);
+        setBookings((res?.data || []).reverse());
       });
     }
   };
@@ -78,7 +78,7 @@ const BookingHistory = () => {
                   <TableCell>{b.field?.name}</TableCell>
                   <TableCell>{b.field?.location}</TableCell>
                   <TableCell>
-                    {b.startTime} - {b.endTime}
+                    {dayjs(b.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs(b.endTime).format('HH:mm DD/MM/YYYY')}
                   </TableCell>
                   <TableCell>
                     <Chip
