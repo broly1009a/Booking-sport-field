@@ -332,7 +332,7 @@ const router = createBrowserRouter([
             path: "type-list",
             element: (
               <ProtectedRoute>
-                <UserList />
+                <TypeDashboard />
               </ProtectedRoute>
             ),
           },

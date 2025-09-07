@@ -1,5 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Divider } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  Table, 
+  TableHead, 
+  TableRow, 
+  TableCell, 
+  TableBody, 
+  Paper, 
+  Chip, 
+  IconButton, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  Button, 
+  Divider,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  TablePagination
+} from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -17,10 +41,23 @@ const statusMap = {
 const BookingHistory = () => {
   const { currentUser } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [feedbackBooking, setFeedbackBooking] = useState(null);
+
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // Filter states
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    timeRange: 'all', // 'all', 'today', 'week', 'month'
+    status: 'all', // 'all', 'pending', 'confirmed', 'cancelled', 'completed'
+    priceRange: 'all', // 'all', 'under100', '100to200', '200to500', 'over500'
+  });
   useEffect(() => {
     const fetchBookings = async () => {
       if (!currentUser?._id) return;

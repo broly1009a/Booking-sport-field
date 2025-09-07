@@ -116,7 +116,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
       const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
       const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
       const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-      const totalPrice = calculateFieldTotal();
+      const totalPrice = calculateTotal(); // Tính tổng cả sân và items
       const items = selectedItems
         .filter(item => item.quantity > 0)
         .map(item => ({
@@ -175,7 +175,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
     const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
     const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
     const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-    const totalPrice = calculateFieldTotal();
+    const totalPrice = calculateTotal(); // Tính tổng cả sân và items
     const items = selectedItems
       .filter(item => item.quantity > 0)
       .map(item => ({

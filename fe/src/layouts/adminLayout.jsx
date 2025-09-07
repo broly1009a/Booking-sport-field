@@ -32,10 +32,15 @@ const menuItems = [
     icon: <TableBarIcon />,
     path: "/admin/sport-field-list",
   },
-    {
+  {
+    text: "Quản lí loại sân",
+    icon: <TableBarIcon />,
+    path: "/admin/type-list",
+  },
+  {
     text: "Quản lí ưu đãi",
     icon: <VoucherIcon />,
-    path: "/admin/coupon-list",
+    path: "/admin/voucher-list",
   }
 ];
 

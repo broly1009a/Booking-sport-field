@@ -133,6 +133,48 @@ async function checkAndCreateMissingSchedules(days = 1) {
             now.getUTCDate(),
             0, 0, 0, 0
         ));
+        
+        // Kiểm tra và tạo lịch cho ngày hiện tại nếu chưa có
+        const sportFields = await SportField.find();
+        for (const field of sportFields) {
+            const existingTodaySchedule = await Schedule.findOne({
+                fieldId: field._id,
+                date: today
+            });
+            
+            if (!existingTodaySchedule) {
+                const timeSlots = generateTimeSlots(today);
+                
+                // Lấy các maintenance cho sân này trong ngày hiện tại
+                const maintenances = await Maintenance.find({
+                    fieldId: field._id,
+                    startTime: { $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
+                    endTime: { $gt: today }
+                });
+
+                // Đánh dấu các slot bị maintenance
+                for (const maintenance of maintenances) {
+                    for (const slot of timeSlots) {
+                        if (
+                            slot.startTime < maintenance.endTime &&
+                            slot.endTime > maintenance.startTime
+                        ) {
+                            slot.status = 'maintenance';
+                        }
+                    }
+                }
+
+                await Schedule.create({
+                    fieldId: field._id,
+                    date: today,
+                    timeSlots
+                });
+
+                console.log(`[Schedule Cron] Đã tạo lịch cho sân ${field.name} ngày hiện tại ${today.toISOString().slice(0, 10)}`);
+            }
+        }
+
+        // Tiếp tục kiểm tra và tạo lịch cho các ngày tiếp theo
         for (let i = 1; i <= days; i++) {
             const targetDate = new Date(Date.UTC(
                 today.getUTCFullYear(),

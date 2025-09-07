@@ -21,7 +21,7 @@ const CouponTable = ({ coupons, onEdit, onDelete }) => (
             <td className="py-2 px-4 border-b">{coupon.type === 'percent' ? 'Phần trăm' : 'Số tiền'}</td>
             <td className="py-2 px-4 border-b">{coupon.value}</td>
             <td className="py-2 px-4 border-b">{coupon.minOrderValue}</td>
-            <td className="py-2 px-4 border-b">{coupon.maxDiscount}</td>
+            <td className="py-2 px-4 border-b">{coupon.maxDiscount || "Không có"}</td>
             <td className="py-2 px-4 border-b">{coupon.expiryDate ? coupon.expiryDate.slice(0, 10) : ''}</td>
             <td className="py-2 px-4 border-b flex gap-2">
               <button onClick={() => onEdit(coupon)} className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 duration-200">Sửa</button>
