@@ -5,7 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Person3Icon from '@mui/icons-material/Person3';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import TableBarIcon from '@mui/icons-material/TableBar';
+// import TableBarIcon from '@mui/icons-material/TableBar';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import LoginDialog from '../dialogs/loginDialog'
 import RegisterDialog from '../dialogs/registerDialog';
@@ -50,7 +50,7 @@ function GuestHeader() {
                                 textDecoration: 'none',
                             }}
                         >
-                            FPT
+                            FPT FPT
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                             <Link

@@ -50,7 +50,7 @@ const Footer = () => {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>© 2025 FSF. All rights reserved.</p>
+            <p>© 2025 FSF FPT. All rights reserved.</p>
           </div>
         </div>
       </footer>

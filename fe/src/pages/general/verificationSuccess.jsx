@@ -26,7 +26,7 @@ const VerificationSuccess = () => {
     const [count, setCount] = useState(5);
 
     useEffect(() => {
-        document.title = "Ratatouille | Xác Thực Thành Công";
+        document.title = "FSF | Xác Thực Thành Công";
         const intervalId = setInterval(() => {
             setCount(prev => {
                 if (prev === 1) {

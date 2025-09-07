@@ -16,7 +16,7 @@ const Unauthorized = () => {
         },
     });
     useEffect(() => {
-        document.title = "Ratatouille | Lỗi"
+        document.title = "FSF | Lỗi"
     }, []);
 
     return (

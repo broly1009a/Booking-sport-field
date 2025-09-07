@@ -16,7 +16,7 @@ const InvalidRequest = () => {
         },
     });
     useEffect(() => {
-        document.title = "Ratatouille | Lỗi"
+        document.title = "FSF | Lỗi"
     }, []);
 
     return (

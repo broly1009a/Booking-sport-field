@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import AdminHeader from "../components/headers/adminHeader";
 import People from "@mui/icons-material/People";
-import TableBarIcon from "@mui/icons-material/TableBar";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import VoucherIcon from "@mui/icons-material/CardGiftcard";
 const drawerWidth = 240;
 
@@ -29,12 +29,12 @@ const menuItems = [
   },
   {
     text: "Quản lí Sân",
-    icon: <TableBarIcon />,
+    icon: <SportsSoccerIcon />,
     path: "/admin/sport-field-list",
   },
   {
     text: "Quản lí loại sân",
-    icon: <TableBarIcon />,
+    icon: <SportsSoccerIcon />,
     path: "/admin/type-list",
   },
   {
@@ -66,7 +66,7 @@ const AdminLayout = () => {
         }}
       >       
         <Box sx={{ textAlign: "center", py: 2 }}>
-          <TableBarIcon sx={{ fontSize: 40, color: "#fff" }} />
+          <SportsSoccerIcon sx={{ fontSize: 40, color: "#fff" }} />
           <Typography variant="h6" fontWeight="bold" sx={{ letterSpacing: ".2rem" }}>
             ADMIN PANEL
           </Typography>

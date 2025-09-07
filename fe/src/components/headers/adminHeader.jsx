@@ -8,7 +8,7 @@ import Menu from '@mui/material/Menu';
 import Container from '@mui/material/Container';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import TableBarIcon from '@mui/icons-material/TableBar';
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import { useNavigate } from 'react-router-dom';
 import Link from '@mui/material/Link';
 import { useAuth } from '../../contexts/authContext';
@@ -59,7 +59,7 @@ function AdminHeader() {
             >
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
-                        <TableBarIcon onClick={() => navigate('/admin/dish')} sx={{ cursor: 'pointer', display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                        <SportsSoccerIcon onClick={() => navigate('/admin/dish')} sx={{ cursor: 'pointer', display: { xs: 'none', md: 'flex' }, mr: 1 }} />
                         <Typography
                             variant="h6"
                             noWrap
@@ -75,7 +75,7 @@ function AdminHeader() {
                                 textDecoration: 'none',
                             }}
                         >
-                            Ratatouille Admin Dashboard
+                            FSF Admin Dashboard
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         </Box>

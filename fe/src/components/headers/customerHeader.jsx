@@ -106,7 +106,7 @@ function CustomerHeader() {
                                 textDecoration: 'none',
                             }}
                         >
-                            FPT
+                            FPT FPT
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                             <Link
