@@ -89,15 +89,15 @@ const BookingSuccess = () => {
   useEffect(() => {
     setOpenMatchingQuestion(true);
   }, []);
-  const handleQuantityChange = (itemId, delta) => {
-    setSelectedItems(prev =>
-      prev.map(item =>
-        item._id === itemId
-          ? { ...item, quantity: Math.max(0, item.quantity + delta) }
-          : item
-      )
-    );
-  };
+  // const handleQuantityChange = (itemId, delta) => {
+  //   setSelectedItems(prev =>
+  //     prev.map(item =>
+  //       item._id === itemId
+  //         ? { ...item, quantity: Math.max(0, item.quantity + delta) }
+  //         : item
+  //     )
+  //   );
+  // };
 
 
   const totalItemPrice = selectedItems.reduce(
@@ -120,7 +120,7 @@ const BookingSuccess = () => {
         <Typography>
           Thời gian: {formatBookingTimeUTC(bookingData.startTime)} - {formatBookingTimeUTC(bookingData.endTime)}
         </Typography>
-        <Typography>Tổng tiền sân: {bookingData.totalPrice.toLocaleString()}đ</Typography>
+        <Typography>Tổng tiền sân: {(bookingData.totalPrice - totalItemPrice).toLocaleString()}đ</Typography>
         <Typography>Tên người đặt: {bookingData.customerName}</Typography>
         <Typography>Số điện thoại: +84{bookingData.phoneNumber}</Typography>
         {bookingData.note && <Typography>Ghi chú: {bookingData.note}</Typography>}
@@ -160,7 +160,7 @@ const BookingSuccess = () => {
       )}
 
       <Typography sx={{ mb: 2, fontWeight: 'bold', color: '#388e3c' }}>
-        Tổng cộng: {(bookingData.totalPrice + totalItemPrice).toLocaleString()}đ
+        Tổng cộng: {(bookingData.totalPrice).toLocaleString()}đ
       </Typography>
 
       {/* <Button

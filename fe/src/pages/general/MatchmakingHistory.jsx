@@ -54,16 +54,80 @@ const MatchmakingHistory = () => {
     status: 'all', // 'all', 'open', 'full', 'closed'
   });
 
+  const applyFilters = (matches) => {
+    let filtered = [...matches];
+
+    // Apply search filter
+    if (filters.searchTerm) {
+      filtered = filtered.filter(match =>
+        match.bookingId?.fieldId?.name?.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply time range filter
+    const now = dayjs();
+    switch (filters.timeRange) {
+      case 'today':
+        filtered = filtered.filter(match =>
+          dayjs.utc(match.bookingId?.startTime).local().isSame(now, 'day')
+        );
+        break;
+      case 'week':
+        filtered = filtered.filter(match =>
+          dayjs.utc(match.bookingId?.startTime).local().isAfter(now.subtract(7, 'day'))
+        );
+        break;
+      case 'month':
+        filtered = filtered.filter(match =>
+          dayjs.utc(match.bookingId?.startTime).local().isAfter(now.subtract(30, 'day'))
+        );
+        break;
+      default:
+        break;
+    }
+
+    // Apply status filter
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(match => match.status === filters.status);
+    }
+
+    setFilteredMatchmakings(filtered);
+  };
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+    setPage(0); // Reset to first page when filter changes
+  };
+
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   useEffect(() => {
     const fetchMatchmakings = async () => {
       if (!currentUser?._id) return;
       setLoading(true);
       const res = await matchmakingService.getMatchmakingsByUser(currentUser._id);
-      setMatchmakings(res?.data || []);
+      const data = res?.data || [];
+      setMatchmakings(data);
+      applyFilters(data);
       setLoading(false);
     };
     fetchMatchmakings();
   }, [currentUser]);
+
+  useEffect(() => {
+    applyFilters(matchmakings);
+  }, [filters]);
 
   return (
     <Box sx={{ p: 4, bgcolor: '#f5f5f5' }}>
