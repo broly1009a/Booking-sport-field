@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import { TextField, Button, FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
 import UserService from '../../../services/userService';
-
+import { toast } from 'react-toastify';
 const RegisterUser = () => {
     const [fname, setFname] = useState('');
     const [lname, setLname] = useState('');
@@ -17,9 +17,24 @@ const RegisterUser = () => {
     }, []);
     const handleSubmit = async (e) => {
         e.preventDefault();
+    try {
+         
         const filter = { fname, lname, dob, phoneNumber, email, gender, password, role };
         await UserService.registerAndVerifyAccount(filter);
-        alert('Tạo tài khoản thành công!');
+        toast.success('Tạo tài khoản thành công!');
+        // Reset form fields
+        setFname('');
+        setLname('');
+        setDob('');
+        setPhoneNumber('');
+        setEmail('');
+        setGender('');
+        setPassword('');
+        setRole('');
+        } catch (error) {
+            console.error('Error creating user:', error?.message );
+           toast.error( error?.message || 'Đã xảy ra lỗi khi tạo tài khoản.');
+        }
     };
 
     return (

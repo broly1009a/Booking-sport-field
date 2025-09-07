@@ -1,4 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Box,
   Container,
@@ -101,6 +103,14 @@ const AdminLayout = () => {
           <Outlet />
         </Container>
       </Box>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        pauseOnHover
+        closeOnClick
+        draggable
+        theme="colored"
+      />
     </Box>
   );
 };

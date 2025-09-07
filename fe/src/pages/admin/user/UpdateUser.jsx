@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
 import UserService from '../../../services/userService';
-
+import { toast } from 'react-toastify';
 const UpdateUser = ({ user, onClose }) => {
     const [fname, setFname] = useState(user?.fname || '');
     const [lname, setLname] = useState(user?.lname || '');
@@ -12,9 +12,14 @@ const UpdateUser = ({ user, onClose }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await UserService.updateAccountInfo(user._id, fname, lname, dob, phoneNumber, gender, role);
-        alert('User information updated!');
-        onClose(); // Close dialog after updating
+        try {
+            await UserService.updateAccountInfo(user._id, fname, lname, dob, phoneNumber, gender, role);
+            toast.success('Cập nhật thông tin người dùng thành công!');
+            onClose(); // Close dialog after updating
+        } catch (error) {
+            console.error('Error updating user:', error?.message);
+            toast.error(error?.message || 'Đã xảy ra lỗi khi cập nhật thông tin người dùng.');
+        }
     };
 
     return (
