@@ -58,16 +58,99 @@ const BookingHistory = () => {
     status: 'all', // 'all', 'pending', 'confirmed', 'cancelled', 'completed'
     priceRange: 'all', // 'all', 'under100', '100to200', '200to500', 'over500'
   });
+  const applyFilters = (bookingsList) => {
+    let filtered = [...bookingsList];
+
+    // Apply search filter
+    if (filters.searchTerm) {
+      filtered = filtered.filter(booking =>
+        booking.field?.name?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        booking.field?.location?.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply time range filter
+    const now = dayjs();
+    switch (filters.timeRange) {
+      case 'today':
+        filtered = filtered.filter(booking =>
+          dayjs.utc(booking.startTime).local().isSame(now, 'day')
+        );
+        break;
+      case 'week':
+        filtered = filtered.filter(booking =>
+          dayjs.utc(booking.startTime).local().isAfter(now.subtract(7, 'day'))
+        );
+        break;
+      case 'month':
+        filtered = filtered.filter(booking =>
+          dayjs.utc(booking.startTime).local().isAfter(now.subtract(30, 'day'))
+        );
+        break;
+      default:
+        break;
+    }
+
+    // Apply status filter
+    if (filters.status !== 'all') {
+      filtered = filtered.filter(booking => booking.status === filters.status);
+    }
+
+    // Apply price range filter
+    switch (filters.priceRange) {
+      case 'under100':
+        filtered = filtered.filter(booking => booking.totalPrice < 100000);
+        break;
+      case '100to200':
+        filtered = filtered.filter(booking => booking.totalPrice >= 100000 && booking.totalPrice < 200000);
+        break;
+      case '200to500':
+        filtered = filtered.filter(booking => booking.totalPrice >= 200000 && booking.totalPrice < 500000);
+        break;
+      case 'over500':
+        filtered = filtered.filter(booking => booking.totalPrice >= 500000);
+        break;
+      default:
+        break;
+    }
+
+    setFilteredBookings(filtered);
+  };
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+    setPage(0); // Reset to first page when filter changes
+  };
+
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   useEffect(() => {
     const fetchBookings = async () => {
       if (!currentUser?._id) return;
       setLoading(true);
-  const res = await bookingService.getBookingsByUser(currentUser._id);
-  setBookings((res?.data || []).reverse());
+      const res = await bookingService.getBookingsByUser(currentUser._id);
+      const data = (res?.data || []).reverse();
+      setBookings(data);
+      applyFilters(data);
       setLoading(false);
     };
     fetchBookings();
   }, [currentUser]);
+
+  useEffect(() => {
+    applyFilters(bookings);
+  }, [filters]);
   const handleOpenFeedback = (booking) => {
     setFeedbackBooking(booking);
     setOpenFeedbackDialog(true);
@@ -88,6 +171,70 @@ const BookingHistory = () => {
       <Typography variant="h4" sx={{ mb: 2, color: '#388e3c' }}>
         Lịch sử đặt sân của bạn
       </Typography>
+
+      {/* Filter Section */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              fullWidth
+              label="Tìm kiếm theo tên sân/địa điểm"
+              variant="outlined"
+              value={filters.searchTerm}
+              onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Thời gian</InputLabel>
+              <Select
+                value={filters.timeRange}
+                label="Thời gian"
+                onChange={(e) => handleFilterChange('timeRange', e.target.value)}
+              >
+                <MenuItem value="all">Tất cả</MenuItem>
+                <MenuItem value="today">Hôm nay</MenuItem>
+                <MenuItem value="week">7 ngày qua</MenuItem>
+                <MenuItem value="month">30 ngày qua</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Trạng thái</InputLabel>
+              <Select
+                value={filters.status}
+                label="Trạng thái"
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+              >
+                <MenuItem value="all">Tất cả</MenuItem>
+                <MenuItem value="pending">Đang chờ</MenuItem>
+                <MenuItem value="confirmed">Đã xác nhận</MenuItem>
+                <MenuItem value="cancelled">Đã hủy</MenuItem>
+                <MenuItem value="completed">Hoàn thành</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Giá tiền</InputLabel>
+              <Select
+                value={filters.priceRange}
+                label="Giá tiền"
+                onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+              >
+                <MenuItem value="all">Tất cả</MenuItem>
+                <MenuItem value="under100">Dưới 100k</MenuItem>
+                <MenuItem value="100to200">100k - 200k</MenuItem>
+                <MenuItem value="200to500">200k - 500k</MenuItem>
+                <MenuItem value="over500">Trên 500k</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
+
       <Paper>
         <Table>
           <TableHead>
@@ -112,7 +259,9 @@ const BookingHistory = () => {
                 <TableCell colSpan={7} align="center">Bạn chưa có lịch sử đặt sân nào</TableCell>
               </TableRow>
             ) : (
-              bookings.map(b => (
+              filteredBookings
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map(b => (
                 <TableRow key={b._id}>
                   <TableCell>{b.field?.name}</TableCell>
                   <TableCell>{b.field?.location}</TableCell>
@@ -163,6 +312,17 @@ const BookingHistory = () => {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredBookings.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Số hàng mỗi trang:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} trong ${count}`}
+        />
       </Paper>
 
       {/* Dialog chi tiết booking */}
