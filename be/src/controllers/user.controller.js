@@ -151,7 +151,7 @@ class UserController {
             next(error);
         }
     }
-    getPaginatedUsers = async (req, res, next) => {
+     getPaginatedUsers = async (req, res, next) => {
         try {
             const { page, limit, search, role } = req.query;
             const users = await UserService.getPaginatedUsers(page, limit, search, role);
@@ -163,7 +163,8 @@ class UserController {
     registerAndVerifyAccount = async (req, res, next) => {
         try {
             const { fname, lname, dob, phoneNumber, email, gender, password,role } = req.body;
-            const newUser = await UserService.signUpAndVerify(fname, lname, dob, phoneNumber, email, gender, role, password);
+            const restaurant = null;
+            const newUser = await UserService.signUpAndVerify(fname, lname, dob, phoneNumber, email, gender, role, password, restaurant);
             return res.status(200).json({
                 data: newUser
             });
@@ -190,6 +191,34 @@ class UserController {
             next(error);
         }
     }
+    getEmailByPhoneNumber = async (req, res, next) => {
+    try {
+        const { phoneNumber } = req.body;
+        const email = await UserService.getEmailByPhoneNumber(phoneNumber);
+        res.status(200).json({ email });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};
+ disableAccount = async (req, res, next) => {
+        try {
+            const { firebaseUID } = req.params;
+            const result = await UserService.disableAccount(firebaseUID);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    enableAccount = async (req, res, next) => {
+        try {
+            const { firebaseUID } = req.params;
+            const result = await UserService.enableAccount(firebaseUID);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 module.exports = new UserController;

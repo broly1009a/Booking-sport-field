@@ -1,6 +1,5 @@
 # dependencies
 /node_modules
-/serviceAccountKey.json
 
 # Env files
 *.env

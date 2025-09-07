@@ -6,12 +6,3 @@ Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-
-
-Frontend gửi ISO có offset
-Gửi "2025-06-19T10:30:00+07:00" từ frontend (dùng .format('YYYY-MM-DDTHH:mm:ssZ') với dayjs/moment).
-Backend không cần sửa gì, MongoDB sẽ lưu đúng UTC.
-
-Example: dayjs(slot.time).format('YYYY-MM-DDTHH:mm:ssZ') 
-// => "2025-06-19T10:30:00+07:00"
