@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://fptsportsfield.io.vn/</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/login</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/register</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/sign-out</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/yard</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/yard-detail/{id}</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/news</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/news/{id}</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/booking/{typeId}</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/booking-success/{id}</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/matchmaking-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/booking-history</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/matchmaking-history</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/wallet-history</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/vnpay_return_url</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/voucher</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/event</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/about</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/favorite</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/policy</loc></url>
+  <!-- Manager routes -->
+  <url><loc>https://fptsportsfield.io.vn/manager/dashboard</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/user-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/type-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/sport-field-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/equipment-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/consumable-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/booking-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/maintenance-schedule/{typeId}</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/event-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/new-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/category-policy-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/manager/policy-list</loc></url>
+  <!-- Admin routes -->
+  <url><loc>https://fptsportsfield.io.vn/admin/user-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/admin/type-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/admin/sport-field-list</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/admin/voucher-list</loc></url>
+  <!-- Other routes -->
+  <url><loc>https://fptsportsfield.io.vn/unauthorized</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/invalid</loc></url>
+  <url><loc>https://fptsportsfield.io.vn/verification-success</loc></url>
+</urlset>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://fptsportsfield.io.vn/sitemap.xml
