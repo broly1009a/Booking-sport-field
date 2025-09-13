@@ -57,7 +57,7 @@ export default function ProfileDialog({ open, setOpen }) {
             >
 
                 <DialogTitle>
-                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'black', p: 2, textTransform: 'uppercase', color: "#006D38" }}>
+                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', p: 2, textTransform: 'uppercase', color: "#006D38" }}>
                         Thông tin cá nhân
                     </Typography>
                     <IconButton
