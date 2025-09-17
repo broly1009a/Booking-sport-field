@@ -171,7 +171,7 @@ class BookingService {
             { $match: { userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId } },
             {
                 $lookup: {
-                    from: 'matchmakings', // collection name in MongoDB
+                    from: 'matchmakings',
                     localField: '_id',
                     foreignField: 'bookingId',
                     as: 'matchmaking'
@@ -202,6 +202,22 @@ class BookingService {
                     localField: '_id',
                     foreignField: 'bookingId',
                     as: 'feedbacks'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'consumablepurchases',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'consumablePurchases'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'equipmentrentals',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'equipmentRentals'
                 }
             }
         ]);

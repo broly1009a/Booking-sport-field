@@ -75,7 +75,7 @@ const BookingSuccess = () => {
 
   const bookingData = location.state.bookingData;
   const [selectedItems, setSelectedItems] = useState(
-    bookingData?.items || []
+    bookingData?.selectedItems || []
   );
   console.log('Booking data:', bookingData);
   useEffect(() => {
@@ -106,7 +106,7 @@ const BookingSuccess = () => {
   if (!bookingData) {
     return <Typography>Không có dữ liệu đặt sân</Typography>;
   }
-
+console.log('Selected items:', selectedItems);
   return (
     <Box sx={{ p: 4, bgcolor: '#f5f5f5' }}>
       <Typography variant="h4" sx={{ mb: 2, color: '#388e3c' }}>
