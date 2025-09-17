@@ -7,7 +7,8 @@ const transporter = nodemailer.createTransport({
         pass: process.env.PASS_APP
     }
 });
-
+console.log('user:', process.env.EMAIL_APP);
+console.log('pass:', process.env.PASS_APP);
 async function sendVerificationEmail(email, verificationLink) {
     const mailOptions = {
         from: process.env.EMAIL_APP,
@@ -34,6 +35,8 @@ async function sendVerificationEmail(email, verificationLink) {
 }
 
 async function sendNewPassword(email, newPassword) {
+    console.log('Sending new password to:', email);
+    console.log('New password:', newPassword);
     const mailOptions = {
         from: process.env.EMAIL_APP,
         to: email,

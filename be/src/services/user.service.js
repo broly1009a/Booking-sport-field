@@ -136,9 +136,13 @@ class UserService {
     resetPassword = async (email) => {
         try {
             const userRecord = await admin.auth().getUserByEmail(email);
+            console.log('User record found for password reset:', userRecord);
             const newPassword = generateRandomPassword();
+            console.log('Generated new password:', newPassword);
             await admin.auth().updateUser(userRecord.uid, { password: newPassword });
+            console.log('Password updated in Firebase for user:', userRecord.uid);
             await sendNewPassword(email, newPassword);
+            console.log('New password email sent to:', email);
             return {
                 data: {
                     success: true,
