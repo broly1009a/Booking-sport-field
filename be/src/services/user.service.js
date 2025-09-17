@@ -1,6 +1,5 @@
 const { User } = require('../models/index');
 const admin = require('../configs/firebaseAdmin');
-const { serverHostPort, serverHostUrl } = require('../utils/constants');
 const { sendVerificationEmail, sendNewPassword } = require('../configs/nodemailer.config');
 const { generateRandomPassword } = require('../utils/handleGenerate');
 class UserService {
@@ -49,7 +48,7 @@ class UserService {
                 firebaseUID: userRecord.uid,
             }]);
 
-            const emailVerificationLink = `http://${serverHostUrl}:${serverHostPort}/api/v1/user/verify-email?uid=${userRecord.uid}`;
+            const emailVerificationLink = `${process.env.FE_HOST_URL}/api/v1/user/verify-email?uid=${userRecord.uid}`;
             await sendVerificationEmail(email, emailVerificationLink);
 
             return newUser[0];
@@ -107,7 +106,7 @@ class UserService {
     sendEmailVerification = async (email) => {
         try {
             const userRecord = await admin.auth().getUserByEmail(email);
-            const emailVerificationLink = `http://${serverHostUrl}:${serverHostPort}/api/v1/user/verify-email?uid=${userRecord.uid}`;
+            const emailVerificationLink = `${process.env.FE_HOST_URL}/api/v1/user/verify-email?uid=${userRecord.uid}`;
             await sendVerificationEmail(email, emailVerificationLink);
             return {
                 data: {

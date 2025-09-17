@@ -1,16 +1,16 @@
 const nodemailer = require("nodemailer");
-const { passwordApp, emailApp } = require('../utils/constants');
+require('dotenv').config();
 const transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {
-        user: emailApp,
-        pass: passwordApp
+        user: process.env.EMAIL_APP,
+        pass: process.env.PASS_APP
     }
 });
 
 async function sendVerificationEmail(email, verificationLink) {
     const mailOptions = {
-        from: emailApp,
+        from: process.env.EMAIL_APP,
         to: email,
         subject: "Xác minh tài khoản ứng dụng fptsportsfield.io.vn",
         text: `fptsportsfield.io.vn xin chào bạn!\n\nBạn vui lòng vào liên kết sau để xác thực tài khoản: ${verificationLink}\n\nCảm ơn bạn!`,
@@ -35,7 +35,7 @@ async function sendVerificationEmail(email, verificationLink) {
 
 async function sendNewPassword(email, newPassword) {
     const mailOptions = {
-        from: emailApp,
+        from: process.env.EMAIL_APP,
         to: email,
         subject: "Cấp lại mật khẩu tài khoản trên ứng dụng fptsportsfield.io.vn",
         text: `fptsportsfield.io.vn xin chào bạn!\n\nMật khẩu mới của bạn là: ${newPassword}\n\nXin hãy đăng nhập vào tài khoản của bạn để thay đổi mật khẩu nếu cần.\n\nCảm ơn bạn!`,
