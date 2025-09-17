@@ -5,15 +5,15 @@ import {
   Button,
   Dialog,
   DialogTitle,
-  DialogContent,
+  // DialogContent,
   DialogActions,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TextField,
-  IconButton
+  // TextField,
+  // IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -22,30 +22,30 @@ import { useLocation } from 'react-router-dom';
 import { formatBookingTimeUTC } from '../../utils/handleFormat';
 import MatchmakingDialog from '../../components/dialogs/matchmakingDialog';
 import { useAuth } from '../../contexts/authContext';
-const fakeBookingData = {
-  _id: 'booking123',
-  fieldName: 'Sân A - Pickleball',
-  startTime: '2025-06-12T08:00:00.000Z',
-  endTime: '2025-06-12T10:00:00.000Z',
-  totalPrice: 200000,
-  customerName: 'Nguyễn Văn A',
-  phoneNumber: '912345678',
-  note: 'Đặt sân cho nhóm sinh viên'
-};
-const fakeSelectedItems = [
-  { _id: 'item1', name: 'Bóng Pickleball', type: 'equipment', price: 50000, quantity: 2 },
-  { _id: 'item2', name: 'Vợt Pickleball', type: 'equipment', price: 200000, quantity: 1 },
-  { _id: 'item3', name: 'Nước suối', type: 'consumable', price: 10000, quantity: 3 },
-  { _id: 'item4', name: 'Nước tăng lực', type: 'consumable', price: 20000, quantity: 0 }
-];
+// const fakeBookingData = {
+//   _id: 'booking123',
+//   fieldName: 'Sân A - Pickleball',
+//   startTime: '2025-06-12T08:00:00.000Z',
+//   endTime: '2025-06-12T10:00:00.000Z',
+//   totalPrice: 200000,
+//   customerName: 'Nguyễn Văn A',
+//   phoneNumber: '912345678',
+//   note: 'Đặt sân cho nhóm sinh viên'
+// };
+// const fakeSelectedItems = [
+//   { _id: 'item1', name: 'Bóng Pickleball', type: 'equipment', price: 50000, quantity: 2 },
+//   { _id: 'item2', name: 'Vợt Pickleball', type: 'equipment', price: 200000, quantity: 1 },
+//   { _id: 'item3', name: 'Nước suối', type: 'consumable', price: 10000, quantity: 3 },
+//   { _id: 'item4', name: 'Nước tăng lực', type: 'consumable', price: 20000, quantity: 0 }
+// ];
 
-// Fake data for equipment and consumables
-const fakeItems = [
-  { _id: 'item1', name: 'Bóng Pickleball', type: 'equipment', price: 50000 },
-  { _id: 'item2', name: 'Vợt Pickleball', type: 'equipment', price: 200000 },
-  { _id: 'item3', name: 'Nước suối', type: 'consumable', price: 10000 },
-  { _id: 'item4', name: 'Nước tăng lực', type: 'consumable', price: 20000 }
-];
+// // Fake data for equipment and consumables
+// const fakeItems = [
+//   { _id: 'item1', name: 'Bóng Pickleball', type: 'equipment', price: 50000 },
+//   { _id: 'item2', name: 'Vợt Pickleball', type: 'equipment', price: 200000 },
+//   { _id: 'item3', name: 'Nước suối', type: 'consumable', price: 10000 },
+//   { _id: 'item4', name: 'Nước tăng lực', type: 'consumable', price: 20000 }
+// ];
 
 const BookingSuccess = () => {
   const location = useLocation();
@@ -75,14 +75,12 @@ const BookingSuccess = () => {
 
   const bookingData = location.state.bookingData;
   const [selectedItems, setSelectedItems] = useState(
-    bookingData.selectedItems && bookingData.selectedItems.length > 0
-      ? bookingData.selectedItems
-      : (location.state?.selectedItems || fakeSelectedItems)
+    bookingData?.items || []
   );
   console.log('Booking data:', bookingData);
   useEffect(() => {
     // Mở popup nếu chưa có mục nào được chọn
-    if (!selectedItems.some(item => item.quantity > 0)) {
+    if (selectedItems && selectedItems.length > 0 && !selectedItems.some(item => item.quantity > 0)) {
       setOpenAddItemsDialog(true);
     }
   }, [selectedItems]);
@@ -100,10 +98,10 @@ const BookingSuccess = () => {
   // };
 
 
-  const totalItemPrice = selectedItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const totalItemPrice = selectedItems ? selectedItems.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
     0
-  );
+  ) : 0;
 
   if (!bookingData) {
     return <Typography>Không có dữ liệu đặt sân</Typography>;
@@ -126,7 +124,7 @@ const BookingSuccess = () => {
         {bookingData.note && <Typography>Ghi chú: {bookingData.note}</Typography>}
       </Box>
 
-      {selectedItems.some(item => item.quantity > 0) && (
+      {selectedItems && selectedItems.some(item => item.quantity > 0) ? (
         <Box sx={{ mb: 2, bgcolor: '#e0f2e9', p: 2, borderRadius: 1 }}>
           <Typography variant="h6" sx={{ color: '#388e3c' }}>Thiết bị/Đồ tiêu thụ đã chọn</Typography>
           <Table sx={{ mt: 1 }}>
@@ -146,15 +144,21 @@ const BookingSuccess = () => {
                   <TableRow key={item._id}>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.type === 'equipment' ? 'Thiết bị' : 'Đồ tiêu thụ'}</TableCell>
-                    <TableCell>{item.price.toLocaleString()}đ</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{(item.price * item.quantity).toLocaleString()}đ</TableCell>
+                    <TableCell>{(item.price || 0).toLocaleString()}đ</TableCell>
+                    <TableCell>{item.quantity || 0}</TableCell>
+                    <TableCell>{((item.price || 0) * (item.quantity || 0)).toLocaleString()}đ</TableCell>
                   </TableRow>
                 ))}
             </TableBody>
           </Table>
           <Typography sx={{ mt: 1, fontWeight: 'bold' }}>
             Tổng tiền thiết bị/đồ tiêu thụ: {totalItemPrice.toLocaleString()}đ
+          </Typography>
+        </Box>
+      ) : (
+        <Box sx={{ mb: 2, bgcolor: '#e0f2e9', p: 2, borderRadius: 1 }}>
+          <Typography variant="body1" sx={{ color: '#666', fontStyle: 'italic' }}>
+            Không có thiết bị hoặc đồ tiêu thụ được chọn
           </Typography>
         </Box>
       )}

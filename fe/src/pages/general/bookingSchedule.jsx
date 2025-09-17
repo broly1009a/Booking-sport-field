@@ -44,6 +44,7 @@ const BookingSchedule = () => {
       try {
         const res = await scheduleService.getSchedulesByType(typeId, selectedDate.format('YYYY-MM-DD'));
         if (res && res.data) {
+          console.log('Fetched schedule data:', res.data.sportFields);
           setSportFields(res.data.sportFields || []);
           setTimeSlots(res.data.timeSlots || []);
           setSchedule(res.data.schedules || []);

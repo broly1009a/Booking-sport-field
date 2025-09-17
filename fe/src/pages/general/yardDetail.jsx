@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { FaRestroom, FaParking, FaWifi, FaShower } from "react-icons/fa";
 import { MdSecurity, MdSportsSoccer } from "react-icons/md";
 import sportFieldService from "../../services/api/sportFieldService";
-import { feedbackService } from '../../services/api/feedbackService';
+// import { feedbackService } from '../../services/api/feedbackService';
 import Feedback from '../../components/Feedback/Feedback';
 import { useNavigate } from "react-router-dom";
 const amenityIcons = {
@@ -112,19 +112,19 @@ const YardDetail = () => {
                     {/* Information Cards */}
                     <div className="lg:col-span-4 space-y-6">
                         <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="text-xl font-semibold mb-4">Location</h3>
+                            <h3 className="text-xl font-semibold mb-4">Vị trí</h3>
                             <p className="text-gray-600">{fieldData?.location}</p>
-                            <div className="mt-4 h-48 bg-gray-200 rounded-lg">Map Placeholder</div>
+                            <div className="mt-4 h-48 bg-gray-200 rounded-lg">Bản đồ (Coming Soon)</div>
                         </div>
 
                         <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="text-xl font-semibold mb-4">Capacity & Pricing</h3>
+                            <h3 className="text-xl font-semibold mb-4">Sức chứa & Giá cả</h3>
                             <div className="flex justify-between items-center mb-4">
-                                <span className="text-gray-600">Maximum Capacity:</span>
-                                <span className="font-semibold">{fieldData?.capacity} people</span>
+                                <span className="text-gray-600">Sức chứa tối đa:</span>
+                                <span className="font-semibold">{fieldData?.capacity} người</span>
                             </div>
                             <div className="flex justify-between items-center mb-6">
-                                <span className="text-gray-600">Hourly Rate:</span>
+                                <span className="text-gray-600">Giá theo giờ:</span>
                                 <span className="text-2xl font-bold text-green-600">${fieldData?.pricePerHour}</span>
                             </div>
                             <button
@@ -137,12 +137,12 @@ const YardDetail = () => {
                                 }}
                                 className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                             >
-                                Book Now
+                                Đặt ngay
                             </button>
                         </div>
 
                         <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="text-xl font-semibold mb-4">Amenities</h3>
+                            <h3 className="text-xl font-semibold mb-4">Tiện nghi</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 {fieldData?.amenities?.map((amenity, index) => {
                                     const Icon = amenityIcons[amenity.toLowerCase()];
@@ -168,7 +168,7 @@ const YardDetail = () => {
 
                 {/* Related Fields Section */}
                 <div className="mb-8">
-                    <h3 className="text-2xl font-semibold mb-6">Similar Fields Nearby</h3>
+                    <h3 className="text-2xl font-semibold mb-6">Các sân tương tự gần đây</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {(fieldData?.similarFields || []).map((field, index) => (
                             <div key={field._id || index} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">

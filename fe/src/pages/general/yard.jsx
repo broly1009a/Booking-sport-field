@@ -38,7 +38,7 @@ const Yard = () => {
     }, [currentUser]);
 
     const categories = [
-        { id: "all", name: "All Sports", icon: FaRunning },
+        { id: "all", name: "Tất cả", icon: FaRunning },
         { id: "bóng đá", name: "Bóng đá", icon: FaFutbol },
         { id: "bóng rổ", name: "Bóng rổ", icon: FaBasketballBall },
         { id: "pickleball", name: "Pickleball", icon: FaTableTennis },
@@ -59,10 +59,10 @@ const Yard = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case "available": return "bg-green-500";
-            case "unavailable": return "bg-red-500";
-            case "maintenance": return "bg-yellow-500";
-            default: return "bg-gray-500";
+            case "available": return { color: "bg-green-500", text: "Còn trống" };
+            case "unavailable": return { color: "bg-red-500", text: "Đã đặt" };
+            case "maintenance": return { color: "bg-yellow-500", text: "Đang bảo trì" };
+            default: return { color: "bg-gray-500", text: "Không xác định" };
         }
     };
 
@@ -104,10 +104,10 @@ const Yard = () => {
     return (
         <div className="min-h-screen bg-gray-100 p-6 flex">
             <div className="w-64 bg-white p-4 rounded-lg shadow-lg mr-6 h-fit sticky top-6">
-                <h2 className="text-xl font-bold mb-4">Filters</h2>
+                <h2 className="text-xl font-bold mb-4">Lọc Sân</h2>
 
                 <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3">Categories</h3>
+                    <h3 className="text-lg font-semibold mb-3">Danh Mục</h3>
                     {categories.map((category) => (
                         <button
                             key={category.id}
@@ -121,7 +121,7 @@ const Yard = () => {
                 </div>
 
                 <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3">Price Range</h3>
+                    <h3 className="text-lg font-semibold mb-3">Khoảng Giá (VND/giờ)</h3>
                     <div className="space-y-2">
                         <input
                             type="range"
@@ -156,8 +156,8 @@ const Yard = () => {
                                         e.target.src = "https://images.unsplash.com/photo-1560272564-c83b66b1ad12";
                                     }}
                                 />
-                                <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-white text-sm font-semibold ${getStatusColor(field.status)}`}>
-                                    {field.status}
+                                <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-white text-sm font-semibold ${getStatusColor(field.status).color}`}>
+                                    {getStatusColor(field.status).text}
                                 </div>
                                 <div
                                     className="absolute bottom-2 right-2 text-xl cursor-pointer z-10"
@@ -178,8 +178,8 @@ const Yard = () => {
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{field.name}</h3>
                                 <p className="text-gray-600 mb-2">{field.location}</p>
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-gray-600">Capacity: {field.capacity}</span>
-                                    <span className="text-blue-600 font-bold">${field.pricePerHour}/hr</span>
+                                    <span className="text-gray-600">Sức chứa: {field.capacity}</span>
+                                    <span className="text-blue-600 font-bold">{field.pricePerHour} VND/giờ</span>
                                 </div>
                                 <div className="flex space-x-2">
                                     {field.amenities.map((amenity, index) => (
@@ -236,17 +236,17 @@ const Yard = () => {
                                 <div className="space-y-4">
                                     <p className="text-gray-600">{selectedField.location}</p>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Capacity: {selectedField.capacity}</span>
-                                        <span className="text-blue-600 font-bold">${selectedField.pricePerHour}/hr</span>
+                                        <span className="text-gray-600">Sức chứa: {selectedField.capacity}</span>
+                                        <span className="text-blue-600 font-bold">{selectedField.pricePerHour} VND/giờ</span>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <span className="text-gray-600">Status:</span>
-                                        <span className={`px-3 py-1 rounded-full text-white text-sm ${getStatusColor(selectedField.status)}`}>
-                                            {selectedField.status}
+                                        <span className="text-gray-600">Trạng thái:</span>
+                                        <span className={`px-3 py-1 rounded-full text-white text-sm ${getStatusColor(selectedField.status).color}`}>
+                                            {getStatusColor(selectedField.status).text}
                                         </span>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <span className="text-gray-600">Amenities:</span>
+                                        <span className="text-gray-600">Tiện nghi:</span>
                                         <div className="flex space-x-2">
                                             {selectedField.amenities.map((amenity, index) => (
                                                 <div key={index} className="p-2 bg-gray-100 rounded-full">

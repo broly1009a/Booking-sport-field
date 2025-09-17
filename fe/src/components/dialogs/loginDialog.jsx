@@ -55,7 +55,7 @@ export default function LoginDialog({ open, setOpen }) {
                 <LoadingOverlay open={loading}></LoadingOverlay>
                 <DialogTitle sx={{ fontWeight: 'bold', fontSize: 'h4.fontSize', textAlign: 'center' }}>Đăng nhập</DialogTitle>
                 <DialogContentText sx={{ fontSize: 'normal', textAlign: 'center', mb: 2 }}>
-                    Chào mừng bạn đến với Reservation Service
+                    Chào mừng bạn đến với FPT Sports Field! Vui lòng đăng nhập để tiếp tục.
                 </DialogContentText>
                 <Divider orientation="horizontal" flexItem />
                 <DialogContent>

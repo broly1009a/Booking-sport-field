@@ -32,7 +32,7 @@ import PayByWalletButton from '../buttons/PayByWalletButton';
 import bookingService from '../../services/api/bookingService';
 import { useNavigate } from 'react-router-dom';
 export default function BookingDialog({ open, onClose, selectedSlots, sportField, userId, onConfirm }) {
-
+ console.log('BookingDialog props:' ,sportField);
   const [note, setNote] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [openNotification, setOpenNotification] = useState(false);
@@ -245,10 +245,62 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ mb: 2, bgcolor: '#e0f2e9', p: 2, borderRadius: 1 }}>
-            <Typography variant="h6" sx={{ color: '#388e3c' }}>Thông tin sân</Typography>
-            <Typography>Tên CLB: CN Q9 CLB Pickleball Hoàng Thành Trung</Typography>
-            <Typography>Địa chỉ: 449 Lê Văn Việt quận 9 (bên trong trường Đào tạo bộ đội đường Nghiệp vụ Kiểm sát)</Typography>
-            <Typography>SĐT: 0918435436</Typography>
+            <Typography variant="h6" sx={{ color: '#388e3c', mb: 2 }}>Thông tin sân</Typography>
+            
+            {/* Phần hiển thị ảnh */}
+            {sportField.images && sportField.images.length > 0 && (
+              <Box sx={{ mb: 2, position: 'relative', borderRadius: 2, overflow: 'hidden' }}>
+                <img
+                  src={sportField.images[0]}
+                  alt={sportField.name}
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    objectFit: 'cover',
+                    borderRadius: '8px'
+                  }}
+                  onError={(e) => {
+                    e.target.src = "https://images.unsplash.com/photo-1560272564-c83b66b1ad12";
+                  }}
+                />
+                {sportField.images.length > 1 && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 8,
+                      right: 8,
+                      bgcolor: 'rgba(0,0,0,0.7)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    +{sportField.images.length - 1} ảnh
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {/* Phần thông tin chi tiết */}
+            <Box sx={{ display: 'grid', gap: 1 }}>
+              <Typography><strong>Tên sân:</strong> {sportField.name}</Typography>
+              <Typography><strong>Địa điểm:</strong> {sportField.location}</Typography>
+              <Typography><strong>Sức chứa:</strong> {sportField.capacity} người</Typography>
+              <Typography>
+                <strong>Tiện ích:</strong>{' '}
+                {sportField.amenities?.map(amenity => {
+                  switch(amenity) {
+                    case 'parking': return 'Bãi đỗ xe';
+                    case 'showers': return 'Phòng tắm';
+                    case 'wifi': return 'Wifi';
+                    case 'restrooms': return 'Nhà vệ sinh';
+                    case 'seating': return 'Chỗ ngồi';
+                    default: return amenity;
+                  }
+                }).join(', ')}
+              </Typography>
+            </Box>
           </Box>
 
           <Box sx={{ mb: 2, bgcolor: '#e0f2e9', p: 2, borderRadius: 1 }}>

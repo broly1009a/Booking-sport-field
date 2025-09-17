@@ -63,7 +63,7 @@ const Feedback = ({ fieldId }) => {
     return (
         <Box>
             <ReviewSummary fieldId={fieldId} />
-            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 4, mt: 5 }}>Customer Reviews</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 4, mt: 5 }}>Đánh giá từ người dùng</Typography>
             <div className="space-y-6">
                 {feedbacks.length === 0 && (
                     <Typography color="text.secondary">Chưa có đánh giá nào</Typography>

@@ -187,7 +187,13 @@ async getSchedulesByType(typeId, date) {
     const sportFields = fields.map(f => ({
         _id: f._id,
         name: f.name,
-        pricePerHour: f.pricePerHour
+        pricePerHour: f.pricePerHour,
+        location: f.location,
+        capacity: f.capacity,
+        amenities: f.amenities,
+        status: f.status,
+        images: f.images,
+        type: f.type
     }));
 
     // Lấy tất cả timeSlots (giờ) của một schedule bất kỳ
