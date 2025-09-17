@@ -1,19 +1,16 @@
 const nodemailer = require("nodemailer");
-require('dotenv').config();
+const { passwordApp, emailApp } = require('../utils/constants');
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    service: "Gmail",
     auth: {
-        user: process.env.EMAIL_APP,
-        pass: process.env.PASS_APP
+        user: emailApp,
+        pass: passwordApp
     }
 });
-console.log('user:', process.env.EMAIL_APP);
-console.log('pass:', process.env.PASS_APP);
+
 async function sendVerificationEmail(email, verificationLink) {
     const mailOptions = {
-        from: process.env.EMAIL_APP,
+        from: emailApp,
         to: email,
         subject: "Xác minh tài khoản ứng dụng fptsportsfield.io.vn",
         text: `fptsportsfield.io.vn xin chào bạn!\n\nBạn vui lòng vào liên kết sau để xác thực tài khoản: ${verificationLink}\n\nCảm ơn bạn!`,
@@ -37,12 +34,8 @@ async function sendVerificationEmail(email, verificationLink) {
 }
 
 async function sendNewPassword(email, newPassword) {
-    console.log('Sending new password to:', email);
-    console.log('New password:', newPassword);
-    console.log('pass:', process.env.PASS_APP);
-    console.log('Email app:', process.env.EMAIL_APP);
     const mailOptions = {
-        from: process.env.EMAIL_APP,
+        from: emailApp,
         to: email,
         subject: "Cấp lại mật khẩu tài khoản trên ứng dụng fptsportsfield.io.vn",
         text: `fptsportsfield.io.vn xin chào bạn!\n\nMật khẩu mới của bạn là: ${newPassword}\n\nXin hãy đăng nhập vào tài khoản của bạn để thay đổi mật khẩu nếu cần.\n\nCảm ơn bạn!`,
@@ -60,15 +53,9 @@ async function sendNewPassword(email, newPassword) {
     };
 
     try {
-        console.log('Sending new password to PENDING:', email);
         await transporter.sendMail(mailOptions);
-        console.log('New password email sent to ENDING:', email);
     } catch (error) {
-        console.error('Lỗi gửi email:', error);
-        if (error.response) {
-            console.error('Phản hồi từ server email:', error.response);
-        }
-        throw new Error(error.message);
+        throw new Error(error.message)
     }
 }
 
