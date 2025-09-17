@@ -58,7 +58,9 @@ async function sendNewPassword(email, newPassword) {
     };
 
     try {
+        console.log('Sending new password to PENDING:', email);
         await transporter.sendMail(mailOptions);
+        console.log('New password email sent to ENDING:', email);
     } catch (error) {
         console.error('Lỗi gửi email:', error);
         if (error.response) {
