@@ -96,7 +96,12 @@ class UserService {
         try {
             return await admin.auth().updateUser(firebaseUID, { emailVerified: true });
         } catch (error) {
-            throw { message: 'Có lỗi xảy ra khi xác minh tài khoản.', status: 500 };
+            console.error('Verify email error:', error);
+            throw { 
+                message: 'Có lỗi xảy ra khi xác minh tài khoản.', 
+                status: 500,
+                error: error.message 
+            };
         }
     };
 
@@ -115,7 +120,12 @@ class UserService {
                 }
             };
         } catch (error) {
-            throw new Error('Email chưa được đăng ký!');
+            console.error('Send email verification error:', error);
+            throw { 
+                message: 'Email chưa được đăng ký!',
+                status: 404,
+                error: error.message 
+            };
         }
     };
 
@@ -136,9 +146,13 @@ class UserService {
                 }
             };
         } catch (error) {
-            throw new Error('Email chưa được đăng ký!');
+            console.error('Reset password error:', error);
+            throw { 
+                message: 'Email chưa được đăng ký!',
+                status: 404,
+                error: error.message 
+            };
         }
-
     };
 
     getPaginatedUsers = async (page = 1, limit = 6, search = '', role = '') => {
@@ -284,7 +298,12 @@ class UserService {
             await admin.auth().updateUser(firebaseUID, { disabled });
             return { message: `Tài khoản đã được ${disabled ? 'vô hiệu hóa' : 'kích hoạt lại'}.` };
         } catch (error) {
-            throw new Error(`Không thể cập nhật trạng thái tài khoản: ${error.message}`);
+            console.error('Update account status error:', error);
+            throw { 
+                message: `Không thể cập nhật trạng thái tài khoản`,
+                status: 500,
+                error: error.message 
+            };
         }
     };
 
