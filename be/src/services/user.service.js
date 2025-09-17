@@ -48,7 +48,7 @@ class UserService {
                 firebaseUID: userRecord.uid,
             }]);
 
-            const emailVerificationLink = `${process.env.FE_HOST_URL}/api/v1/user/verify-email?uid=${userRecord.uid}`;
+            const emailVerificationLink = `${process.env.BE_HOST_URL}/api/v1/user/verify-email?uid=${userRecord.uid}`;
             await sendVerificationEmail(email, emailVerificationLink);
 
             return newUser[0];
@@ -111,7 +111,7 @@ class UserService {
     sendEmailVerification = async (email) => {
         try {
             const userRecord = await admin.auth().getUserByEmail(email);
-            const emailVerificationLink = `${process.env.FE_HOST_URL}/api/v1/user/verify-email?uid=${userRecord.uid}`;
+            const emailVerificationLink = `${process.env.BE_HOST_URL}/api/v1/user/verify-email?uid=${userRecord.uid}`;
             await sendVerificationEmail(email, emailVerificationLink);
             return {
                 data: {

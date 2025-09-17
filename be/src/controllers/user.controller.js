@@ -1,7 +1,5 @@
 const { UserService } = require('../services/index');
 const { GuestService } = require('../services/index');
-const { frontendUrl } = require('../utils/constants');
-
 
 class UserController {
     /**
