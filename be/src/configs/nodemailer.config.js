@@ -37,6 +37,8 @@ async function sendVerificationEmail(email, verificationLink) {
 async function sendNewPassword(email, newPassword) {
     console.log('Sending new password to:', email);
     console.log('New password:', newPassword);
+    console.log('pass:', process.env.PASS_APP);
+    console.log('Email app:', process.env.EMAIL_APP);
     const mailOptions = {
         from: process.env.EMAIL_APP,
         to: email,
@@ -58,7 +60,11 @@ async function sendNewPassword(email, newPassword) {
     try {
         await transporter.sendMail(mailOptions);
     } catch (error) {
-        throw new Error(error.message)
+        console.error('Lỗi gửi email:', error);
+        if (error.response) {
+            console.error('Phản hồi từ server email:', error.response);
+        }
+        throw new Error(error.message);
     }
 }
 
