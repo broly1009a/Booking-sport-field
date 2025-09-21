@@ -75,9 +75,25 @@ const YardDetail = () => {
                             </h1>
                             <h2 className="text-2xl text-gray-700 mt-2">{fieldData?.name}</h2>
                         </div>
-                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${fieldData?.status === "available" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                            {fieldData?.status}
-                        </span>
+                                                {(() => {
+                                                    let statusInfo = { color: "bg-gray-300 text-gray-800", text: "Không xác định" };
+                                                    switch (fieldData?.status) {
+                                                        case "available":
+                                                            statusInfo = { color: "bg-green-500 text-white", text: "Còn trống" };
+                                                            break;
+                                                        case "unavailable":
+                                                            statusInfo = { color: "bg-red-500 text-white", text: "Đã đặt" };
+                                                            break;
+                                                        case "maintenance":
+                                                            statusInfo = { color: "bg-yellow-500 text-white", text: "Đang bảo trì" };
+                                                            break;
+                                                    }
+                                                    return (
+                                                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${statusInfo.color}`}>
+                                                            {statusInfo.text}
+                                                        </span>
+                                                    );
+                                                })()}
                     </div>
                 </div>
 
@@ -114,7 +130,18 @@ const YardDetail = () => {
                         <div className="bg-white rounded-xl shadow-md p-6">
                             <h3 className="text-xl font-semibold mb-4">Vị trí</h3>
                             <p className="text-gray-600">{fieldData?.location}</p>
-                            <div className="mt-4 h-48 bg-gray-200 rounded-lg">Bản đồ (Coming Soon)</div>
+                                                        <div className="mt-4 h-48 rounded-lg overflow-hidden">
+                                                            <iframe
+                                                                title="FPT University Hanoi Map"
+                                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.5062169040193!2d105.52271427476879!3d21.012421688340503!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135abc60e7d3f19%3A0x2be9d7d0b5abcbf4!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBGUFQgSMOgIE7hu5lp!5e0!3m2!1svi!2sus!4v1758140210104!5m2!1svi!2sus"
+                                                                width="100%"
+                                                                height="100%"
+                                                                style={{ border: 0 }}
+                                                                allowFullScreen=""
+                                                                loading="lazy"
+                                                                referrerPolicy="no-referrer-when-downgrade"
+                                                            ></iframe>
+                                                        </div>
                         </div>
 
                         <div className="bg-white rounded-xl shadow-md p-6">

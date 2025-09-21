@@ -28,7 +28,12 @@ const Home = () => {
                 <div className="relative z-20 text-center px-4">
                     <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">Đặt sân trong tích tắc</h1>
                     <p className="text-xl md:text-2xl text-white mb-8">Trải nghiệm các sân thể thao tốt nhất trong khu vực của bạn</p>
-                    <button className="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-full transition duration-300">Đặt Sân Ngay</button>
+                                        <button
+                                            className="bg-green-500 hover:bg-green-600 text-white text-xl font-bold py-4 px-8 rounded-full transition duration-300"
+                                            onClick={() => navigate('/yard')}
+                                        >
+                                            Đặt Sân Ngay
+                                        </button>
                 </div>
             </div>
 
