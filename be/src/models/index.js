@@ -2,6 +2,7 @@ const Guest = require('./guest.model');
 const User = require('./user.model');
 const Type = require('./type.model');
 const SportField = require('./sportField.model');
+const DeletedSportField = require('./deletedSportField.model');
 const Equipment = require('./equipment.model'); 
 const Consumable = require('./consumable.model');
 const Booking = require('./booking.model');
@@ -14,6 +15,7 @@ module.exports = {
     User,
     Type,
     SportField,
+    DeletedSportField,
     Equipment,
     Consumable,
     Booking,

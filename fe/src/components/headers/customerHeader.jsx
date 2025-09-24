@@ -129,7 +129,7 @@ function CustomerHeader() {
                             >
                                 Ghép trận
                             </Link>
-                            <Link
+                            {/* <Link
                                 sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
                                 component="button"
                                 color="inherit"
@@ -138,7 +138,7 @@ function CustomerHeader() {
                                 onClick={() => navigate('/event')}
                             >
                                 Sự kiện
-                            </Link>
+                            </Link> */}
                             <Link
                                 sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
                                 component="button"

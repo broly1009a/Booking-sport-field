@@ -50,6 +50,7 @@ function generateTimeSlots(date) {
 // 1. Tạo lịch mới cho ngày tiếp theo, đồng bộ với Maintenance
 async function createNextDaySchedule() {
     try {
+        console.log(`[Schedule Cron] [TEST] Cron createNextDaySchedule đã được gọi lúc:`, new Date().toISOString());
         const now = new Date();
         // Lấy ngày tiếp theo, set về 00:00:00 UTC
         const tomorrow = new Date(Date.UTC(
@@ -231,8 +232,8 @@ function registerScheduleCrons() {
     // Kiểm tra và bù lịch khi server khởi động (bù cho ngày tiếp theo)
     checkAndCreateMissingSchedules(1);
 
-    // Tạo lịch mới mỗi ngày lúc 00:01
-    cron.schedule('1 0 * * *', createNextDaySchedule);
+    // Tạo lịch mới thử nghiệm lúc 23:59 hôm nay (giờ server UTC)
+    cron.schedule('59 23 * * *', createNextDaySchedule);
 
     // Xóa lịch cũ mỗi tuần vào thứ Hai lúc 00:01
     cron.schedule('1 0 * * 1', cleanupOldSchedules);

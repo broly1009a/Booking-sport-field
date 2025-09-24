@@ -84,7 +84,7 @@ const TypeDashboard = () => {
             onClick={() => handleOpenModal(null)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Create Type
+            Tạo loại mới
           </button>
         </div>
         {/* Search */}
@@ -93,7 +93,7 @@ const TypeDashboard = () => {
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search types..."
+              placeholder="Tìm kiếm loại..."
               className="pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

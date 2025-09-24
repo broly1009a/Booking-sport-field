@@ -340,7 +340,7 @@ const router = createBrowserRouter([
             path: "sport-field-list",
             element: (
               <ProtectedRoute>
-                <UserList />
+                <SportsVenueDashboard />
               </ProtectedRoute>
             ),
           },

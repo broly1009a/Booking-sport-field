@@ -59,12 +59,12 @@ function AdminHeader() {
             >
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
-                        <SportsSoccerIcon onClick={() => navigate('/admin/dish')} sx={{ cursor: 'pointer', display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                        <SportsSoccerIcon onClick={() => navigate('/admin')} sx={{ cursor: 'pointer', display: { xs: 'none', md: 'flex' }, mr: 1 }} />
                         <Typography
                             variant="h6"
                             noWrap
                             component="a"
-                            href="/admin/dish"
+                            href="/admin"
                             sx={{
                                 mr: 2,
                                 display: { xs: 'none', md: 'flex' },

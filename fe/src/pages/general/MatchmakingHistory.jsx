@@ -52,10 +52,27 @@ const MatchmakingHistory = () => {
     searchTerm: '',
     timeRange: 'all', // 'all', 'today', 'week', 'month'
     status: 'all', // 'all', 'open', 'full', 'closed'
+    role: 'all', // 'all', 'creator', 'participant'
   });
 
   const applyFilters = (matches) => {
     let filtered = [...matches];
+
+    // Xác định vai trò của currentUser trong từng trận
+    filtered = filtered.map(match => {
+      let role = '';
+      if (match.userId?._id === currentUser?._id) {
+        role = 'creator';
+      } else if (Array.isArray(match.joinedPlayers) && match.joinedPlayers.some(p => p?._id === currentUser?._id)) {
+        role = 'participant';
+      }
+      return { ...match, _role: role };
+    });
+
+    // Filter theo vai trò
+    if (filters.role !== 'all') {
+      filtered = filtered.filter(match => match._role === filters.role);
+    }
 
     // Apply search filter
     if (filters.searchTerm) {
@@ -138,7 +155,7 @@ const MatchmakingHistory = () => {
       {/* Filter Section */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
               label="Tìm kiếm theo tên sân"
@@ -148,7 +165,7 @@ const MatchmakingHistory = () => {
               size="small"
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Thời gian</InputLabel>
               <Select
@@ -163,7 +180,7 @@ const MatchmakingHistory = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Trạng thái</InputLabel>
               <Select
@@ -178,6 +195,20 @@ const MatchmakingHistory = () => {
               </Select>
             </FormControl>
           </Grid>
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Vai trò</InputLabel>
+              <Select
+                value={filters.role}
+                label="Vai trò"
+                onChange={(e) => handleFilterChange('role', e.target.value)}
+              >
+                <MenuItem value="all">Tất cả</MenuItem>
+                <MenuItem value="creator">Người tạo</MenuItem>
+                <MenuItem value="participant">Người tham gia</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
         </Grid>
       </Paper>
 
@@ -189,6 +220,7 @@ const MatchmakingHistory = () => {
               <TableCell>Thời gian</TableCell>
               <TableCell>Số người cần thêm</TableCell>
               <TableCell>Trạng thái</TableCell>
+              <TableCell>Vai trò</TableCell>
               <TableCell>Chi tiết</TableCell>
             </TableRow>
           </TableHead>
@@ -219,6 +251,9 @@ const MatchmakingHistory = () => {
                       color={statusMap[m.status]?.color || 'default'}
                       size="small"
                     />
+                  </TableCell>
+                  <TableCell>
+                    {m._role === 'creator' ? 'Người tạo' : 'Người tham gia'}
                   </TableCell>
                   <TableCell>
                     <IconButton color="primary" onClick={() => setSelectedMatchmaking(m)}>
@@ -256,10 +291,14 @@ const MatchmakingHistory = () => {
               <Typography>Số người cần thêm: {selectedMatchmaking.requiredPlayers}</Typography>
               <Typography>Trạng thái: <Chip label={statusMap[selectedMatchmaking.status]?.label || selectedMatchmaking.status} color={statusMap[selectedMatchmaking.status]?.color || 'default'} size="small" /></Typography>
               <Typography>Người tạo: {selectedMatchmaking.userId?.fname} {selectedMatchmaking.userId?.lname}</Typography>
+              {/* <Typography>Email người tạo: {selectedMatchmaking.userId?.email || 'Không có'}</Typography> */}
+              <Typography>SĐT người tạo: {selectedMatchmaking.userId?.phoneNumber || 'Không có'}</Typography>
               <Typography>Người đại diện ghép: {selectedMatchmaking.representativeId ? `${selectedMatchmaking.representativeId?.fname} ${selectedMatchmaking.representativeId?.lname}` : 'Chưa có'}</Typography>
-              <Typography>Người đã tham gia: {selectedMatchmaking.joinedPlayers && selectedMatchmaking.joinedPlayers.length > 0
-                ? selectedMatchmaking.joinedPlayers.map(p => p?.fname ? `${p.fname} ${p.lname}` : p).join(', ')
-                : 'Chưa có'}</Typography>
+              {selectedMatchmaking.joinedPlayers && selectedMatchmaking.joinedPlayers.length > 0 && (
+                <Typography>
+                  Người đã tham gia: {selectedMatchmaking.joinedPlayers.map(p => p?.fname ? `${p.fname} ${p.lname}` : p).join(', ')}
+                </Typography>
+              )}
               <Typography>Ngày tạo: {dayjs.utc(selectedMatchmaking.createdAt).format('HH:mm DD/MM/YYYY')}</Typography>
             </Box>
           )}

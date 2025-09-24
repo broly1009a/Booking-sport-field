@@ -18,6 +18,7 @@ import {
 import AdminHeader from "../components/headers/adminHeader";
 import People from "@mui/icons-material/People";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import Category from "@mui/icons-material/Category";
 import VoucherIcon from "@mui/icons-material/CardGiftcard";
 const drawerWidth = 240;
 
@@ -34,7 +35,7 @@ const menuItems = [
   },
   {
     text: "Quản lí loại sân",
-    icon: <SportsSoccerIcon />,
+    icon: <Category />,
     path: "/admin/type-list",
   },
   {
@@ -50,7 +51,6 @@ const AdminLayout = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", background: "#f6f7fb" }}>
       <CssBaseline />
-      {/* Sidebar Drawer */}
       <Drawer
         variant="permanent"
         sx={{

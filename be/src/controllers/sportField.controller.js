@@ -58,9 +58,10 @@ class SportFieldController {
     async deleteSportField(req, res, next) {
         const { id } = req.params;
         try {
-            const deletedSportField = await SportFieldService.deleteSportField(id);
-            if (!deletedSportField) {
-                return res.status(404).json({ message: 'Sport field not found' });
+            const deletedBy = req.user ? req.user._id : null;
+            const result = await SportFieldService.deleteAndArchiveSportField(id, deletedBy);
+            if (!result) {
+                return res.status(404).json({ message: 'Không tìm thấy sân thể thao' });
             }
             res.status(204).send();
         } catch (error) {

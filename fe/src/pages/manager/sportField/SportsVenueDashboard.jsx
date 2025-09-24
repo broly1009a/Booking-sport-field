@@ -4,7 +4,6 @@ import { MdSportsSoccer, MdSportsBasketball, MdSportsVolleyball } from "react-ic
 import CreateVenue from "./CreateVenue";
 import UpdateVenue from "./UpdateVenue";
 import sportFieldService from '../../../services/api/sportFieldService';
-import typeService from "../../../services/api/typeService";
 import { PublicContext } from "../../../contexts/publicContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +14,27 @@ const SportsVenueDashboard = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
+  const [venueToDelete, setVenueToDelete] = useState(null);
+  // XÓA
+  const handleDeleteVenue = async (venue) => {
+    setVenueToDelete(venue);
+  };
+
+  const confirmDeleteVenue = async () => {
+    if (!venueToDelete) return;
+    try {
+      await sportFieldService.deleteSportField(venueToDelete._id || venueToDelete.id);
+      setSportFields(prev => prev.filter(v => v._id !== (venueToDelete._id || venueToDelete.id) && v.id !== (venueToDelete._id || venueToDelete.id)));
+      toast.success("Xóa sân thành công!");
+    } catch (error) {
+      toast.error(error?.message || "Có lỗi xảy ra khi xóa!");
+    }
+    setVenueToDelete(null);
+  };
+
+  const cancelDeleteVenue = () => {
+    setVenueToDelete(null);
+  };
   const { types, sportFields, setSportFields } = useContext(PublicContext);
   const navigate = useNavigate();
   const itemsPerPage = 5;
@@ -203,9 +223,32 @@ const SportsVenueDashboard = () => {
                             }
                           />
                         </button>
-                        <button className="text-red-600 hover:text-red-900">
+                        <button className="text-red-600 hover:text-red-900" onClick={() => handleDeleteVenue(venue)}>
                           <FaTrash className="h-5 w-5" />
                         </button>
+      {/* Confirm Delete Dialog */}
+      {venueToDelete && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">Xác nhận xóa sân</h2>
+            <p>Bạn có chắc chắn muốn xóa sân <span className="font-bold">{venueToDelete.name}</span> không?</p>
+            <div className="mt-6 flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={cancelDeleteVenue}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={confirmDeleteVenue}
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
                         <button className="text-green-600 hover:text-green-900" 
                           onClick={() => {
                             navigate(`/manager/maintenance-schedule/${venue.type._id}`);

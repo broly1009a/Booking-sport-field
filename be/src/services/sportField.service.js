@@ -1,7 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const sportFieldModel = require('../models/sportField.model');
+const DeletedSportField = require('../models/deletedSportField.model');
 const cloudinary = require('../configs/cloudinary.config');
-
+const Booking = require('../models/booking.model');
 class SportFieldService {
     async createSportField(sportFieldData, imageFiles = []) {
         let imageUrls = [];
@@ -34,22 +35,22 @@ class SportFieldService {
         return await sportFieldModel.find().populate('type');
     }
 
-   async getSportFieldById(sportFieldId) {
-    const sportField = await sportFieldModel.findById(sportFieldId).populate('type');
-    if (!sportField) return null;
+    async getSportFieldById(sportFieldId) {
+        const sportField = await sportFieldModel.findById(sportFieldId).populate('type');
+        if (!sportField) return null;
 
-    // Tìm các sân cùng loại, khác id, cùng location (hoặc có thể chỉ cùng loại)
-    const similarFields = await sportFieldModel.find({
-        _id: { $ne: sportFieldId },
-        type: sportField.type._id,
-        // location: sportField.location // Nếu muốn chỉ cùng loại, bỏ dòng này
-    }).limit(5);
+       
+        const similarFields = await sportFieldModel.find({
+            _id: { $ne: sportFieldId },
+            type: sportField.type._id,
+          
+        }).limit(5);
 
-    return {
-        ...sportField.toObject(),
-        similarFields
-    };
-}
+        return {
+            ...sportField.toObject(),
+            similarFields
+        };
+    }
 
     async updateSportField(sportFieldId, sportFieldData, imageFiles = []) {
         let imageUrls = [];
@@ -80,6 +81,33 @@ class SportFieldService {
 
     async deleteSportField(sportFieldId) {
         return await sportFieldModel.findByIdAndDelete(sportFieldId);
+    }
+
+    async deleteAndArchiveSportField(sportFieldId, deletedBy = null) {
+        const sportField = await sportFieldModel.findById(sportFieldId);
+        if (!sportField) return null;
+        const hasBooking = await Booking.exists({ fieldId: sportFieldId });
+        if (hasBooking) {
+            const err = new Error('Không thể xóa sân đã từng có lịch đặt!');
+            err.status = 400;
+            throw err;
+        }
+
+        await DeletedSportField.create({
+            originalId: sportField._id,
+            name: sportField.name,
+            type: sportField.type,
+            location: sportField.location,
+            capacity: sportField.capacity,
+            status: sportField.status,
+            pricePerHour: sportField.pricePerHour,
+            amenities: sportField.amenities,
+            images: sportField.images,
+            deletedBy: deletedBy || undefined
+        });
+
+        await sportFieldModel.findByIdAndDelete(sportFieldId);
+        return true;
     }
 }
 

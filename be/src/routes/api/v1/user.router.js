@@ -11,7 +11,7 @@ router.post('/send-email-verification', AuthMiddleware.checkRoles(['GUEST', 'CUS
 router.get('/verify-email', AuthMiddleware.checkRoles(['GUEST', 'CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN']), UserController.verifyEmail);
 router.get('/get-current-user', AuthMiddleware.checkRoles(['CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN']), UserController.getCurrentUser);
 router.post('/register-customer-account', AuthMiddleware.checkRoles(['GUEST']), UserController.registerCustomerAccount);
-router.patch('/update-customer-info', AuthMiddleware.checkRoles(['CUSTOMER']), UserController.updateCustomerInfo);
+router.patch('/update-customer-info', AuthMiddleware.checkRoles(['CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN']), UserController.updateCustomerInfo);
 router.get('/authenticated', AuthMiddleware.checkRoles(['ADMIN']), UserController.getAllAuthenticatedUsers);
 router.get('/unauthenticated', AuthMiddleware.checkRoles(['ADMIN']), UserController.getAllUnauthenticatedUser);
 router.get('/', AuthMiddleware.checkRoles(['ADMIN']), UserController.getAllUsers);
