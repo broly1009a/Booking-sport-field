@@ -162,7 +162,7 @@ class PaymentService {
 
             await Booking.findByIdAndUpdate(
                 payment.bookingId,
-                { status: responseData.vnp_ResponseCode === '00' ? 'confirmed' : 'cancelled' }
+                { status: responseData.vnp_ResponseCode === '00' ? 'waiting' : 'cancelled' }
             );
 
             // Nếu thanh toán thất bại, trả lại slot về available
@@ -234,7 +234,7 @@ class PaymentService {
             status: 'completed'
         });
 
-        booking.status = 'confirmed';
+        booking.status = 'waiting';
         await booking.save();
 
         return booking;

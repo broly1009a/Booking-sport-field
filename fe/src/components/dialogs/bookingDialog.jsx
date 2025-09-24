@@ -351,7 +351,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                     <TableCell>{(item.pricePerUnit || item.price).toLocaleString()}đ</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <IconButton onClick={() => handleQuantityChange(item._id, -1)}>
+                        <IconButton onClick={() => handleQuantityChange(item._id, -1)} disabled={!!createdBookingId}>
                           <RemoveIcon />
                         </IconButton>
                         <TextField
@@ -362,8 +362,9 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                           onChange={e =>
                             handleQuantityChange(item._id, parseInt(e.target.value) - item.quantity)
                           }
+                          disabled={!!createdBookingId}
                         />
-                        <IconButton onClick={() => handleQuantityChange(item._id, 1)}>
+                        <IconButton onClick={() => handleQuantityChange(item._id, 1)} disabled={!!createdBookingId}>
                           <AddIcon />
                         </IconButton>
                       </Box>
@@ -386,6 +387,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Nhập tên người đặt"
               sx={{ mb: 2 }}
+              disabled={!!createdBookingId}
             />
           </Box>
 
@@ -402,6 +404,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                 )
               }}
               sx={{ mb: 2 }}
+              disabled={!!createdBookingId}
             />
           </Box>
 
@@ -414,6 +417,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
               placeholder="Nhập ghi chú"
               multiline
               rows={2}
+              disabled={!!createdBookingId}
             />
           </Box>
 
@@ -459,7 +463,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
       if (onConfirm) onConfirm(createdBookingData, selectedItems);
       onClose();
       if (createdBookingData?._id) {
-        navigate(`/booking-success/${createdBookingData._id}`, { state: { bookingData: createdBookingData } });
+       navigate(`/booking-success/${createdBookingData._id}`, { state: { bookingData: { ...createdBookingData, selectedItems } } });
       } else {
         navigate('/booking-history');
       }

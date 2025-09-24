@@ -12,7 +12,8 @@ import { PublicContext } from "../../../contexts/publicContext";
 
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả' },
-    { value: 'pending', label: 'Đang chờ' },
+    { value: 'pending', label: 'Đang chờ thanh toán' },
+    { value: 'waiting', label: 'Chờ xác nhận' },
     { value: 'confirmed', label: 'Đã xác nhận' },
     { value: 'cancelled', label: 'Đã hủy' }
 ];
@@ -155,7 +156,11 @@ const BookingList = ({ userId }) => {
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                     <Box sx={{ width: 20, height: 20, bgcolor: '#ff9800', mr: 1 }} />
-                    <Typography>Đang chờ</Typography>
+                    <Typography>Đang chờ thanh toán</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                    <Box sx={{ width: 20, height: 20, bgcolor: '#1976d2', mr: 1 }} />
+                    <Typography>Chờ xác nhận</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box sx={{ width: 20, height: 20, bgcolor: '#f44336', mr: 1 }} />
@@ -199,7 +204,8 @@ const BookingList = ({ userId }) => {
                                         sx={{
                                             bgcolor:
                                                 booking.status === 'confirmed' ? '#4caf50' :
-                                                    booking.status === 'pending' ? '#ff9800' : '#f44336',
+                                                booking.status === 'pending' ? '#ff9800' :
+                                                booking.status === 'waiting' ? '#1976d2' : '#f44336',
                                             color: 'white',
                                             textAlign: 'center',
                                             borderRadius: '12px',
@@ -208,21 +214,24 @@ const BookingList = ({ userId }) => {
                                         }}
                                     >
                                         {booking.status === 'confirmed' ? 'Đã xác nhận' :
-                                            booking.status === 'pending' ? 'Đang chờ' : 'Đã hủy'}
+                                            booking.status === 'pending' ? 'Đang chờ thanh toán' :
+                                            booking.status === 'waiting' ? 'Chờ xác nhận' : 'Đã hủy'}
                                     </Box>
                                 </TableCell>
                                 <TableCell>
-                                    {booking.status === 'pending' && (
+                                    {(booking.status === 'pending' || booking.status === 'waiting') && (
                                         <>
-                                            <Button
-                                                variant="contained"
-                                                color="success"
-                                                size="small"
-                                                sx={{ mr: 1 }}
-                                                onClick={() => handleConfirmBooking(booking._id)}
-                                            >
-                                                Xác nhận
-                                            </Button>
+                                            {booking.status === 'waiting' && (
+                                                <Button
+                                                    variant="contained"
+                                                    color="success"
+                                                    size="small"
+                                                    sx={{ mr: 1 }}
+                                                    onClick={() => handleConfirmBooking(booking._id)}
+                                                >
+                                                    Xác nhận
+                                                </Button>
+                                            )}
                                             <Button
                                                 variant="contained"
                                                 color="error"

@@ -144,9 +144,20 @@ console.log('Selected items:', selectedItems);
                   <TableRow key={item._id}>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.type === 'equipment' ? 'Thiết bị' : 'Đồ tiêu thụ'}</TableCell>
-                    <TableCell>{(item.price || 0).toLocaleString()}đ</TableCell>
+                    <TableCell>
+                      {item.pricePerUnit
+                        ? `${item.pricePerUnit.toLocaleString()}đ`
+                        : `${(item.price || 0).toLocaleString()}đ`}
+                      {item.pricePerUnit
+                        ? <span style={{ color: '#388e3c', fontWeight: 'bold', marginLeft: 4 }} title="Thanh toán ví"> (Ví)</span>
+                        : <span style={{ color: '#1976d2', fontWeight: 'bold', marginLeft: 4 }} title="Thanh toán online"> (Online)</span>}
+                    </TableCell>
                     <TableCell>{item.quantity || 0}</TableCell>
-                    <TableCell>{((item.price || 0) * (item.quantity || 0)).toLocaleString()}đ</TableCell>
+                    <TableCell>
+                      {item.pricePerUnit
+                        ? (item.pricePerUnit * (item.quantity || 0)).toLocaleString()
+                        : ((item.price || 0) * (item.quantity || 0)).toLocaleString()}đ
+                    </TableCell>
                   </TableRow>
                 ))}
             </TableBody>

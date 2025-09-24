@@ -37,7 +37,7 @@ class BookingService {
         // Kiểm tra trùng lịch đặt sân
         const overlap = await bookingModel.findOne({
             fieldId,
-            status: { $in: ['pending', 'confirmed'] },
+            status: { $in: ['pending', 'waiting', 'confirmed'] },
             $or: [
                 {
                     startTime: { $lt: end },
