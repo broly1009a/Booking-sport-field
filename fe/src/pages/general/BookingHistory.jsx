@@ -32,10 +32,10 @@ import { useAuth } from '../../contexts/authContext';
 import bookingService from '../../services/api/bookingService';
 import AddFeedbackForm from '../../components/Feedback/AddFeedbackForm';
 const statusMap = {
-  pending: { label: 'Đang chờ', color: 'warning' },
+  pending: { label: 'Đang xử lí', color: 'warning' },
+  waiting: { label: 'Chờ xác nhận', color: 'info' },
   confirmed: { label: 'Đã xác nhận', color: 'success' },
-  cancelled: { label: 'Đã hủy', color: 'error' },
-  completed: { label: 'Hoàn thành', color: 'primary' }
+  cancelled: { label: 'Đã hủy', color: 'error' }
 };
 
 const BookingHistory = () => {
@@ -209,10 +209,11 @@ const BookingHistory = () => {
                 onChange={(e) => handleFilterChange('status', e.target.value)}
               >
                 <MenuItem value="all">Tất cả</MenuItem>
-                <MenuItem value="pending">Đang chờ</MenuItem>
+                <MenuItem value="pending">Đang xử lí</MenuItem>
+                 <MenuItem value="waiting">Chờ xác nhận</MenuItem>
                 <MenuItem value="confirmed">Đã xác nhận</MenuItem>
                 <MenuItem value="cancelled">Đã hủy</MenuItem>
-                <MenuItem value="completed">Hoàn thành</MenuItem>
+               
               </Select>
             </FormControl>
           </Grid>

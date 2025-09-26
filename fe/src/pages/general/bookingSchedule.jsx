@@ -245,17 +245,17 @@ const BookingSchedule = () => {
           <TableHead>
             <TableRow>
               <TableCell
-      sx={{
-        minWidth: isMobile ? 80 : 120,
-        maxWidth: isMobile ? 120 : 200,
-        width: isMobile ? 100 : 150,
-        fontWeight: 'bold',
-        fontSize: isMobile ? 12 : 16,
-        whiteSpace: 'nowrap'
-      }}
-    >
-      Sân
-    </TableCell>
+                sx={{
+                  minWidth: isMobile ? 80 : 120,
+                  maxWidth: isMobile ? 120 : 200,
+                  width: isMobile ? 100 : 150,
+                  fontWeight: 'bold',
+                  fontSize: isMobile ? 12 : 16,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Sân
+              </TableCell>
               {timeSlots.map((time, index) => (
                 <TableCell
                   key={index}
@@ -277,18 +277,18 @@ const BookingSchedule = () => {
           <TableBody>
             {sportFields.map(field => (
               <TableRow key={field._id}>
-             <TableCell
-  sx={{
-    fontWeight: 'bold',
-    fontSize: isMobile ? 12 : 14,
-    minWidth: isMobile ? 80 : 120,
-    maxWidth: isMobile ? 120 : 200,
-    width: isMobile ? 100 : 150, // Thêm width cố định
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis'
-  }}
->
+                <TableCell
+                  sx={{
+                    fontWeight: 'bold',
+                    fontSize: isMobile ? 12 : 14,
+                    minWidth: isMobile ? 80 : 120,
+                    maxWidth: isMobile ? 120 : 200,
+                    width: isMobile ? 100 : 150, // Thêm width cố định
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
                   {field.name}
                 </TableCell>
                 {timeSlots.map((time, index) => {
@@ -340,7 +340,13 @@ const BookingSchedule = () => {
           fontWeight: 'bold',
           fontSize: isMobile ? 14 : 16
         }}
-        onClick={() => setOpenBookingDialog(true)}
+        onClick={() => {
+          if (!currentUser || !currentUser._id) {
+            toast.warn('Bạn cần đăng nhập để đặt lịch!');
+            return;
+          }
+          setOpenBookingDialog(true);
+        }}
       >
         Đặt lịch
       </Button>

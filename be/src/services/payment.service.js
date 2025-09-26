@@ -7,56 +7,88 @@ const querystring = require('qs');
 const crypto = require('crypto');
 const moment = require('moment');
 const BookingService = require('./booking.service');
-const EquipmentRentalService = require('./equipmentRental.service');
-const ConsumablePurchaseService = require('./consumablePurchase.service');
+// const EquipmentRentalService = require('./equipmentRental.service');
+// const ConsumablePurchaseService = require('./consumablePurchase.service');
 const EquipmentRental = require('../models/equipmentRental.model');
 const ConsumablePurchase = require('../models/consumablePurchase.model');
+const Equipment = require('../models/equipment.model');
+const Consumable = require('../models/consumable.model');
 class PaymentService {
     // Tạo booking và payment cho thanh toán online
     async createBookingAndPayment(bookingData, req) {
-        // 1. Tạo booking (pending)
-        const booking = await BookingService.createBooking(bookingData);
-        if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
-            // Thiết bị
-            const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
-            if (equipmentItems.length > 0) {
-                await EquipmentRental.create({
-                    userId: bookingData.userId,
-                    bookingId: booking._id,
-                    equipments: equipmentItems.map(item => ({
-                        equipmentId: item.productId,
-                        quantity: item.quantity
-                    })),
-                    totalPrice: equipmentItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
-                });
+            // 1. Kiểm tra số lượng tồn kho trước khi tạo booking
+            if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
+                // Kiểm tra thiết bị
+                const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
+                for (const item of equipmentItems) {
+                    const equipment = await Equipment.findById(item.productId);
+                    if (!equipment) throw new Error(`Thiết bị không tồn tại: ${item.productId}`);
+                    if (item.quantity > equipment.quantity) {
+                        throw new Error(`Thiết bị '${equipment.name}' chỉ còn ${equipment.quantity}, bạn yêu cầu ${item.quantity}`);
+                    }
+                }
+                // Kiểm tra đồ tiêu thụ
+                const consumableItems = bookingData.items.filter(i => i.type === 'consumable' && i.quantity > 0);
+                for (const item of consumableItems) {
+                    const consumable = await Consumable.findById(item.productId);
+                    if (!consumable) throw new Error(`Đồ tiêu thụ không tồn tại: ${item.productId}`);
+                    if (item.quantity > consumable.quantity) {
+                        throw new Error(`Đồ tiêu thụ '${consumable.name}' chỉ còn ${consumable.quantity}, bạn yêu cầu ${item.quantity}`);
+                    }
+                }
             }
-            // Đồ tiêu thụ
-            const consumableItems = bookingData.items.filter(i => i.type === 'consumable' && i.quantity > 0);
-            if (consumableItems.length > 0) {
-                await ConsumablePurchase.create({
-                    userId: bookingData.userId,
-                    bookingId: booking._id,
-                    consumables: consumableItems.map(item => ({
-                        consumableId: item.productId,
-                        quantity: item.quantity
-                    })),
-                    totalPrice: consumableItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
-                });
+
+            // 2. Tạo booking (pending)
+            const booking = await BookingService.createBooking(bookingData);
+            if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
+                // Thiết bị
+                const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
+                if (equipmentItems.length > 0) {
+                    await EquipmentRental.create({
+                        userId: bookingData.userId,
+                        bookingId: booking._id,
+                        equipments: equipmentItems.map(item => ({
+                            equipmentId: item.productId,
+                            quantity: item.quantity
+                        })),
+                        totalPrice: equipmentItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
+                    });
+                        // Giảm số lượng tồn kho thiết bị
+                        for (const item of equipmentItems) {
+                            await Equipment.findByIdAndUpdate(item.productId, { $inc: { quantity: -item.quantity } });
+                        }
+                }
+                // Đồ tiêu thụ
+                const consumableItems = bookingData.items.filter(i => i.type === 'consumable' && i.quantity > 0);
+                if (consumableItems.length > 0) {
+                    await ConsumablePurchase.create({
+                        userId: bookingData.userId,
+                        bookingId: booking._id,
+                        consumables: consumableItems.map(item => ({
+                            consumableId: item.productId,
+                            quantity: item.quantity
+                        })),
+                        totalPrice: consumableItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0)
+                    });
+                        // Giảm số lượng tồn kho đồ tiêu thụ
+                        for (const item of consumableItems) {
+                            await Consumable.findByIdAndUpdate(item.productId, { $inc: { quantity: -item.quantity } });
+                        }
+                }
             }
-        }
-        // 2. Tạo payment (pending)
-        const payment = await Payment.create({
-            bookingId: booking._id,
-            userId: bookingData.userId,
-            amount: bookingData.totalPrice,
-            paymentMethod: 'vnpay',
-            status: 'pending'
-        });
+            // 3. Tạo payment (pending)
+            const payment = await Payment.create({
+                bookingId: booking._id,
+                userId: bookingData.userId,
+                amount: bookingData.totalPrice,
+                paymentMethod: 'vnpay',
+                status: 'pending'
+            });
 
-        // 3. Tạo URL thanh toán VNPAY
-        const vnpUrl = await this.createPaymentUrl(payment, req);
+            // 4. Tạo URL thanh toán VNPAY
+            const vnpUrl = await this.createPaymentUrl(payment, req);
 
-        return { booking, payment, vnpUrl };
+            return { booking, payment, vnpUrl };
     }
 
     // Tạo URL thanh toán VNPAY cho payment (dùng cho cả booking và nạp ví)

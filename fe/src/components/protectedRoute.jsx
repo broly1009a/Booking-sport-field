@@ -1,14 +1,18 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
-import { doSignOut } from "../firebase/auth"
+import { doSignOut } from "../firebase/auth";
+import { useEffect } from "react";
+
 const ProtectedRoute = ({ children, requiredRoles }) => {
     const { currentUser, isUserLoggedIn } = useAuth();
 
-    if (!isUserLoggedIn) {
-        const signOut = async () => {
-            await doSignOut();
+    useEffect(() => {
+        if (!isUserLoggedIn) {
+            doSignOut();
         }
-        signOut();
+    }, [isUserLoggedIn]);
+
+    if (!isUserLoggedIn) {
         if (requiredRoles && !requiredRoles.includes('GUEST')) {
             return <Navigate to="/unauthorized" />;
         } else {

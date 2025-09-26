@@ -6,10 +6,11 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { toast } from 'react-toastify';
-import dayjs from 'dayjs';
 import bookingService from '../../../services/api/bookingService';
 import { PublicContext } from "../../../contexts/publicContext";
-
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả' },
     { value: 'pending', label: 'Đang chờ thanh toán' },
@@ -196,8 +197,8 @@ const BookingList = ({ userId }) => {
                         bookings.map(booking => (
                             <TableRow key={booking._id}>
                                 <TableCell>{booking.fieldId?.name || ''}</TableCell>
-                                <TableCell>{booking.startTime}</TableCell>
-                                <TableCell>{booking.endTime}</TableCell>
+                                <TableCell>{dayjs(booking.startTime).utc().format('DD/MM/YYYY HH:mm')}</TableCell>
+                                <TableCell>{dayjs(booking.endTime).utc().format('DD/MM/YYYY HH:mm')}</TableCell>
                                 <TableCell>{booking.totalPrice?.toLocaleString('vi-VN')} VNĐ</TableCell>
                                 <TableCell>
                                     <Box

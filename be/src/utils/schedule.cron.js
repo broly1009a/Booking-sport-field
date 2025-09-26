@@ -50,8 +50,8 @@ function generateTimeSlots(date) {
 // 1. Tạo lịch mới cho ngày tiếp theo, đồng bộ với Maintenance
 async function createNextDaySchedule() {
     try {
-        console.log(`[Schedule Cron] [TEST] Cron createNextDaySchedule đã được gọi lúc:`, new Date().toISOString());
-        const now = new Date();
+        console.log(`[Schedule Cron] [TEST] Cron createNextDaySchedule đã được gọi lúc:`, new Date(Date.now() + 7 * 60 * 60 * 1000));
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         // Lấy ngày tiếp theo, set về 00:00:00 UTC
         const tomorrow = new Date(Date.UTC(
             now.getUTCFullYear(),
@@ -110,7 +110,7 @@ async function createNextDaySchedule() {
 // 2. Xóa các schedule cũ (trước ngày hiện tại)
 async function cleanupOldSchedules() {
     try {
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const today = new Date(Date.UTC(
             now.getUTCFullYear(),
             now.getUTCMonth(),
@@ -125,9 +125,9 @@ async function cleanupOldSchedules() {
 }
 
 // 3. Kiểm tra và bù lịch thiếu
-async function checkAndCreateMissingSchedules(days = 1) {
+async function checkAndCreateMissingSchedules(days = 3) {
     try {
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const today = new Date(Date.UTC(
             now.getUTCFullYear(),
             now.getUTCMonth(),
@@ -233,7 +233,7 @@ function registerScheduleCrons() {
     checkAndCreateMissingSchedules(1);
 
     // Tạo lịch mới thử nghiệm lúc 23:59 hôm nay (giờ server UTC)
-    cron.schedule('59 23 * * *', createNextDaySchedule);
+    cron.schedule('44 1 * * *', createNextDaySchedule);
 
     // Xóa lịch cũ mỗi tuần vào thứ Hai lúc 00:01
     cron.schedule('1 0 * * 1', cleanupOldSchedules);
