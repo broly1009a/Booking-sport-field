@@ -1,6 +1,11 @@
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
 import React, { useState, useEffect, useContext } from 'react';
 import {
-    Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, MenuItem, Select, FormControl, InputLabel, Pagination
+    Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, TextField, Button, MenuItem, Select, FormControl, InputLabel, Pagination, Divider
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -10,6 +15,7 @@ import bookingService from '../../../services/api/bookingService';
 import { PublicContext } from "../../../contexts/publicContext";
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+
 dayjs.extend(utc);
 const STATUS_OPTIONS = [
     { value: '', label: 'Tất cả' },
@@ -20,6 +26,17 @@ const STATUS_OPTIONS = [
 ];
 
 const BookingList = ({ userId }) => {
+    const [selectedBooking, setSelectedBooking] = useState(null);
+    const [openDetail, setOpenDetail] = useState(false);
+
+    const handleOpenDetail = (booking) => {
+        setSelectedBooking(booking);
+        setOpenDetail(true);
+    };
+    const handleCloseDetail = () => {
+        setOpenDetail(false);
+        setSelectedBooking(null);
+    };
     // const [selectedDate, setSelectedDate] = useState(dayjs());
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -125,14 +142,14 @@ const BookingList = ({ userId }) => {
                         ))}
                     </Select>
                 </FormControl>
-                  <FormControl sx={{ minWidth: 140 }}>
-                     <TextField
-        label="Tìm kiếm tên sân"
-        value={search}
-        onChange={e => { setSearch(e.target.value); setPage(1); }}
-        size="small"
-        sx={{ width: '200px' }}
-    />
+                <FormControl sx={{ minWidth: 140 }}>
+                    <TextField
+                        label="Tìm kiếm tên sân"
+                        value={search}
+                        onChange={e => { setSearch(e.target.value); setPage(1); }}
+                        size="small"
+                        sx={{ width: '200px' }}
+                    />
                 </FormControl>
                 <FormControl sx={{ minWidth: 180 }}>
                     <InputLabel>Loại sân</InputLabel>
@@ -177,6 +194,7 @@ const BookingList = ({ userId }) => {
                         <TableCell>Thời gian kết thúc</TableCell>
                         <TableCell>Tổng tiền</TableCell>
                         <TableCell>Trạng thái</TableCell>
+                        <TableCell>Chi tiết</TableCell>
                         <TableCell>Hành động</TableCell>
                     </TableRow>
                 </TableHead>
@@ -205,8 +223,8 @@ const BookingList = ({ userId }) => {
                                         sx={{
                                             bgcolor:
                                                 booking.status === 'confirmed' ? '#4caf50' :
-                                                booking.status === 'pending' ? '#ff9800' :
-                                                booking.status === 'waiting' ? '#1976d2' : '#f44336',
+                                                    booking.status === 'pending' ? '#ff9800' :
+                                                        booking.status === 'waiting' ? '#1976d2' : '#f44336',
                                             color: 'white',
                                             textAlign: 'center',
                                             borderRadius: '12px',
@@ -216,8 +234,13 @@ const BookingList = ({ userId }) => {
                                     >
                                         {booking.status === 'confirmed' ? 'Đã xác nhận' :
                                             booking.status === 'pending' ? 'Đang chờ thanh toán' :
-                                            booking.status === 'waiting' ? 'Chờ xác nhận' : 'Đã hủy'}
+                                                booking.status === 'waiting' ? 'Chờ xác nhận' : 'Đã hủy'}
                                     </Box>
+                                </TableCell>
+                                <TableCell>
+                                    <IconButton color="primary" onClick={() => handleOpenDetail(booking)}>
+                                        <VisibilityIcon />
+                                    </IconButton>
                                 </TableCell>
                                 <TableCell>
                                     {(booking.status === 'pending' || booking.status === 'waiting') && (
@@ -244,6 +267,66 @@ const BookingList = ({ userId }) => {
                                         </>
                                     )}
                                 </TableCell>
+                                {/* Modal chi tiết booking */}
+                                <Dialog open={openDetail} onClose={handleCloseDetail} maxWidth="md" fullWidth>
+                                    <DialogTitle>Chi tiết đặt lịch</DialogTitle>
+                                    <DialogContent>
+                                        {selectedBooking && (
+                                            <Box>
+                                                <Typography variant="h6" sx={{ mb: 2 }}>Sân: {selectedBooking.fieldId?.name}</Typography>
+                                                <Typography>Thời gian: {dayjs(selectedBooking.startTime).utc().format('HH:mm DD/MM/YYYY')} - {dayjs(selectedBooking.endTime).utc().format('HH:mm DD/MM/YYYY')}</Typography>
+                                                <Typography>Trạng thái: {selectedBooking.status}</Typography>
+                                                <Typography>Tổng tiền: {selectedBooking.totalPrice?.toLocaleString('vi-VN')} VNĐ</Typography>
+                                                <Typography>Tên người đặt: {selectedBooking.customerName}</Typography>
+                                                <Typography>Số điện thoại: {selectedBooking.phoneNumber}</Typography>
+                                                {selectedBooking.notes && <Typography>Ghi chú: {selectedBooking.notes}</Typography>}
+                                                {/* Hiển thị dịch vụ đi kèm */}
+                                                {selectedBooking.consumablePurchases && selectedBooking.consumablePurchases.length > 0 && (
+                                                    <Box sx={{ my: 2 }}>
+                                                        <Divider sx={{ mb: 1 }} />
+                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>Đồ ăn/thức uống đã mua:</Typography>
+                                                        {selectedBooking.consumablePurchases.map((cp, idx) => (
+                                                            <Box key={cp._id || idx} sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
+                                                                <Typography><b>Tổng tiền:</b> {cp.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
+                                                                {cp.consumables && cp.consumables.length > 0 && (
+                                                                    <Box sx={{ mt: 1 }}>
+                                                                        <Typography><b>Chi tiết:</b></Typography>
+                                                                        {cp.consumables.map((item, i) => (
+                                                                            <Typography key={item._id || i} sx={{ ml: 2 }}>
+                                                                                {item.consumableId?.name ? `${item.consumableId.name} - ` : ''}Số lượng: {item.quantity}
+                                                                            </Typography>
+                                                                        ))}
+                                                                    </Box>
+                                                                )}
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
+                                                )}
+                                                {selectedBooking.equipmentRentals && selectedBooking.equipmentRentals.length > 0 && (
+                                                    <Box sx={{ my: 2 }}>
+                                                        <Divider sx={{ mb: 1 }} />
+                                                        <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>Thiết bị thuê:</Typography>
+                                                        {selectedBooking.equipmentRentals.map((eq, idx) => (
+                                                            <Box key={eq._id || idx} sx={{ mb: 2, p: 2, bgcolor: '#fffde7', borderRadius: 2 }}>
+                                                                <Typography><b>Tổng tiền:</b> {eq.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
+                                                                {eq.equipments && eq.equipments.length > 0 && (
+                                                                    <Box sx={{ mt: 1 }}>
+                                                                        <Typography><b>Chi tiết:</b></Typography>
+                                                                        {eq.equipments.map((item, i) => (
+                                                                            <Typography key={item._id || i} sx={{ ml: 2 }}>
+                                                                                {item.equipmentId?.name ? `${item.equipmentId.name} - ` : ''}Số lượng: {item.quantity}
+                                                                            </Typography>
+                                                                        ))}
+                                                                    </Box>
+                                                                )}
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        )}
+                                    </DialogContent>
+                                </Dialog>
                             </TableRow>
                         ))
                     )}

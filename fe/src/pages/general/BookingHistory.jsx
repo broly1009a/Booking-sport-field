@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Box,
   Typography,
@@ -31,6 +31,7 @@ dayjs.extend(utc);
 import { useAuth } from '../../contexts/authContext';
 import bookingService from '../../services/api/bookingService';
 import AddFeedbackForm from '../../components/Feedback/AddFeedbackForm';
+import { PublicContext } from "../../contexts/publicContext";
 const statusMap = {
   pending: { label: 'Đang xử lí', color: 'warning' },
   waiting: { label: 'Chờ xác nhận', color: 'info' },
@@ -46,7 +47,7 @@ const BookingHistory = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [feedbackBooking, setFeedbackBooking] = useState(null);
-
+  const { types } = useContext(PublicContext);
   // Pagination states
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -334,7 +335,7 @@ const BookingHistory = () => {
             <Box>
               <Typography variant="subtitle1" fontWeight="bold">Sân: {selectedBooking.field?.name}</Typography>
               <Typography>Địa điểm: {selectedBooking.field?.location}</Typography>
-              <Typography>Loại sân: {selectedBooking.field?.type}</Typography>
+              <Typography>Loại sân: {types.find(t => t._id === selectedBooking.field?.type)?.name || 'N/A'}</Typography>
               <Typography>Sức chứa: {selectedBooking.field?.capacity}</Typography>
               <Typography>Trạng thái sân: {selectedBooking.field?.status}</Typography>
               <Typography>Giá/giờ: {selectedBooking.field?.pricePerHour?.toLocaleString('vi-VN')}đ</Typography>

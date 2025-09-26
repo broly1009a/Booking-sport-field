@@ -2,7 +2,9 @@ const { User } = require('../models');
 const bookingModel = require('../models/booking.model');
 const SportField = require('../models/sportField.model');
 const Schedule = require('../models/schedule.model');
-const Feedback = require('../models/feedback.model');
+// const Feedback = require('../models/feedback.model');
+const ConsumablePurchase = require('../models/consumablePurchase.model');
+const EquipmentRental = require('../models/equipmentRental.model');
 const mongoose = require('mongoose');
 class BookingService {
     async createBooking(bookingData) {
@@ -128,9 +130,9 @@ class BookingService {
             query.fieldId = { $in: fieldIds };
         }
 
-        const [data, total] = await Promise.all([
+        const [bookings, total] = await Promise.all([
             bookingModel.find(query)
-                .select('_id fieldId startTime endTime status totalPrice participants')
+                .select('_id fieldId startTime endTime status totalPrice participants customerName phoneNumber notes')
                 .populate({ path: 'userId', select: '_id fname lname phoneNumber' })
                 .populate({ path: 'fieldId', select: '_id name location type' })
                 .populate({ path: 'participants', select: '_id fname lname phoneNumber' })
@@ -138,6 +140,20 @@ class BookingService {
                 .limit(Number(limit)),
             bookingModel.countDocuments(query)
         ]);
+
+        const data = await Promise.all(bookings.map(async (booking) => {
+            const consumablePurchases = await ConsumablePurchase.find({ bookingId: booking._id })
+               
+                .populate({ path: 'consumables.consumableId', select: '_id name price' });
+            const equipmentRentals = await EquipmentRental.find({ bookingId: booking._id })
+            
+                .populate({ path: 'equipments.equipmentId', select: '_id name price' });
+            return {
+                ...booking.toObject(),
+                consumablePurchases,
+                equipmentRentals
+            };
+        }));
 
         return {
             data,
