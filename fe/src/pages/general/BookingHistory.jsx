@@ -162,7 +162,9 @@ const BookingHistory = () => {
     // Reload bookings to update feedback status
     if (currentUser?._id) {
       bookingService.getBookingsByUser(currentUser._id).then(res => {
-        setBookings((res?.data || []).reverse());
+        const data = (res?.data || []).reverse();
+        setBookings(data);
+        applyFilters(data);
       });
     }
   };
@@ -292,16 +294,16 @@ const BookingHistory = () => {
                     <TableCell>
                       {b.feedbacks && b.feedbacks.length > 0
                         ? 'Đã đánh giá'
-                        : (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => handleOpenFeedback(b)}
-                          >
-                            Đánh giá
-                          </Button>
-                        )
+                        : b.status === 'confirmed' ? (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => handleOpenFeedback(b)}
+                            >
+                              Đánh giá
+                            </Button>
+                          ) : 'Hạn chế'
                       }
                     </TableCell>
                     <TableCell>

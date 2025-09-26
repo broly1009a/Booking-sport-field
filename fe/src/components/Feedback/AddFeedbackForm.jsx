@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Box, Rating, Typography } from '@mui/material';
 
 import { feedbackService } from '../../services/api/feedbackService';
-
+import { toast } from 'react-toastify';
 const AddFeedbackForm = ({userId, bookingId, fieldId, onFeedbackAdded }) => {
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -11,13 +11,14 @@ const AddFeedbackForm = ({userId, bookingId, fieldId, onFeedbackAdded }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const newFeedback = { fieldId,bookingId, userId, rating, comment };
-             await feedbackService.createFeedback(newFeedback);
-            const response = await feedbackService.getFeedbacksByProduct(fieldId);
-            onFeedbackAdded(response);
+            const newFeedback = { fieldId, bookingId, userId, rating, comment };
+            await feedbackService.createFeedback(newFeedback);
+            toast.success('Gửi đánh giá thành công!');
             setRating(0);
             setComment('');
+            if (onFeedbackAdded) onFeedbackAdded();
         } catch (error) {
+            toast.error('Gửi đánh giá thất bại!');
             console.error('Failed to add Feedback:', error);
         }
     };
