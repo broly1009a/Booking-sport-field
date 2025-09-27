@@ -23,4 +23,7 @@ export const walletService = {
     // Xóa giao dịch ví (admin)
     deleteTransaction: (transactionId) =>
         handleApiCall(() => api.delete(`/wallet/transaction/${transactionId}`)),
+    // Hoàn tiền vào ví khi booking bị từ chối
+    refundToWallet: (refundData) =>
+        handleApiCall(() => api.post('/wallet/refund', refundData)),
 };

@@ -78,6 +78,17 @@ class WalletController {
             next(error);
         }
     }
+
+        // Hoàn tiền vào ví khi booking bị từ chối
+    async refundToWallet(req, res, next) {
+        try {
+            const { userId, amount, bookingId, description } = req.body;
+            const wallet = await WalletService.refundToWallet(userId, amount, bookingId, description);
+            res.status(200).json({ success: true, wallet });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new WalletController();

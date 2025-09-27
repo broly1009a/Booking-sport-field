@@ -1,15 +1,15 @@
 const Wallet = require('../models/wallet.model');
 const WalletTransaction = require('../models/walletTransaction.model');
-
+const Booking = require('../models/booking.model');
 class WalletService {
     // Lấy thông tin ví của người dùng
- async getWallet(userId) {
-    const wallet = await Wallet.findOne({ userId });
-    if (!wallet) {
-        return await this.createWallet(userId);
+    async getWallet(userId) {
+        const wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            return await this.createWallet(userId);
+        }
+        return wallet;
     }
-    return wallet;
-}
     // Nạp tiền vào ví
     async topUpWallet(userId, amount) {
         if (amount <= 0) {
@@ -58,17 +58,17 @@ class WalletService {
         return wallet;
     }
     // Lấy lịch sử giao dịch ví
-   async getTransactionHistory(userId, limit = 10, offset = 0) {
-    const wallet = await Wallet.findOne({ userId });
-    if (!wallet) {
-        throw { status: 404, message: 'Ví không tồn tại.' };
+    async getTransactionHistory(userId, limit = 10, offset = 0) {
+        const wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            throw { status: 404, message: 'Ví không tồn tại.' };
+        }
+        const transactions = await WalletTransaction.find({ userId })
+            .sort({ createdAt: -1 })
+            .skip(offset)
+            .limit(limit);
+        return transactions;
     }
-    const transactions = await WalletTransaction.find({ userId })
-        .sort({ createdAt: -1 })
-        .skip(offset)
-        .limit(limit);
-    return transactions;
-}
     // Xóa giao dịch ví (chỉ dành cho admin)
     async deleteTransaction(transactionId) {
         const transaction = await WalletTransaction.findByIdAndDelete(transactionId);
@@ -104,6 +104,36 @@ class WalletService {
     async createWallet(userId) {
         const wallet = new Wallet({ userId, balance: 0 });
         await wallet.save();
+        return wallet;
+    }
+
+    // Hoàn tiền vào ví khi booking bị từ chối, kiểm tra bookingId
+    async refundToWallet(userId, amount, bookingId, description = 'Hoàn tiền do booking bị từ chối') {
+        if (amount <= 0) {
+            throw { status: 400, message: 'Số tiền hoàn phải lớn hơn 0.' };
+        }
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            throw { status: 404, message: 'Booking không tồn tại.' };
+        }
+        // Kiểm tra trạng thái booking (ví dụ: waiting và bị từ chối)
+        if (booking.status !== 'waiting' && booking.status !== 'cancelled') {
+            throw { status: 400, message: 'Booking không ở trạng thái chờ hoặc đã bị từ chối.' };
+        }
+        const wallet = await Wallet.findOneAndUpdate(
+            { userId },
+            { $inc: { balance: amount } },
+            { new: true, upsert: true }
+        );
+        // Ghi log giao dịch ví
+        await WalletTransaction.create({
+            walletId: wallet._id,
+            userId,
+            type: 'refund',
+            amount,
+            status: 'completed',
+            description: description + ` (BookingId: ${bookingId})`,
+        });
         return wallet;
     }
 }

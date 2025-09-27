@@ -13,6 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { toast } from 'react-toastify';
 import bookingService from '../../../services/api/bookingService';
 import { PublicContext } from "../../../contexts/publicContext";
+import { walletService } from '../../../services/api/walletService';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
@@ -81,13 +82,28 @@ const BookingList = ({ userId }) => {
 
     const handleCancelBooking = async (bookingId) => {
         try {
+            const booking = bookings.find(b => b._id === bookingId);
             await bookingService.updateBooking(bookingId, { status: 'cancelled' });
             setBookings(bookings.map(b =>
                 b._id === bookingId ? { ...b, status: 'cancelled' } : b
             ));
-            toast.success('Hủy đặt lịch thành công');
+            // Nếu booking đang ở trạng thái waiting thì hoàn tiền
+            if (booking && booking.status === 'waiting') {
+                console.log('Booking ở trạng thái waiting, tiến hành hoàn tiền');
+                // Gọi refund API
+                const refundData = {
+                    userId: booking.userId,
+                    amount: booking.totalPrice,
+                    bookingId: booking._id,
+                    description: 'Hoàn tiền do manager hủy booking ở trạng thái waiting'
+                };
+                await walletService.refundToWallet(refundData);
+                toast.success('Hoàn tiền cho khách thành công');
+            } else {
+                toast.success('Hủy đặt lịch thành công');
+            }
         } catch (error) {
-            toast.error('Hủy đặt lịch thất bại');
+            toast.error('Hủy đặt lịch hoặc hoàn tiền thất bại');
         }
     };
 

@@ -23,4 +23,7 @@ router.put('/:userId', WalletController.updateWallet);
 // Xóa ví (admin)
 router.delete('/:userId', WalletController.deleteWallet);
 
+// Hoàn tiền vào ví khi booking bị từ chối
+router.post('/refund', WalletController.refundToWallet);
+
 module.exports = router;
