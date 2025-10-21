@@ -7,14 +7,33 @@ import sportFieldService from '../../../services/api/sportFieldService';
 import { PublicContext } from "../../../contexts/publicContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../../contexts/authContext';
+import { fieldComplexService } from '../../../services/api/fieldComplexService';
 const SportsVenueDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+  const [filterFieldComplex, setFilterFieldComplex] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState(null);
   const [venueToDelete, setVenueToDelete] = useState(null);
+  const { currentUser } = useAuth();
+  const [fieldComplexes, setFieldComplexes] = useState([]);
+  React.useEffect(() => {
+    const fetchFieldComplexes = async () => {
+      try {
+        //lấy ra các field complexes của owner hiện tại
+        const response = await fieldComplexService.getAll();
+        const complexesForOwner = response.filter(fc => fc.owner._id === currentUser._id);
+        console.log("complexesForOwner", complexesForOwner);
+        setFieldComplexes(complexesForOwner);
+      } catch (error) {
+        console.error("Error fetching field complexes:", error);
+      }
+    };
+    fetchFieldComplexes();
+  }, []);
   // XÓA
   const handleDeleteVenue = async (venue) => {
     setVenueToDelete(venue);
@@ -69,13 +88,19 @@ const SportsVenueDashboard = () => {
   };
 
   const filteredVenues = useMemo(() => {
-    return sportFields.filter((venue) => {
+    const result = sportFields.filter((venue) => {
       const matchesSearch = venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         venue.location.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === "all" || venue.type.name.toLowerCase() === filterType;
-      return matchesSearch && matchesType;
+      const matchesComplex =
+        filterFieldComplex === "all" ||
+        (venue.complex &&
+          (venue.complex._id === filterFieldComplex ||
+            venue.complex === filterFieldComplex));
+      return matchesSearch && matchesType && matchesComplex;
     });
-  }, [searchTerm, filterType, sportFields]);
+    return result;
+  }, [searchTerm, filterType, filterFieldComplex, sportFields]);
 
   const paginatedVenues = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -145,18 +170,34 @@ const SportsVenueDashboard = () => {
             />
           </div>
 
-          <select
-            className="w-full sm:w-48 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <option value="all">Tất cả loại sân</option>
-            {types.map((type) => (
-              <option key={type._id} value={type.name.toLowerCase()}>
-                {type.name}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              className="w-full sm:w-48 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">Tất cả loại sân</option>
+              {types.map((type) => (
+                <option key={type._id} value={type.name.toLowerCase()}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="w-full sm:w-48 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={filterFieldComplex}
+              onChange={(e) => setFilterFieldComplex(e.target.value)}
+            >
+              <option value="all">Tất cả cụm sân</option>
+              {fieldComplexes.map((complex) => (
+                <option key={complex._id} value={complex._id}>
+                  {complex.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
         </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -226,30 +267,30 @@ const SportsVenueDashboard = () => {
                         <button className="text-red-600 hover:text-red-900" onClick={() => handleDeleteVenue(venue)}>
                           <FaTrash className="h-5 w-5" />
                         </button>
-      {/* Confirm Delete Dialog */}
-      {venueToDelete && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-            <h2 className="text-lg font-semibold mb-4">Xác nhận xóa sân</h2>
-            <p>Bạn có chắc chắn muốn xóa sân <span className="font-bold">{venueToDelete.name}</span> không?</p>
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={cancelDeleteVenue}
-              >
-                Hủy
-              </button>
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                onClick={confirmDeleteVenue}
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-                        <button className="text-green-600 hover:text-green-900" 
+                        {/* Confirm Delete Dialog */}
+                        {venueToDelete && (
+                          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+                            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                              <h2 className="text-lg font-semibold mb-4">Xác nhận xóa sân</h2>
+                              <p>Bạn có chắc chắn muốn xóa sân <span className="font-bold">{venueToDelete.name}</span> không?</p>
+                              <div className="mt-6 flex justify-end space-x-2">
+                                <button
+                                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                  onClick={cancelDeleteVenue}
+                                >
+                                  Hủy
+                                </button>
+                                <button
+                                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                  onClick={confirmDeleteVenue}
+                                >
+                                  Xóa
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <button className="text-green-600 hover:text-green-900"
                           onClick={() => {
                             navigate(`/manager/maintenance-schedule/${venue.type._id}`);
                           }}
@@ -318,6 +359,7 @@ const SportsVenueDashboard = () => {
           onClose={() => setCreateDialogOpen(false)}
           onCreate={handleCreateVenue}
           types={types}
+          fieldComplexes={fieldComplexes}
         />
 
         {/* Dialog cập nhật sân */}
@@ -327,6 +369,7 @@ const SportsVenueDashboard = () => {
           onUpdate={handleUpdateVenue}
           selectedVenue={selectedVenue}
           types={types}
+          fieldComplexes={fieldComplexes}
         />
       </div>
     </div>

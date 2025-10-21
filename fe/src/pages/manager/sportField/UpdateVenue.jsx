@@ -48,12 +48,26 @@ const STATUSES = [
   { label: "Đã đặt", value: "booked" }
 ];
 
-export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, types }) {
-  const [venueData, setVenueData] = useState(selectedVenue || {});
+export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, types, fieldComplexes }) {
+  // Rename fieldComplex to complex in state
+  const [venueData, setVenueData] = useState(() => {
+    if (selectedVenue && selectedVenue.fieldComplex && !selectedVenue.complex) {
+      // migrate fieldComplex to complex for backward compatibility
+      const { fieldComplex, ...rest } = selectedVenue;
+      return { ...rest, complex: fieldComplex };
+    }
+    return selectedVenue || {};
+  });
   const [imagePreviews, setImagePreviews] = useState([]);
 
   useEffect(() => {
-    setVenueData(selectedVenue || {});
+    if (selectedVenue && selectedVenue.fieldComplex && !selectedVenue.complex) {
+      // migrate fieldComplex to complex for backward compatibility
+      const { fieldComplex, ...rest } = selectedVenue;
+      setVenueData({ ...rest, complex: fieldComplex });
+    } else {
+      setVenueData(selectedVenue || {});
+    }
     if (selectedVenue && selectedVenue.images) {
       setImagePreviews(
         selectedVenue.images.map(img =>
@@ -84,17 +98,22 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
     setImagePreviews(newPreviews);
   };
 
+
 const handleSubmit = () => {
   const dataToSend = {
     ...venueData,
-    type: typeof venueData.type === "object" ? venueData.type._id : venueData.type
+    type: typeof venueData.type === "object" ? venueData.type._id : venueData.type,
+    complex:
+      typeof venueData.complex === "object"
+        ? venueData.complex._id
+        : venueData.complex
   };
   onUpdate(dataToSend);
   onClose();
 };
 
   if (!venueData) return null;
-console.log("types", types);
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Cập nhật sân</DialogTitle>
@@ -174,6 +193,40 @@ console.log("types", types);
             </MenuItem>
           ))}
         </Select>
+
+
+        <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
+        {fieldComplexes && fieldComplexes.length === 1 ? (
+          <TextField
+            fullWidth
+            value={fieldComplexes[0].name}
+            disabled
+            sx={{ mb: 2 }}
+          />
+        ) : (
+          <Select
+            name="complex"
+            fullWidth
+            value={
+              typeof venueData.complex === "object"
+                ? venueData.complex._id
+                : venueData.complex || ""
+            }
+            onChange={(e) =>
+              setVenueData({
+                ...venueData,
+                complex: e.target.value
+              })
+            }
+          >
+            {fieldComplexes && fieldComplexes.map((fc) => (
+              <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
+            ))}
+          </Select>
+        )}
+
+        {/* Ensure complex is set if only one option */}
+        {fieldComplexes && fieldComplexes.length === 1 && venueData.complex !== fieldComplexes[0]._id && setVenueData(v => ({ ...v, complex: fieldComplexes[0]._id }))}
 
         <TextField margin="dense" label="Địa chỉ" name="location" fullWidth value={venueData.location || ""} onChange={handleChange} />
         <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity || ""} onChange={handleChange} />

@@ -43,6 +43,7 @@ import PolicyList from './pages/manager/policy/PolicyList';
 import Coupon from "./pages/admin/voucher/CouponManager";
 import FieldComplexPage from './pages/admin/fieldComplex/FieldComplexPage';
 import OwnerList from './pages/admin/owner/OwnerList';
+import FieldComplex from './pages/manager/fieldComplex/FieldComplex';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -314,8 +315,15 @@ const router = createBrowserRouter([
                 <PolicyList />
               </ProtectedRoute>
             ),
-          }
-         
+          },
+            {
+            path: "field-complex-list",
+            element: (
+              <ProtectedRoute >
+                <FieldComplex />
+              </ProtectedRoute>
+            )
+          },
 
         ]
       },
@@ -346,14 +354,14 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             ),
           },
-             {
-        path: "field-complex-list",
-        element: (
-          <ProtectedRoute >
-            <FieldComplexPage />
-          </ProtectedRoute>
-        )
-      },
+          {
+            path: "field-complex-list",
+            element: (
+              <ProtectedRoute >
+                <FieldComplexPage />
+              </ProtectedRoute>
+            )
+          },
         ],
       },
       {

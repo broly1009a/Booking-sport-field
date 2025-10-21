@@ -38,71 +38,71 @@ const ManagerLayout = () => {
           <Typography variant="h6" sx={{ px: 2, mb: 1, fontWeight: 'bold' }}>QUẢN LÝ</Typography>
           <List>
             <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/dashboard">
-                  <ListItemIcon sx={{ color: 'white' }}>
-                    <TableChart />
-                  </ListItemIcon>
-                  <ListItemText primary="Dashboard" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/booking-list">
-                  <ListItemIcon sx={{ color: 'white' }}>
-                    <Event />
-                  </ListItemIcon>
-                  <ListItemText primary="Lịch Đặt Sân" />
-                </ListItemButton>
-            </ListItem>
-
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/type-list">
-                  <ListItemIcon sx={{ color: 'white' }}><Category /></ListItemIcon>
-                  <ListItemText primary="Loại Sân" />
-                </ListItemButton>
-            </ListItem>
-
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/sport-field-list">
-                  <ListItemIcon sx={{ color: 'white' }}><SportsSoccer /></ListItemIcon>
-                  <ListItemText primary="Sân Thể Thao" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/equipment-list">
-                  <ListItemIcon sx={{ color: 'white' }}><Inventory /></ListItemIcon>
-                  <ListItemText primary="Thiết Bị" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/consumable-list">
-                  <ListItemIcon sx={{ color: 'white' }}><Inventory /></ListItemIcon>
-                  <ListItemText primary="Vật Tư Tiêu Hao" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/new-list">
-                  <ListItemIcon sx={{ color: 'white' }}><Newspaper /></ListItemIcon>
-                  <ListItemText primary="Tin Tức" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/category-policy-list">
-                  <ListItemIcon sx={{ color: 'white' }}><Category /></ListItemIcon>
-                  <ListItemText primary="Danh mục chính sách" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} to="manager/policy-list">
-                  <ListItemIcon sx={{ color: 'white' }}><Policy /></ListItemIcon>
-                  <ListItemText primary="Danh sách chính sách" />
-                </ListItemButton>
-            </ListItem>
-            {/* <ListItem disablePadding>
-              <ListItemButton component={Link} to="manager/tournament-dashboard">
-                <ListItemIcon sx={{ color: 'white' }}><GiChampions /></ListItemIcon>
-                <ListItemText primary="Giải đấu" />
+              <ListItemButton component={Link} to="manager/dashboard">
+                <ListItemIcon sx={{ color: 'white' }}>
+                  <TableChart />
+                </ListItemIcon>
+                <ListItemText primary="Dashboard" />
               </ListItemButton>
-            </ListItem> */}
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/booking-list">
+                <ListItemIcon sx={{ color: 'white' }}>
+                  <Event />
+                </ListItemIcon>
+                <ListItemText primary="Lịch Đặt Sân" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/field-complex-list">
+                <ListItemIcon sx={{ color: 'white' }}><GiChampions /></ListItemIcon>
+                <ListItemText primary="Cụm sân" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/type-list">
+                <ListItemIcon sx={{ color: 'white' }}><Category /></ListItemIcon>
+                <ListItemText primary="Loại Sân" />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/sport-field-list">
+                <ListItemIcon sx={{ color: 'white' }}><SportsSoccer /></ListItemIcon>
+                <ListItemText primary="Sân Thể Thao" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/equipment-list">
+                <ListItemIcon sx={{ color: 'white' }}><Inventory /></ListItemIcon>
+                <ListItemText primary="Thiết Bị" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/consumable-list">
+                <ListItemIcon sx={{ color: 'white' }}><Inventory /></ListItemIcon>
+                <ListItemText primary="Vật Tư Tiêu Hao" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/new-list">
+                <ListItemIcon sx={{ color: 'white' }}><Newspaper /></ListItemIcon>
+                <ListItemText primary="Tin Tức" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/category-policy-list">
+                <ListItemIcon sx={{ color: 'white' }}><Category /></ListItemIcon>
+                <ListItemText primary="Danh mục chính sách" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/policy-list">
+                <ListItemIcon sx={{ color: 'white' }}><Policy /></ListItemIcon>
+                <ListItemText primary="Danh sách chính sách" />
+              </ListItemButton>
+            </ListItem>
+
           </List>
           <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.2)', my: 2 }} />
         </Box>

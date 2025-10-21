@@ -45,9 +45,11 @@ const STATUSES = [
   { label: "Đã đặt", value: "booked" }
 ];
 
-export default function CreateVenue({ open, onClose, onCreate, types }) {
+export default function CreateVenue({ open, onClose, onCreate, types, fieldComplexes}) {
   const [venueData, setVenueData] = useState(initialState);
   const [imagePreviews, setImagePreviews] = useState([]);
+  
+
 
   const handleChange = (e) => {
     setVenueData({ ...venueData, [e.target.name]: e.target.value });
@@ -75,7 +77,7 @@ export default function CreateVenue({ open, onClose, onCreate, types }) {
     setImagePreviews([]);
     onClose();
   };
-console.log("types", types);
+// console.log("types", types);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -144,7 +146,26 @@ console.log("types", types);
             <MenuItem key={t._id} value={t._id}>{t.name}</MenuItem>
           ))}
         </Select>
-        <TextField margin="dense" label="Địa chỉ" name="location" fullWidth value={venueData.location} onChange={handleChange} />
+
+        <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
+        {fieldComplexes.length === 1 ? (
+          <TextField
+            fullWidth
+            value={fieldComplexes[0].name}
+            disabled
+            sx={{ mb: 2 }}
+          />
+        ) : (
+          <Select name="complex" fullWidth value={venueData.fieldComplex || ''} onChange={handleChange}>
+            {fieldComplexes.map((fc) => (
+              <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
+            ))}
+          </Select>
+        )}
+
+        {/* Ensure fieldComplex is set if only one option */}
+        {fieldComplexes.length === 1 && venueData.fieldComplex !== fieldComplexes[0]._id && setVenueData(v => ({ ...v, fieldComplex: fieldComplexes[0]._id }))}
+        <TextField margin="dense" label="Địa chỉ cụ thể" name="location" fullWidth value={venueData.location} onChange={handleChange} />
         <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity} onChange={handleChange} />
         <InputLabel sx={{ mt: 2 }}>Trạng thái</InputLabel>
         <Select name="status" fullWidth value={venueData.status} onChange={handleChange}>

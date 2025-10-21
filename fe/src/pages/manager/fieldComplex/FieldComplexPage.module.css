@@ -1,0 +1,136 @@
+.fc-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 32px 24px;
+}
+.fc-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1a237e;
+}
+.fc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.fc-form-group label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+.fc-form-group input,
+.fc-form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #c5cae9;
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-top: 2px;
+}
+.fc-form-images-preview {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.fc-form-actions {
+  display: flex;
+  gap: 12px;
+}
+.fc-btn {
+  padding: 7px 18px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.fc-btn-primary {
+  background: #3949ab;
+  color: #fff;
+}
+.fc-btn-primary:disabled {
+  background: #b0bec5;
+  cursor: not-allowed;
+}
+.fc-btn-secondary {
+  background: #e3e3e3;
+  color: #333;
+}
+.fc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.fc-list-item {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 18px 16px;
+  box-shadow: 0 1px 4px rgba(60,60,60,0.04);
+  position: relative;
+}
+.fc-list-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+.fc-list-location {
+  color: #3949ab;
+  font-weight: 500;
+}
+.fc-status {
+  margin-left: auto;
+  font-size: 0.95rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.fc-status.active {
+  background: #c8e6c9;
+  color: #256029;
+}
+.fc-status.inactive {
+  background: #ffcdd2;
+  color: #b71c1c;
+}
+.fc-list-desc {
+  color: #333;
+  margin-bottom: 6px;
+}
+.fc-list-images {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.fc-list-owner {
+  font-size: 0.97rem;
+  color: #607d8b;
+  margin-bottom: 8px;
+}
+.fc-list-actions {
+  display: flex;
+  gap: 10px;
+}
+.fc-btn-edit {
+  background: #fffde7;
+  color: #fbc02d;
+  border: 1px solid #fbc02d;
+}
+.fc-btn-delete {
+  background: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #d32f2f;
+}
+.fc-inactive {
+  opacity: 0.7;
+}
