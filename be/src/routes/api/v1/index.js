@@ -22,6 +22,8 @@ const newsRouter = require('./news.router');
 const favoriteRouter = require('./favorite.router');
 const categoryPolicyRouter = require('./categoryPolicy.router');
 const policyRouter = require('./policy.router');
+
+const fieldComplexRouter = require('./fieldComplex.router');
 const couponRouter = require('./coupon.router');
 
 router.use('/guest', guestRouter);
@@ -46,6 +48,8 @@ router.use('/news', newsRouter);
 router.use('/favorite', favoriteRouter);
 router.use('/category-policy', categoryPolicyRouter);
 router.use('/policy', policyRouter);
+
+router.use('/field-complex', fieldComplexRouter);
 router.use('/coupon', couponRouter);
 
 module.exports = router;

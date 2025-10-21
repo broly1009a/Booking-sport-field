@@ -42,6 +42,11 @@ const sportFieldSchema = new Schema({
         type: [String],
         default: []
     },
+    complex: {
+        type: Schema.Types.ObjectId,
+        ref: 'FieldComplex',
+        default: null
+    },
     isdeleted: {
         type: Boolean,
         default: false

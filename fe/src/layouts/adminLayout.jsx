@@ -29,14 +29,14 @@ const menuItems = [
     path: "/admin/user-list",
   },
   {
-    text: "Quản lí Sân",
+    text: "Quản lí Chủ Sân",
     icon: <SportsSoccerIcon />,
-    path: "/admin/sport-field-list",
+    path: "/admin/owner-list",
   },
   {
-    text: "Quản lí loại sân",
+    text: "Quản lí Cụm Sân",
     icon: <Category />,
-    path: "/admin/type-list",
+    path: "/admin/field-complex-list",
   },
   {
     text: "Quản lí ưu đãi",

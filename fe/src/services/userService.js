@@ -88,6 +88,11 @@ const UserService = {
             api.patch(`/user/disable-account/${firebaseUID}`)
         )
     },
+    getAllUsers: async () => {
+        return handleApiCall(() =>
+            api.get('/user/')
+        );
+    }
 }
 
 export default UserService;

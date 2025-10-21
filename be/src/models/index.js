@@ -10,11 +10,13 @@ const Maintenance = require('./maintenance.model');
 const ConsumablePurchase = require('./consumablePurchase.model');
 const EquipmentRental = require('./equipmentRental.model');
 const Blacklist = require('./blacklist.model');
+const FieldComplex = require('./fieldComplex.model');
 module.exports = {
     Guest,
     User,
     Type,
     SportField,
+    FieldComplex,
     DeletedSportField,
     Equipment,
     Consumable,
