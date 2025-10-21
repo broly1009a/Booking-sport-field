@@ -6,7 +6,7 @@ import UpdateVenue from "./UpdateVenue";
 import sportFieldService from '../../../services/api/sportFieldService';
 import { PublicContext } from "../../../contexts/publicContext";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from '../../../contexts/authContext';
 import { fieldComplexService } from '../../../services/api/fieldComplexService';
 const SportsVenueDashboard = () => {
@@ -20,20 +20,27 @@ const SportsVenueDashboard = () => {
   const [venueToDelete, setVenueToDelete] = useState(null);
   const { currentUser } = useAuth();
   const [fieldComplexes, setFieldComplexes] = useState([]);
-  React.useEffect(() => {
+  const location = useLocation();
+  
+  useEffect(() => {
     const fetchFieldComplexes = async () => {
       try {
-        //lấy ra các field complexes của owner hiện tại
         const response = await fieldComplexService.getAll();
         const complexesForOwner = response.filter(fc => fc.owner._id === currentUser._id);
-        console.log("complexesForOwner", complexesForOwner);
         setFieldComplexes(complexesForOwner);
       } catch (error) {
         console.error("Error fetching field complexes:", error);
       }
     };
     fetchFieldComplexes();
-  }, []);
+
+  
+    const params = new URLSearchParams(location.search);
+    const complexId = params.get('complex');
+    if (complexId) {
+      setFilterFieldComplex(complexId);
+    }
+  }, [location.search, currentUser]);
   // XÓA
   const handleDeleteVenue = async (venue) => {
     setVenueToDelete(venue);

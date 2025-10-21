@@ -39,7 +39,6 @@ export default function FieldComplexForm({
   }, []);
   const handleChange = (e) => {
     if (e.target.name === 'owner') {
-      // Nếu là trường owner, lấy thông tin đầy đủ của owner từ owners state
       const selectedOwner = owners[e.target.value];
       setForm({ ...form, owner: selectedOwner });
     } else if (e.target.name.startsWith('coordinates.')) {

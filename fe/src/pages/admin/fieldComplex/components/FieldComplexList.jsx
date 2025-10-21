@@ -1,6 +1,6 @@
 
 
-export default function FieldComplexList({ list, onEdit, onDelete, loading }) {
+export default function FieldComplexList({ list, onEdit, onDelete, loading, onAddVenue, onViewVenue }) {
   if (loading) return null;
 
   return (
@@ -20,15 +20,12 @@ export default function FieldComplexList({ list, onEdit, onDelete, loading }) {
               {item.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
             </span>
           </div>
-          
           <div className="text-gray-600 mb-2">
             <i className="fas fa-map-marker-alt mr-1"></i> {item.location}
           </div>
-          
           {item.description && (
             <p className="text-gray-600 text-sm mb-3">{item.description}</p>
           )}
-
           {item.images && item.images.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
               {item.images.map((img, idx) => (
@@ -41,7 +38,6 @@ export default function FieldComplexList({ list, onEdit, onDelete, loading }) {
               ))}
             </div>
           )}
-
           {item.owner && (
             <div className="text-sm text-gray-500 mb-3">
               <div>Quản lý: {item.owner.fname} {item.owner.lname}</div>
@@ -49,8 +45,19 @@ export default function FieldComplexList({ list, onEdit, onDelete, loading }) {
               <div>SĐT: {item.owner.phoneNumber}</div>
             </div>
           )}
-
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-wrap justify-end gap-2 mt-2">
+            <button
+              className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+              onClick={() => onAddVenue && onAddVenue(item)}
+            >
+              Thêm sân
+            </button>
+            <button
+              className="px-3 py-1 text-sm bg-green-50 text-green-600 rounded hover:bg-green-100"
+              onClick={() => onViewVenue && onViewVenue(item)}
+            >
+              Xem sân
+            </button>
             <button
               onClick={() => onEdit(item)}
               className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"

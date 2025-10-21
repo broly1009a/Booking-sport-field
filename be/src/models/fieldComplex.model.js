@@ -11,7 +11,7 @@ const fieldComplexSchema = new Schema({
     description: { type: String, default: "" },
     owner: { type: Schema.Types.ObjectId, ref: 'User' }, 
     images: { type: [String], default: [] },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('FieldComplex', fieldComplexSchema);

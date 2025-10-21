@@ -5,7 +5,7 @@ import SearchFilter from './components/SearchFilter';
 import Pagination from './components/Pagination';
 import CreateVenue from '../sportField/CreateVenue';
 import { useNavigate } from 'react-router-dom';
-
+  import { useAuth } from '../../../contexts/authContext';
 function FieldComplex() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,12 +17,14 @@ function FieldComplex() {
   const [selectedComplex, setSelectedComplex] = useState(null);
   const [types, setTypes] = useState([]); // types for CreateVenue
   const navigate = useNavigate();
+    const { currentUser } = useAuth();
 
   const fetchList = async () => {
     setLoading(true);
     try {
       const data = await fieldComplexService.getAll();
-      setList(data);
+       const complexesForOwner = data.filter(fc => fc.owner._id === currentUser._id);
+      setList(complexesForOwner);
     } finally {
       setLoading(false);
     }
@@ -150,7 +152,7 @@ function FieldComplex() {
               </button>
               <button
                 className="px-3 py-1 text-sm bg-green-50 text-green-600 rounded hover:bg-green-100"
-                onClick={() => navigate(`/manager/sport-fields?complex=${item._id}`)}
+                onClick={() => navigate(`/manager/sport-field-list?complex=${item._id}`)}
               >
                 Xem sân
               </button>

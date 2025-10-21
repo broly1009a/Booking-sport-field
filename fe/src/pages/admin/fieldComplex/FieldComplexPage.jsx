@@ -5,9 +5,26 @@ import FieldComplexList from './components/FieldComplexList';
 import Modal from './components/Modal';
 import SearchFilter from './components/SearchFilter';
 import Pagination from './components/Pagination';
+import CreateVenue from '../../manager/sportField/CreateVenue';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function FieldComplexPage() {
+  const [showCreateVenue, setShowCreateVenue] = useState(false);
+  const [selectedComplex, setSelectedComplex] = useState(null);
+  const [types, setTypes] = useState([]);
+  const navigate = useNavigate();
+  // Fetch sport field types for CreateVenue
+  const fetchTypes = async () => {
+    try {
+      const res = await import('../../../services/api/sportFieldService');
+      if (res && res.default && res.default.getTypes) {
+        const t = await res.default.getTypes();
+        setTypes(t);
+      }
+    } catch (e) {}
+  };
+
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ 
@@ -45,6 +62,7 @@ export default function FieldComplexPage() {
 
   useEffect(() => {
     fetchList();
+    fetchTypes();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -210,6 +228,13 @@ export default function FieldComplexPage() {
         }}
         onDelete={handleDelete}
         loading={loading}
+        onAddVenue={(item) => {
+          setSelectedComplex(item);
+          setShowCreateVenue(true);
+        }}
+        onViewVenue={(item) => {
+          navigate(`/manager/sport-field-list?complex=${item._id}`);
+        }}
       />
 
       {filteredList.length > 0 && (
@@ -227,6 +252,15 @@ export default function FieldComplexPage() {
         <div className="text-center py-8 text-gray-500">
           Không tìm thấy cụm sân nào {keyword && `cho từ khóa "${keyword}"`}
         </div>
+      )}
+      {showCreateVenue && (
+        <CreateVenue
+          open={showCreateVenue}
+          onClose={() => { setShowCreateVenue(false); setSelectedComplex(null); }}
+          onCreate={() => { setShowCreateVenue(false); setSelectedComplex(null); fetchList(); }}
+          types={types}
+          fieldComplexes={selectedComplex ? [selectedComplex] : list}
+        />
       )}
     </div>
   );

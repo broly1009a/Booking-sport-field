@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('token', user?.accessToken);
                 const dbUser = await UserService.getCurrentUser();
                 setCurrentUser({ ...user, ...dbUser.data });
-                console.log("Current user: ", { ...user, ...dbUser.data });
+                // console.log("Current user: ", { ...user, ...dbUser.data });
                 setIsUserLoggedIn(true);
             } catch (error) {
                 setCurrentUser(null);

@@ -247,7 +247,7 @@ const router = createBrowserRouter([
           {
             path: "sport-field-list",
             element: (
-              <ProtectedRoute requiredRoles={['MANAGER']}>
+              <ProtectedRoute requiredRoles={['MANAGER','ADMIN']}>
                 <SportsVenueDashboard />
               </ProtectedRoute>
             ),
