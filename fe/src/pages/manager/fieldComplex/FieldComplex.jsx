@@ -1,11 +1,14 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { fieldComplexService } from '../../../services/api/fieldComplexService';
 import FieldComplexList from './components/FieldComplexList';
 import SearchFilter from './components/SearchFilter';
 import Pagination from './components/Pagination';
 import CreateVenue from '../sportField/CreateVenue';
 import { useNavigate } from 'react-router-dom';
-  import { useAuth } from '../../../contexts/authContext';
+import { useAuth } from '../../../contexts/authContext';
+import { PublicContext } from "../../../contexts/publicContext";
+import sportFieldService from '../../../services/api/sportFieldService';
+import { toast } from 'react-toastify';
 function FieldComplex() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,46 +18,34 @@ function FieldComplex() {
   const [pageSize, setPageSize] = useState(10);
   const [showCreateVenue, setShowCreateVenue] = useState(false);
   const [selectedComplex, setSelectedComplex] = useState(null);
-  const [types, setTypes] = useState([]); // types for CreateVenue
+  const { types } = useContext(PublicContext);
   const navigate = useNavigate();
-    const { currentUser } = useAuth();
+  const { currentUser } = useAuth();
 
   const fetchList = async () => {
     setLoading(true);
     try {
       const data = await fieldComplexService.getAll();
-       const complexesForOwner = data.filter(fc => fc.owner._id === currentUser._id);
+      const complexesForOwner = data.filter(fc => fc.owner._id === currentUser._id);
       setList(complexesForOwner);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch sport field types for CreateVenue
-  const fetchTypes = async () => {
-    try {
-      const res = await import('../../../services/api/sportFieldService');
-      if (res && res.default && res.default.getTypes) {
-        const t = await res.default.getTypes();
-        setTypes(t);
-      }
-    } catch (e) {}
-  };
-
   useEffect(() => {
     fetchList();
-    fetchTypes();
   }, []);
 
   const filteredList = useMemo(() => {
     return list.filter(item => {
-      const matchesKeyword = 
+      const matchesKeyword =
         item.name.toLowerCase().includes(keyword.toLowerCase()) ||
         item.location.toLowerCase().includes(keyword.toLowerCase());
-      const matchesStatus = 
+      const matchesStatus =
         status === 'all' ? true :
-        status === 'active' ? item.isActive :
-        status === 'inactive' ? !item.isActive : true;
+          status === 'active' ? item.isActive :
+            status === 'inactive' ? !item.isActive : true;
       return matchesKeyword && matchesStatus;
     });
   }, [list, keyword, status]);
@@ -70,7 +61,32 @@ function FieldComplex() {
   useEffect(() => {
     setCurrentPage(1);
   }, [keyword, status, pageSize]);
-
+  const handleDelete = async (id, newStatus) => {
+    setLoading(true);
+    try {
+      await fieldComplexService.update(id, { isActive: newStatus });
+      fetchList();
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCreateVenue = async (newVenue) => {
+    try {
+      const { images, ...data } = newVenue;
+      const res = await sportFieldService.createSportField(data, images || []);
+      if (res) {
+        toast.success("Tạo sân mới thành công!");
+        if (selectedComplex && !selectedComplex.isActive) {
+          await handleDelete(selectedComplex._id, true);
+        }
+        // await fetchList();
+      }
+      setShowCreateVenue(false);
+    } catch (error) {
+      toast.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
+      setShowCreateVenue(false);
+    }
+  };
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -107,11 +123,10 @@ function FieldComplex() {
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-semibold text-lg">{item.name}</h3>
-              <span className={`px-2 py-1 text-xs rounded-full ${
-                item.isActive
+              <span className={`px-2 py-1 text-xs rounded-full ${item.isActive
                   ? 'bg-green-100 text-green-800'
                   : 'bg-red-100 text-red-800'
-              }`}>
+                }`}>
                 {item.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
               </span>
             </div>
@@ -142,11 +157,12 @@ function FieldComplex() {
             )}
             <div className="flex gap-2 mt-2">
               <button
-                className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => {
                   setSelectedComplex(item);
                   setShowCreateVenue(true);
                 }}
+                disabled={!item.isActive}
               >
                 Thêm sân
               </button>
@@ -183,7 +199,11 @@ function FieldComplex() {
         <CreateVenue
           open={showCreateVenue}
           onClose={() => { setShowCreateVenue(false); setSelectedComplex(null); }}
-          onCreate={() => { setShowCreateVenue(false); setSelectedComplex(null); fetchList(); }}
+          onCreate={async (newVenue) => {
+            await handleCreateVenue(newVenue);
+            setSelectedComplex(null);
+            // fetchList();
+          }}
           types={types}
           fieldComplexes={selectedComplex ? [selectedComplex] : list}
         />
