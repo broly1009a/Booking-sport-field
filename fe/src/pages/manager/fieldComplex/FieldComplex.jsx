@@ -72,7 +72,12 @@ function FieldComplex() {
   };
   const handleCreateVenue = async (newVenue) => {
     try {
-      const { images, ...data } = newVenue;
+      const { images, fieldComplex, ...rest } = newVenue;
+      // Đổi fieldComplex thành complex
+      const data = { ...rest };
+      if (fieldComplex) {
+        data.complex = fieldComplex;
+      }
       const res = await sportFieldService.createSportField(data, images || []);
       if (res) {
         toast.success("Tạo sân mới thành công!");

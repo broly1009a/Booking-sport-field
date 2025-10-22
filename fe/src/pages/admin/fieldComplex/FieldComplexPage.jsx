@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 export default function FieldComplexPage() {
     const [showCreateVenue, setShowCreateVenue] = useState(false);
     const [selectedComplex, setSelectedComplex] = useState(null);
-      const { types } = useContext(PublicContext);
+      const { types,refreshData } = useContext(PublicContext);
     const navigate = useNavigate();
     // Fetch sport field types for CreateVenue
  
@@ -151,23 +151,31 @@ export default function FieldComplexPage() {
         setCurrentPage(1);
     }, [keyword, status, pageSize]);
 // CREATE
-    const handleCreateVenue = async (newVenue) => {
-        try {
-            const { images, ...data } = newVenue;
-            const res = await sportFieldService.createSportField(data, images || []);
-            if (res) {
-                toast.success("Tạo sân mới thành công!");
-                if (selectedComplex && !selectedComplex.isActive) {
-                    await handleDelete(selectedComplex._id, true);
-                }
-                // await fetchList();
-            }
-            setShowCreateVenue(false);
-        } catch (error) {
-            toast.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
-            setShowCreateVenue(false);
-        }
-    };
+     const handleCreateVenue = async (newVenue) => {
+             try {
+                 const { images, fieldComplex, ...rest } = newVenue;
+                 // Đổi fieldComplex thành complex
+                 const data = { ...rest };
+                 if (fieldComplex) {
+                     data.complex = fieldComplex;
+                 }
+                 const res = await sportFieldService.createSportField(data, images || []);
+                 if (res) {
+                     toast.success("Tạo sân mới thành công!");
+                     if (selectedComplex && !selectedComplex.isActive) {
+                         await handleDelete(selectedComplex._id, true);
+                     }
+                     if (typeof refreshData === 'function') {
+                         refreshData();
+                     }
+                     // await fetchList();
+                 }
+                 setShowCreateVenue(false);
+             } catch (error) {
+                 toast.error(error?.message || "Có lỗi xảy ra, vui lòng thử lại!");
+                 setShowCreateVenue(false);
+             }
+         };
     return (
         <div className="container mx-auto p-4">
             <div className="flex justify-between items-center mb-6">
