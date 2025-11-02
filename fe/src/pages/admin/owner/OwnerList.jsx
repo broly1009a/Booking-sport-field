@@ -9,7 +9,7 @@ import UserService from '../../../services/userService';
 import { formatDate } from '../../../utils/handleFormat';
 import UpdateOwner from './UpdateOwner';
 import RegisterOwner from './RegisterOwner';
-
+import { useNavigate } from 'react-router-dom';
 const roleMapping = {
     ADMIN: 'Quản trị viên',
     MANAGER: 'Quản lí viên',
@@ -29,7 +29,7 @@ const OwnerList = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
     const [loading, setLoading] = useState(true);
-
+    const navigate = useNavigate();
     const fetchUsers = async () => {
         setLoading(true);
         try {
@@ -48,10 +48,10 @@ const OwnerList = () => {
         // eslint-disable-next-line
     }, [page, limit, search, role]);
 
-    const handleEditClick = (user) => {
-        setSelectedUser(user);
-        setOpenEditDialog(true);
-    };
+    // const handleEditClick = (user) => {
+    //     setSelectedUser(user);
+    //     setOpenEditDialog(true);
+    // };
 
     const handleCloseEditDialog = () => {
         setOpenEditDialog(false);
@@ -85,7 +85,9 @@ const OwnerList = () => {
             toast.error(error.message || `Không thể ${action} tài khoản.`);
         }
     };
-
+    const handleEditClick = (user) => {
+        navigate(`/admin/update-user/${user._id}`);
+    };
     if (loading) {
         return <div>Loading...</div>;
     }

@@ -318,6 +318,26 @@ class UserService {
     enableAccount = async (firebaseUID) => {
         return this.updateFirebaseAccountStatus(firebaseUID, false);
     };
+        getUserById = async (id) => {
+        const user = await User.findById(id).populate('role', '_id name displayName');
+        if (!user) return null;
+        let email = null;
+        let accountStatus = 'Unknown';
+        if (user.firebaseUID) {
+            try {
+                const firebaseUser = await admin.auth().getUser(user.firebaseUID);
+                email = firebaseUser.email;
+                accountStatus = firebaseUser.disabled ? 'Disabled' : 'Active';
+            } catch (error) {
+                // Không tìm thấy trên Firebase
+            }
+        }
+        return {
+            ...user.toObject(),
+            email,
+            accountStatus
+        };
+    };
 }
 
 module.exports = new UserService;

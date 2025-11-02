@@ -26,8 +26,11 @@ const SportsVenueDashboard = () => {
     const fetchFieldComplexes = async () => {
       try {
         const response = await fieldComplexService.getAll();
-        const complexesForOwner = response.filter(fc => fc.owner._id === currentUser._id);
-        setFieldComplexes(complexesForOwner);
+        let complexes = response;
+        if (currentUser.role !== 'ADMIN') {
+          complexes = response.filter(fc => fc.owner && fc.owner._id === currentUser._id);
+        }
+        setFieldComplexes(complexes);
       } catch (error) {
         console.error("Error fetching field complexes:", error);
       }

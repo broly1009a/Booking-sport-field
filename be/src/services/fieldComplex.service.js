@@ -1,4 +1,5 @@
 const FieldComplex = require('../models/fieldComplex.model');
+const SportField = require('../models/sportField.model');
 const { User } = require('../models/index');
 const admin = require('../configs/firebaseAdmin');
 class FieldComplexService {
@@ -60,9 +61,12 @@ class FieldComplexService {
                 };
             }
         }
+        // Lấy danh sách các sân thuộc cụm sân này
+        const sportFields = await SportField.find({ complex: id });
         return {
             ...complex.toObject(),
-            owner: ownerDetail
+            owner: ownerDetail,
+            sportFields: sportFields.map(f => f.toObject())
         };
     }
 

@@ -92,6 +92,12 @@ const UserService = {
         return handleApiCall(() =>
             api.get('/user/')
         );
+    },
+
+    getUserById: async (id) => {
+        return handleApiCall(() =>
+            api.get(`/user/${id}`)
+        );
     }
 }
 

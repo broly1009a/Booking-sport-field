@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
     Pagination, TextField, Select, MenuItem, FormControl, InputLabel, Button, Dialog,
@@ -19,14 +20,15 @@ const roleMapping = {
 const getRoleInVietnamese = (role) => roleMapping[role] || 'Không xác định';
 
 const UserList = () => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [page, setPage] = useState(1);
     const [limit] = useState(5);
     const [search, setSearch] = useState('');
     const [role, setRole] = useState('');
     const [totalPages, setTotalPages] = useState(1);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
+    // const [openEditDialog, setOpenEditDialog] = useState(false);
+    // const [selectedUser, setSelectedUser] = useState(null);
     const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -48,15 +50,15 @@ const UserList = () => {
         // eslint-disable-next-line
     }, [page, limit, search, role]);
 
+
     const handleEditClick = (user) => {
-        setSelectedUser(user);
-        setOpenEditDialog(true);
+        navigate(`/admin/update-user/${user._id}`);
     };
 
-    const handleCloseEditDialog = () => {
-        setOpenEditDialog(false);
-        setSelectedUser(null);
-    };
+    // const handleCloseEditDialog = () => {
+    //     setOpenEditDialog(false);
+    //     setSelectedUser(null);
+    // };
 
     const handleOpenRegisterDialog = () => {
         setOpenRegisterDialog(true);
@@ -216,15 +218,7 @@ const UserList = () => {
                 sx={{ marginTop: 2, display: 'flex', justifyContent: 'center' }}
             />
 
-            {/* Dialog for UpdateUser form */}
-            <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
-                <DialogTitle>Chỉnh sửa tài khoản</DialogTitle>
-                <DialogContent>
-                    {selectedUser && (
-                        <UpdateUser user={selectedUser} onClose={handleCloseEditDialog} />
-                    )}
-                </DialogContent>
-            </Dialog>
+            {/* Dialog for UpdateUser form đã chuyển sang trang riêng */}
 
             {/* Dialog for RegisterUser form */}
             <Dialog open={openRegisterDialog} onClose={handleCloseRegisterDialog}>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -45,10 +45,22 @@ const STATUSES = [
   { label: "Đã đặt", value: "booked" }
 ];
 
-export default function CreateVenue({ open, onClose, onCreate, types, fieldComplexes}) {
+export default function CreateVenue({ open, onClose, onCreate, types, fieldComplexes }) {
+  // Lấy param complex từ URL nếu có
   const [venueData, setVenueData] = useState(initialState);
   const [imagePreviews, setImagePreviews] = useState([]);
-  
+
+  useEffect(() => {
+    if (open) {
+      const params = new URLSearchParams(window.location.search);
+      const complexId = params.get('complex');
+      if (complexId && fieldComplexes && fieldComplexes.some(fc => fc._id === complexId)) {
+        setVenueData(v => ({ ...v, fieldComplex: complexId }));
+      } else if (fieldComplexes && fieldComplexes.length === 1) {
+        setVenueData(v => ({ ...v, fieldComplex: fieldComplexes[0]._id }));
+      }
+    }
+  }, [open, fieldComplexes]);
 
 
   const handleChange = (e) => {
@@ -147,7 +159,7 @@ export default function CreateVenue({ open, onClose, onCreate, types, fieldCompl
           ))}
         </Select>
 
-        <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
+        {/* <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
         {fieldComplexes.length === 1 ? (
           <TextField
             fullWidth
@@ -161,10 +173,18 @@ export default function CreateVenue({ open, onClose, onCreate, types, fieldCompl
               <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
             ))}
           </Select>
+        )} */}
+        
+        {fieldComplexes.length !== 1 && (
+          <>
+            <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
+            <Select name="complex" fullWidth value={venueData.fieldComplex || ''} onChange={handleChange}>
+              {fieldComplexes.map((fc) => (
+                <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
+              ))}
+            </Select>
+          </>
         )}
-
-        {/* Ensure fieldComplex is set if only one option */}
-        {fieldComplexes.length === 1 && venueData.fieldComplex !== fieldComplexes[0]._id && setVenueData(v => ({ ...v, fieldComplex: fieldComplexes[0]._id }))}
         <TextField margin="dense" label="Địa chỉ cụ thể" name="location" fullWidth value={venueData.location} onChange={handleChange} />
         <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity} onChange={handleChange} />
         <InputLabel sx={{ mt: 2 }}>Trạng thái</InputLabel>

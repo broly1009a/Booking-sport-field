@@ -44,6 +44,9 @@ import Coupon from "./pages/admin/voucher/CouponManager";
 import FieldComplexPage from './pages/admin/fieldComplex/FieldComplexPage';
 import OwnerList from './pages/admin/owner/OwnerList';
 import FieldComplex from './pages/manager/fieldComplex/FieldComplex';
+import FieldComplexFormPage from './pages/admin/fieldComplex/FieldComplexFormPage';
+import FieldComplexDetailPage from './pages/manager/fieldComplex/FieldComplexDetailPage';
+import UpdateUserPage from './pages/admin/user/UpdateUserPage';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -324,7 +327,14 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             )
           },
-
+            {
+            path: "field-complex-detail/:id",
+            element: (
+              <ProtectedRoute >
+                <FieldComplexDetailPage />
+              </ProtectedRoute>
+            )
+          },
         ]
       },
       {
@@ -335,6 +345,14 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute>
                 <UserList />
+              </ProtectedRoute>
+            ),
+          },
+           {
+            path: "update-user/:id",
+            element: (
+              <ProtectedRoute>
+                <UpdateUserPage />
               </ProtectedRoute>
             ),
           },
@@ -359,6 +377,14 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute >
                 <FieldComplexPage />
+              </ProtectedRoute>
+            )
+          },
+              {
+            path: "field-complex-form/:id?",
+            element: (
+              <ProtectedRoute >
+                <FieldComplexFormPage />
               </ProtectedRoute>
             )
           },
