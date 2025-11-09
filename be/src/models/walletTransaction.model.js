@@ -31,6 +31,10 @@ const walletTransactionSchema = new Schema({
   relatedBookingId: {
     type: Schema.Types.ObjectId,
     ref: 'Booking'
+  },
+  vnpayUrl: {
+    type: String,
+    required: false, // Lưu URL trả về từ VNPay nếu có
   }
 }, { timestamps: true });
 

@@ -12,4 +12,10 @@ export const fieldComplexService = {
         handleApiCall(() => api.put(`/field-complex/${id}`, data)),
     delete: (id) =>
         handleApiCall(() => api.delete(`/field-complex/${id}`)),
+    addStaffToFieldComplex: (id, staffId) =>
+        handleApiCall(() => api.put(`/field-complex/${id}/add-staff`, { staffId })),
+    removeStaffFromFieldComplex: (id, staffId) =>
+        handleApiCall(() => api.put(`/field-complex/${id}/remove-staff`, { staffId })),
+    getAvailableStaff: () =>
+        handleApiCall(() => api.get('/field-complex/users/available-staff'))
 };

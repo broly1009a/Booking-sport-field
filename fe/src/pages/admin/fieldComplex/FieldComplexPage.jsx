@@ -179,7 +179,12 @@ export default function FieldComplexPage() {
                     setShowCreateVenue(true);
                 }}
                 onViewVenue={(item) => {
-                    navigate(`/manager/sport-field-list?complex=${item._id}`);
+                    navigate(`/manager/sport-field-list?complex=${item._id}`, {
+                        state: {
+                            complex: item,
+                            owner: item.owner
+                        }
+                    });
                 }}
                 onCreateSuccess={async (item) => {
                     // Tự động hiện sân sau khi tạo thành công

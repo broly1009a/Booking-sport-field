@@ -10,7 +10,7 @@ class FieldComplexService {
 
 
     async getAllFieldComplexes() {
-        const complexes = await FieldComplex.find().populate('owner');
+        const complexes = await FieldComplex.find().populate('owner').populate('staffs');
         // Lấy danh sách owner hợp lệ
         const owners = complexes.map(c => c.owner).filter(Boolean);
         const firebaseUIDs = owners.map((user) => ({ uid: user.firebaseUID })).filter(u => u.uid);
@@ -34,15 +34,26 @@ class FieldComplexService {
                     accountStatus: firebaseUser ? (firebaseUser.disabled ? 'Disabled' : 'Active') : 'Unknown',
                 };
             }
+            // Trả về thông tin staffs kèm email nếu có firebaseUID
+            const staffsDetail = complex.staffs ? complex.staffs.map(staff => {
+                let staffObj = staff.toObject();
+                let email = null;
+                if (staff.firebaseUID) {
+                    const firebaseUser = firebaseUsers.find(fu => fu.uid === staff.firebaseUID);
+                    email = firebaseUser ? firebaseUser.email : null;
+                }
+                return { ...staffObj, email };
+            }) : [];
             return {
                 ...complex.toObject(),
-                owner: ownerDetail
+                owner: ownerDetail,
+                staffs: staffsDetail
             };
         });
     }
 
     async getFieldComplexById(id) {
-        const complex = await FieldComplex.findById(id).populate('owner');
+        const complex = await FieldComplex.findById(id).populate('owner').populate('staffs');
         if (!complex) return null;
         let ownerDetail = null;
         if (complex.owner && complex.owner.firebaseUID) {
@@ -63,10 +74,28 @@ class FieldComplexService {
         }
         // Lấy danh sách các sân thuộc cụm sân này
         const sportFields = await SportField.find({ complex: id });
+        // Trả về thông tin staffs kèm email nếu có firebaseUID
+        let staffsDetail = [];
+        if (complex.staffs && complex.staffs.length > 0) {
+            staffsDetail = await Promise.all(complex.staffs.map(async staff => {
+                let staffObj = staff.toObject();
+                let email = null;
+                if (staff.firebaseUID) {
+                    try {
+                        const firebaseUser = await admin.auth().getUser(staff.firebaseUID);
+                        email = firebaseUser.email;
+                    } catch (error) {
+                        email = null;
+                    }
+                }
+                return { ...staffObj, email };
+            }));
+        }
         return {
             ...complex.toObject(),
             owner: ownerDetail,
-            sportFields: sportFields.map(f => f.toObject())
+            sportFields: sportFields.map(f => f.toObject()),
+            staffs: staffsDetail
         };
     }
 
@@ -76,6 +105,28 @@ class FieldComplexService {
 
     async deleteFieldComplex(id) {
         return await FieldComplex.findByIdAndDelete(id);
+    }
+
+    async addStaffToFieldComplex(complexId, staffId) {
+        // Thêm staffId vào mảng staffs nếu chưa có
+        const complex = await FieldComplex.findById(complexId);
+        if (!complex) return null;
+        if (!complex.staffs) complex.staffs = [];
+        if (!complex.staffs.includes(staffId)) {
+            complex.staffs.push(staffId);
+            await complex.save();
+        }
+        return complex;
+    }
+
+    async removeStaffFromFieldComplex(complexId, staffId) {
+        // Xoá staffId khỏi mảng staffs
+        const complex = await FieldComplex.findById(complexId);
+        if (!complex) return null;
+        if (!complex.staffs) complex.staffs = [];
+        complex.staffs = complex.staffs.filter(id => id.toString() !== staffId);
+        await complex.save();
+        return complex;
     }
 }
 

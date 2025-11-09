@@ -21,7 +21,7 @@ const SportsVenueDashboard = () => {
   const { currentUser } = useAuth();
   const [fieldComplexes, setFieldComplexes] = useState([]);
   const location = useLocation();
-  
+  const { complex, owner } = location.state || {};
   useEffect(() => {
     const fetchFieldComplexes = async () => {
       try {
@@ -154,12 +154,19 @@ const SportsVenueDashboard = () => {
       setSelectedVenue(null);
     }
   };
-  // console.log("venues", venues);
-  // console.log("types", types);
+// console.log("complex:", complex);
+// console.log("owner:", owner);
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Quản lý sân thể thao</h1>
+        {/* Thông tin cụm sân và chủ sân */}
+        {complex && (
+          <div className="mb-6 p-4 bg-white rounded-lg shadow">
+            <h2 className="text-2xl font-semibold mb-2">Cụm sân: {complex.name}</h2>
+            <p className="text-gray-600">Chủ sân: {owner?.fname} {owner?.lname} | Email: {owner?.email} | SĐT: {owner?.phoneNumber}</p>
+          </div>
+        )}
         <div className="mb-4 flex justify-end">
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -224,7 +231,7 @@ const SportsVenueDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedVenues.map((venue) => (
-                  <tr key={venue.id} className="hover:bg-gray-50 transition-colors duration-200">
+                  <tr key={venue._id} className="hover:bg-gray-50 transition-colors duration-200">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-16 w-16 flex-shrink-0">

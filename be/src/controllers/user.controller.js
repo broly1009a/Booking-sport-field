@@ -226,6 +226,20 @@ class UserController {
             next(error);
         }
     };
+
+    /**
+    * method: GET
+    * router(/api/v1/users/available-staff)
+    * author: Copilot
+    */
+    getAvailableStaff = async (req, res, next) => {
+        try {
+            const staffList = await UserService.getAvailableStaff();
+            res.status(200).json({ data: staffList });
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 module.exports = new UserController;

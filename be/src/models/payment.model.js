@@ -31,6 +31,10 @@ const paymentSchema = new Schema({
         type: String,
         required: false // Chỉ cần khi thanh toán qua cổng thanh toán
     },
+    vnpayUrl: {
+        type: String,
+        required: false, // Lưu URL trả về từ VNPay nếu có
+    },
     paymentTime: {
         type: Date,
         default: Date.now

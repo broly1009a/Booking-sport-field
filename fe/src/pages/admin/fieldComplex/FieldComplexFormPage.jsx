@@ -10,6 +10,7 @@ export default function FieldComplexFormPage() {
     const navigate = useNavigate();
     const { id } = useParams();
     const [form, setForm] = useState({
+        _id: null,
         name: '',
         location: '',
         description: '',
@@ -19,12 +20,24 @@ export default function FieldComplexFormPage() {
             latitude: null,
             longitude: null
         },
-        sportFields: []
+        sportFields: [],
+        staffs: []
     });
     const [editId, setEditId] = useState(null);
     const [imageFiles, setImageFiles] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [availableStaff, setAvailableStaff] = useState([]);
     // Không cần state modal nữa
+
+    const refreshAvailableStaff = async () => {
+        try {
+            const response = await fieldComplexService.getAvailableStaff();
+            setAvailableStaff(response.data || []);
+        } catch (error) {
+            console.error("Error fetching available staff:", error);
+            toast.error("Không thể lấy danh sách nhân viên!");
+        }
+    };
 
     useEffect(() => {
         if (id) {
@@ -33,13 +46,15 @@ export default function FieldComplexFormPage() {
                 .then((data) => {
                     if (data) {
                         setForm({
+                            _id: data._id || null,
                             name: data.name || '',
                             location: data.location || '',
                             description: data.description || '',
                             images: data.images || [],
                             owner: data.owner || '',
                             coordinates: data.coordinates || { latitude: null, longitude: null },
-                            sportFields: data.sportFields || []
+                            sportFields: data.sportFields || [],
+                            staffs: data.staffs || []
                         });
                         setEditId(data._id);
                     }
@@ -51,6 +66,11 @@ export default function FieldComplexFormPage() {
                 .finally(() => setLoading(false));
         }
     }, [id, navigate]);
+
+    useEffect(() => {
+        // Lấy danh sách staff chưa được gán
+        refreshAvailableStaff();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -98,6 +118,8 @@ export default function FieldComplexFormPage() {
                     onSubmit={handleSubmit}
                     loading={loading}
                     onClose={() => navigate(-1)}
+                    availableStaff={availableStaff}
+                    onStaffUpdate={refreshAvailableStaff}
                 />
             </div>
         </div>

@@ -2,6 +2,7 @@ const { User } = require('../models/index');
 const admin = require('../configs/firebaseAdmin');
 const { sendVerificationEmail, sendNewPassword } = require('../configs/nodemailer.config');
 const { generateRandomPassword } = require('../utils/handleGenerate');
+const FieldComplex = require('../models/fieldComplex.model');
 class UserService {
     /**
     * author: XXX
@@ -338,6 +339,43 @@ class UserService {
             accountStatus
         };
     };
+
+        /**
+        * Lấy danh sách staff chưa được gán vào cụm sân nào
+        */
+        getAvailableStaff = async () => {
+            // Lấy tất cả user có role STAFF
+            const allStaffs = await User.find({ role: 'STAFF' });
+            // Lấy tất cả staffs đã được gán vào bất kỳ FieldComplex nào
+            const complexes = await FieldComplex.find({}, 'staffs');
+            const assignedStaffIds = new Set();
+            complexes.forEach(complex => {
+                if (complex.staffs && complex.staffs.length > 0) {
+                    complex.staffs.forEach(staffId => assignedStaffIds.add(staffId.toString()));
+                }
+            });
+            // Lọc ra các staff chưa được gán
+            const availableStaffs = allStaffs.filter(staff => !assignedStaffIds.has(staff._id.toString()));
+            // Lấy email từ Firebase
+            const firebaseUIDs = availableStaffs.map(staff => ({ uid: staff.firebaseUID })).filter(u => u.uid);
+            let firebaseUsers = [];
+            try {
+                if (firebaseUIDs.length > 0) {
+                    const { users: firebaseUserRecords } = await admin.auth().getUsers(firebaseUIDs);
+                    firebaseUsers = firebaseUserRecords;
+                }
+            } catch (error) {
+                // Nếu lỗi vẫn trả về danh sách không có email
+            }
+            return availableStaffs.map(staff => {
+                const firebaseUser = firebaseUsers.find(fu => fu.uid === staff.firebaseUID);
+                return {
+                    ...staff.toObject(),
+                    email: firebaseUser ? firebaseUser.email : null,
+                    accountStatus: firebaseUser ? (firebaseUser.disabled ? 'Disabled' : 'Active') : 'Unknown',
+                };
+            });
+        };
 }
 
 module.exports = new UserService;

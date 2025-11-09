@@ -48,10 +48,36 @@ const deleteFieldComplex = async (req, res) => {
     }
 };
 
+const addStaffToFieldComplex = async (req, res) => {
+    try {
+        const { staffId } = req.body;
+        if (!staffId) return res.status(400).json({ error: 'Missing staffId' });
+        const updated = await fieldComplexService.addStaffToFieldComplex(req.params.id, staffId);
+        if (!updated) return res.status(404).json({ error: 'FieldComplex not found' });
+        res.json(updated);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+const removeStaffFromFieldComplex = async (req, res) => {
+    try {
+        const { staffId } = req.body;
+        if (!staffId) return res.status(400).json({ error: 'Missing staffId' });
+        const updated = await fieldComplexService.removeStaffFromFieldComplex(req.params.id, staffId);
+        if (!updated) return res.status(404).json({ error: 'FieldComplex not found' });
+        res.json(updated);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
 module.exports = {
     createFieldComplex,
     getAllFieldComplexes,
     getFieldComplexById,
     updateFieldComplex,
-    deleteFieldComplex
+    deleteFieldComplex,
+    addStaffToFieldComplex,
+    removeStaffFromFieldComplex
 };
