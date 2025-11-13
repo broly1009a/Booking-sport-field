@@ -40,7 +40,7 @@ const UpdateUser = ({ user, onClose }) => {
                 <InputLabel>Vai trò</InputLabel>
                 <Select value={role} onChange={(e) => setRole(e.target.value)}>
                     <MenuItem value="ADMIN">Quản trị viên</MenuItem>
-                    <MenuItem value="MANAGER">Quản lí viên</MenuItem>
+                    <MenuItem value="MANAGER">Chủ sân</MenuItem>
                     <MenuItem value="CUSTOMER">Khách hàng</MenuItem>               
                 </Select>
             </FormControl>

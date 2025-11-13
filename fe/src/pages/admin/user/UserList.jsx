@@ -13,7 +13,7 @@ import RegisterUser from './RegisterUser';
 
 const roleMapping = {
     ADMIN: 'Quản trị viên',
-    MANAGER: 'Quản lí viên',
+    MANAGER: 'Chủ sân',
     CUSTOMER: 'Khách hàng',
     STAFF: 'Nhân viên'
 };
@@ -115,7 +115,7 @@ const UserList = () => {
                             >
                                 <MenuItem value="">Tất cả</MenuItem>
                                 <MenuItem value="ADMIN">Quản trị viên</MenuItem>
-                                <MenuItem value="MANAGER">Quản lí viên</MenuItem>
+                                <MenuItem value="MANAGER">Chủ sân</MenuItem>
                                 <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
                                 <MenuItem value="STAFF">Nhân viên</MenuItem>
                             </Select>
