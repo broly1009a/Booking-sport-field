@@ -400,6 +400,59 @@ const router = createBrowserRouter([
         ],
       },
       {
+        path: "staff",
+        children: [
+          {
+            path: "dashboard",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
+                <AnalyticsDashboard />
+              </ProtectedRoute>
+            ),
+          },
+           {
+            path: "sport-field-list",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER','STAFF']}>
+                <SportsVenueDashboard />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "equipment-list",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
+                <EquipmentDashboard />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "consumable-list",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
+                <ConsumableDashboard />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "booking-list",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
+                <BookingList />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "new-list",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
+                <NewsDashboard />
+              </ProtectedRoute>
+            )
+          },
+        ],
+      },
+      {
         path: "unauthorized",
         element: (
           <ProtectedRoute>
