@@ -141,7 +141,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
         note,
         items // gửi lên BE để lưu thiết bị/đồ tiêu thụ nếu cần
       };
-
+ console.log('Rendering BookingDialog with props:', bookingData);
       // Gọi API thanh toán online
       const res = await paymentService.createBookingAndPayment(bookingData);
       console.log('Payment response:', res?.data?.vnpUrl);
@@ -237,6 +237,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
       onClose();
     }
   };
+ 
   return (
     <React.Fragment>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>

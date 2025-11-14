@@ -48,6 +48,8 @@ import FieldComplexFormPage from './pages/admin/fieldComplex/FieldComplexFormPag
 import FieldComplexDetailPage from './pages/manager/fieldComplex/FieldComplexDetailPage';
 import UpdateUserPage from './pages/admin/user/UpdateUserPage';
 import RegisterStaff from './pages/admin/fieldComplex/RegisterStaff';
+import EventManagement from './pages/manager/event/EventManagement';
+import EventSchedule from './pages/manager/event/EventSchedule';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -333,6 +335,22 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute >
                 <FieldComplexDetailPage />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "event-schedule/:typeId",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER']}>
+                <EventSchedule />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "event-management",
+            element: (
+              <ProtectedRoute requiredRoles={['MANAGER']}>
+                <EventManagement />
               </ProtectedRoute>
             )
           },

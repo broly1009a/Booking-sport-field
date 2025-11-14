@@ -23,7 +23,7 @@ const scheduleSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['available', 'booked', 'maintenance'],
+            enum: ['available', 'booked', 'maintenance','event'],
             default: 'available'
         }
     }]

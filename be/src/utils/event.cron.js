@@ -1,19 +1,44 @@
 const cron = require('node-cron');
 const Event = require('../models/event.model');
+const FieldComplex = require('../models/fieldComplex.model');
 const { sendEventNotification } = require('../configs/nodemailer.config');
 
 // Helper: Gửi email thông báo
 async function sendEventEmailNotification(event, type, additionalInfo = {}) {
     try {
         const acceptedPlayers = event.interestedPlayers.filter(p => p.status === 'accepted');
-        const allUsers = [event.createdBy, ...acceptedPlayers.map(p => p.userId)];
         
-        // Lọc email hợp lệ
-        const emails = allUsers
+        // 1. Lấy danh sách người chơi (Creator + Accepted players)
+        const players = [event.createdBy, ...acceptedPlayers.map(p => p.userId)];
+        const playerEmails = players
             .filter(user => user && user.email)
             .map(user => user.email);
         
-        if (emails.length === 0) {
+        // 2. Lấy thông tin chủ sân và nhân viên
+        let ownerAndStaffEmails = [];
+        if (event.fieldId && event.fieldId.complex) {
+            const fieldComplex = await FieldComplex.findById(event.fieldId.complex)
+                .populate('owner', 'email fname lname role')
+                .populate('staffs', 'email fname lname role');
+            
+            if (fieldComplex) {
+                // Thêm email chủ sân (owner/manager)
+                if (fieldComplex.owner && fieldComplex.owner.email) {
+                    ownerAndStaffEmails.push(fieldComplex.owner.email);
+                }
+                
+                // Thêm email nhân viên (staff)
+                if (fieldComplex.staffs && fieldComplex.staffs.length > 0) {
+                    const staffEmails = fieldComplex.staffs
+                        .filter(staff => staff && staff.email && staff.role === 'STAFF')
+                        .map(staff => staff.email);
+                    ownerAndStaffEmails.push(...staffEmails);
+                }
+            }
+        }
+        
+        // 3. Kiểm tra có email không
+        if (playerEmails.length === 0 && ownerAndStaffEmails.length === 0) {
             console.log('[Event Cron] Không có email để gửi');
             return;
         }
@@ -23,7 +48,9 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
         switch (type) {
             case 'confirmed':
                 subject = `✅ Event "${event.name}" đã được xác nhận`;
-                htmlContent = `
+                
+                // Email cho người chơi
+                const playerHtml = `
                     <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
                         <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <h2 style="color: #28a745; text-align: center;">✅ Event Đã Được Xác Nhận!</h2>
@@ -42,11 +69,47 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                         </div>
                     </div>
                 `;
+                
+                // Email cho chủ sân/nhân viên
+                const ownerStaffHtml = `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                        <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <h2 style="color: #28a745; text-align: center;">🏟️ Thông Báo Booking Event Mới</h2>
+                            <div style="margin: 20px 0; padding: 15px; background-color: #e7f3ff; border-left: 4px solid #007bff;">
+                                <p style="margin: 5px 0;"><strong>Loại:</strong> Event Matching - Ghép đội</p>
+                                <p style="margin: 5px 0;"><strong>Tên event:</strong> ${event.name}</p>
+                                <p style="margin: 5px 0;"><strong>Sân:</strong> ${event.fieldId?.name || 'N/A'}</p>
+                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${new Date(event.startTime).toLocaleString('vi-VN')} - ${new Date(event.endTime).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Số người:</strong> ${acceptedPlayers.length + 1} người</p>
+                                <p style="margin: 5px 0;"><strong>Người tạo:</strong> ${event.createdBy?.fname} ${event.createdBy?.lname} - ${event.createdBy?.phoneNumber || 'N/A'}</p>
+                                <p style="margin: 5px 0;"><strong>Giảm giá:</strong> ${event.discountPercent}%</p>
+                            </div>
+                            <p style="text-align: center; color: #666; margin-top: 20px;">Vui lòng chuẩn bị sân và kiểm tra thiết bị trước giờ đá! ⚽</p>
+                            <p style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
+                                Hệ thống quản lý fptsportsfield.io.vn
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // Gửi email cho người chơi
+                if (playerEmails.length > 0) {
+                    await sendEventNotification(playerEmails, subject, playerHtml);
+                    console.log(`[Event Cron] 📧 Đã gửi email confirmed đến ${playerEmails.length} người chơi`);
+                }
+                
+                // Gửi email cho chủ sân/nhân viên
+                if (ownerAndStaffEmails.length > 0) {
+                    await sendEventNotification(ownerAndStaffEmails, `🏟️ Booking Event: ${event.name}`, ownerStaffHtml);
+                    console.log(`[Event Cron] 📧 Đã gửi email thông báo đến ${ownerAndStaffEmails.length} chủ sân/nhân viên`);
+                }
                 break;
                 
             case 'cancelled':
                 subject = `❌ Event "${event.name}" đã bị hủy`;
-                htmlContent = `
+                
+                // Email cho người chơi
+                const cancelPlayerHtml = `
                     <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
                         <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <h2 style="color: #dc3545; text-align: center;">❌ Event Đã Bị Hủy</h2>
@@ -65,11 +128,46 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                         </div>
                     </div>
                 `;
+                
+                // Email cho chủ sân/nhân viên
+                const cancelOwnerStaffHtml = `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                        <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <h2 style="color: #dc3545; text-align: center;">🏟️ Event Booking Đã Bị Hủy</h2>
+                            <div style="margin: 20px 0; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
+                                <p style="margin: 5px 0;"><strong>Tên event:</strong> ${event.name}</p>
+                                <p style="margin: 5px 0;"><strong>Sân:</strong> ${event.fieldId?.name || 'N/A'}</p>
+                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${new Date(event.startTime).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Lý do:</strong> Thiếu người (${additionalInfo.acceptedCount}/${event.minPlayers})</p>
+                            </div>
+                            <p style="text-align: center; color: #666; margin-top: 20px;">
+                                Sân này đã được giải phóng và có thể nhận booking khác. 📅
+                            </p>
+                            <p style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
+                                Hệ thống quản lý fptsportsfield.io.vn
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // Gửi email cho người chơi
+                if (playerEmails.length > 0) {
+                    await sendEventNotification(playerEmails, subject, cancelPlayerHtml);
+                    console.log(`[Event Cron] 📧 Đã gửi email cancelled đến ${playerEmails.length} người chơi`);
+                }
+                
+                // Gửi email cho chủ sân/nhân viên
+                if (ownerAndStaffEmails.length > 0) {
+                    await sendEventNotification(ownerAndStaffEmails, `❌ Event Booking Cancelled: ${event.name}`, cancelOwnerStaffHtml);
+                    console.log(`[Event Cron] 📧 Đã gửi email hủy đến ${ownerAndStaffEmails.length} chủ sân/nhân viên`);
+                }
                 break;
                 
             case 'warning':
                 subject = `⚠️ Cảnh báo: Event "${event.name}" sắp bị hủy`;
-                htmlContent = `
+                
+                // Email cảnh báo CHỈ GỬI CHO NGƯỜI CHƠI (chủ sân không cần)
+                const warningHtml = `
                     <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
                         <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <h2 style="color: #ffc107; text-align: center;">⚠️ Cảnh Báo Quan Trọng!</h2>
@@ -89,14 +187,17 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                         </div>
                     </div>
                 `;
+                
+                // Chỉ gửi email cảnh báo cho người chơi (creator + accepted players)
+                if (playerEmails.length > 0) {
+                    await sendEventNotification(playerEmails, subject, warningHtml);
+                    console.log(`[Event Cron] 📧 Đã gửi email warning đến ${playerEmails.length} người chơi`);
+                }
                 break;
                 
             default:
                 return;
         }
-        
-        console.log(`[Event Cron] 📧 Đang gửi email ${type} cho event ${event._id} đến ${emails.length} người`);
-        await sendEventNotification(emails, subject, htmlContent);
         
     } catch (error) {
         console.error('[Event Cron] Lỗi khi gửi email:', error.message);
@@ -115,9 +216,20 @@ async function checkEventDeadlines() {
             status: 'open',
             deadline: { $lte: now }
         })
-        .populate('createdBy', 'name email')
-        .populate('fieldId', 'name location price')
-        .populate('interestedPlayers.userId', 'name email');
+        .populate('createdBy', 'fname lname email phoneNumber role')
+        .populate({
+            path: 'fieldId',
+            select: 'name location pricePerHour complex',
+            populate: {
+                path: 'complex',
+                select: 'name owner staffs',
+                populate: [
+                    { path: 'owner', select: 'email fname lname role' },
+                    { path: 'staffs', select: 'email fname lname role' }
+                ]
+            }
+        })
+        .populate('interestedPlayers.userId', 'fname lname email phoneNumber role');
         
         console.log(`[Event Cron] Tìm thấy ${expiredEvents.length} event đã qua deadline`);
         
@@ -167,9 +279,12 @@ async function sendDeadlineWarnings() {
                 $lte: twoHoursLater 
             }
         })
-        .populate('createdBy', 'name email')
-        .populate('fieldId', 'name location')
-        .populate('interestedPlayers.userId', 'name email');
+        .populate('createdBy', 'fname lname email phoneNumber role')
+        .populate({
+            path: 'fieldId',
+            select: 'name location pricePerHour complex'
+        })
+        .populate('interestedPlayers.userId', 'fname lname email phoneNumber role');
         
         console.log(`[Event Cron] Tìm thấy ${warningEvents.length} event cần cảnh báo`);
         
