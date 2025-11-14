@@ -50,6 +50,7 @@ import UpdateUserPage from './pages/admin/user/UpdateUserPage';
 import RegisterStaff from './pages/admin/fieldComplex/RegisterStaff';
 import EventManagement from './pages/manager/event/EventManagement';
 import EventSchedule from './pages/manager/event/EventSchedule';
+import EventMatching from './pages/general/EventMatching';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -191,10 +192,10 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: "/event",
+        path: "/event-matching",
         element: (
           <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
-            <Event />
+            <EventMatching />
           </ProtectedRoute>
         )
       },
