@@ -8,7 +8,11 @@ const routes = require('./src/routes/index');
 const app = express();
 const mongoose = require('mongoose');
 const { registerScheduleCrons } = require('./src/utils/schedule.cron');
+const { registerEventCrons } = require('./src/utils/event.cron');
+
+// Đăng ký cron jobs
 registerScheduleCrons();
+registerEventCrons();
 
 app.use(cors(
   {

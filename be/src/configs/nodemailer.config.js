@@ -59,7 +59,25 @@ async function sendNewPassword(email, newPassword) {
     }
 }
 
+async function sendEventNotification(emails, subject, htmlContent) {
+    const mailOptions = {
+        from: process.env.EMAIL_APP,
+        to: emails.join(', '),
+        subject: subject,
+        html: htmlContent
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`📧 Email đã gửi thành công đến ${emails.length} người`);
+    } catch (error) {
+        console.error('❌ Lỗi khi gửi email:', error.message);
+        throw new Error(error.message);
+    }
+}
+
 module.exports = {
     sendVerificationEmail,
-    sendNewPassword
+    sendNewPassword,
+    sendEventNotification
 }
