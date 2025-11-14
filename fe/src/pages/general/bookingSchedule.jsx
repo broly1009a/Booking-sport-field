@@ -76,8 +76,18 @@ const BookingSchedule = () => {
       const start = new Date(slot.startTime);
       const end = new Date(slot.endTime);
       if (slotDateTime >= start && slotDateTime < end) {
-        if (slot.status === 'booked') return 'booked';
         if (slot.status === 'maintenance') return 'maintenance';
+        
+        // Nếu là sân pickleball và có booking
+        if (slot.status === 'booked') {
+          const currentBooking = slot.booking; // Giả sử backend trả về thông tin booking
+          if (currentBooking) {
+            if (currentBooking.participants.length >= currentBooking.maxParticipants) {
+              return 'booked';
+            }
+            return 'partially-booked'; // Trạng thái mới cho slot chưa đủ người
+          }
+        }
       }
     }
     return 'available';
@@ -207,7 +217,11 @@ const BookingSchedule = () => {
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
           <Box sx={{ width: 20, height: 20, bgcolor: '#f44336', mr: 1 }} />
-          <Typography fontSize={isMobile ? 12 : 14}>Đã đặt</Typography>
+          <Typography fontSize={isMobile ? 12 : 14}>Đã đủ người</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+          <Box sx={{ width: 20, height: 20, bgcolor: '#ff9800', mr: 1 }} />
+          <Typography fontSize={isMobile ? 12 : 14}>Chờ thêm người</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
           <Box sx={{ width: 20, height: 20, bgcolor: '#9e9e9e', mr: 1 }} />
@@ -298,6 +312,7 @@ const BookingSchedule = () => {
                   );
                   let cellBg;
                   if (status === 'booked') cellBg = '#f44336';
+                  else if (status === 'partially-booked') cellBg = '#ff9800';
                   else if (status === 'maintenance') cellBg = '#9e9e9e';
                   else if (status === 'past') cellBg = '#e0e0e0';
                   else if (isSelected) cellBg = '#4caf50';

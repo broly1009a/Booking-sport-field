@@ -13,10 +13,20 @@ const EquipmentRental = require('../models/equipmentRental.model');
 const ConsumablePurchase = require('../models/consumablePurchase.model');
 const Equipment = require('../models/equipment.model');
 const Consumable = require('../models/consumable.model');
+const PickleballBookingService = require('./pickleballBooking.service');
 class PaymentService {
     // Tạo booking và payment cho thanh toán online
     async createBookingAndPayment(bookingData, req) {
-            // 1. Kiểm tra số lượng tồn kho trước khi tạo booking
+            // 1. Xử lý dựa trên loại booking
+            let bookingService;
+            if (bookingData.bookingType === 'pickleball') {
+              
+                bookingService = PickleballBookingService;
+            } else {
+                bookingService = BookingService;
+            }
+
+            // 2. Kiểm tra số lượng tồn kho trước khi tạo booking
             if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
                 // Kiểm tra thiết bị
                 const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
@@ -38,8 +48,10 @@ class PaymentService {
                 }
             }
 
-            // 2. Tạo booking (pending)
-            const booking = await BookingService.createBooking(bookingData);
+            // 3. Tạo booking dựa trên loại
+            const booking = await bookingService.createBooking(bookingData, bookingData.userId);
+
+            // 4. Xử lý các items đi kèm
             if (Array.isArray(bookingData.items) && bookingData.items.length > 0) {
                 // Thiết bị
                 const equipmentItems = bookingData.items.filter(i => i.type === 'equipment' && i.quantity > 0);
@@ -76,13 +88,15 @@ class PaymentService {
                         }
                 }
             }
-            // 3. Tạo payment (pending)
+            // 5. Tạo payment (pending)
             const payment = await Payment.create({
                 bookingId: booking._id,
                 userId: bookingData.userId,
                 amount: bookingData.totalPrice,
                 paymentMethod: 'vnpay',
-                status: 'pending'
+                status: 'pending',
+                bookingType: bookingData.bookingType || 'standard',
+                participantIndex: bookingData.participantIndex // Cho pickleball booking
             });
 
             // 4. Tạo URL thanh toán VNPAY
@@ -163,6 +177,7 @@ class PaymentService {
         delete responseData.vnp_SecureHash;
         delete responseData.vnp_SecureHashType;
 
+        // Verify hash
         const secretKey = process.env.VNP_HASH_SECRET;
         const sortedData = this.sortObject(responseData);
         const signData = querystring.stringify(sortedData, { encode: false });
@@ -192,10 +207,30 @@ class PaymentService {
                 paymentTime: new Date()
             });
 
-            await Booking.findByIdAndUpdate(
-                payment.bookingId,
-                { status: responseData.vnp_ResponseCode === '00' ? 'waiting' : 'cancelled' }
-            );
+            const booking = await Booking.findById(payment.bookingId);
+            
+            // Xử lý dựa trên loại booking
+            if (payment.bookingType === 'pickleball') {
+              
+                if (responseData.vnp_ResponseCode === '00') {
+                    // Cập nhật trạng thái người tham gia
+                    await PickleballBookingService.updateParticipantPaymentStatus(
+                        booking._id,
+                        payment.userId,
+                        'paid',
+                        payment.participantIndex
+                    );
+                } else {
+                    // Hủy tham gia nếu thanh toán thất bại
+                    await PickleballBookingService.cancelParticipation(booking._id, payment.userId);
+                }
+            } else {
+                // Xử lý booking thông thường
+                await Booking.findByIdAndUpdate(
+                    payment.bookingId,
+                    { status: responseData.vnp_ResponseCode === '00' ? 'waiting' : 'cancelled' }
+                );
+            }
 
             // Nếu thanh toán thất bại, trả lại slot về available
             if (responseData.vnp_ResponseCode !== '00') {
@@ -236,10 +271,17 @@ class PaymentService {
     }
 
     // Thanh toán booking bằng ví (sau khi đã nạp tiền)
-    async payBookingByWallet({ bookingId, userId, amount }) {
+    async payBookingByWallet({ bookingId, userId, amount, bookingType = 'standard', participantIndex }) {
         const booking = await Booking.findById(bookingId);
         if (!booking) throw new Error('Booking không tồn tại');
-        if (booking.status !== 'pending') throw new Error('Booking không hợp lệ để thanh toán');
+
+        // Kiểm tra trạng thái dựa trên loại booking
+        if (bookingType === 'pickleball') {
+          
+            await PickleballBookingService.validateBookingForPayment(booking, userId);
+        } else if (booking.status !== 'pending') {
+            throw new Error('Booking không hợp lệ để thanh toán');
+        }
 
         const wallet = await Wallet.findOne({ userId });
         if (!wallet || wallet.balance < amount) throw new Error('Số dư ví không đủ');
@@ -258,16 +300,28 @@ class PaymentService {
         });
 
         // Cập nhật trạng thái payment và booking
-        await Payment.create({
+        const payment = await Payment.create({
             bookingId,
             userId,
             amount,
             paymentMethod: 'wallet',
-            status: 'completed'
+            status: 'completed',
+            bookingType,
+            participantIndex
         });
 
-        booking.status = 'waiting';
-        await booking.save();
+        if (bookingType === 'pickleball') {
+          
+            await PickleballBookingService.updateParticipantPaymentStatus(
+                bookingId,
+                userId,
+                'paid',
+                participantIndex
+            );
+        } else {
+            booking.status = 'waiting';
+            await booking.save();
+        }
 
         return booking;
     }

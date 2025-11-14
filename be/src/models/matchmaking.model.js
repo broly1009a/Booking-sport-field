@@ -7,28 +7,72 @@ const matchmakingSchema = new Schema({
         ref: 'Booking',
         required: [true, "Booking ID is required!"]
     },
-    userId: {
+    fieldId: {
+        type: Schema.Types.ObjectId,
+        ref: 'SportField',
+        required: [true, "Field ID is required!"]
+    },
+    startTime: {
+        type: Date,
+        required: [true, "Start time is required!"]
+    },
+    endTime: {
+        type: Date,
+        required: [true, "End time is required!"]
+    },
+    createdBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: [true, "User ID is required!"]
+        required: [true, "Creator ID is required!"]
     },
-    requiredPlayers: {
+    playerLevel: {
+        type: String,
+        enum: ['beginner', 'intermediate', 'advanced', 'any'],
+        default: 'any'
+    },
+    playStyle: {
+        type: String,
+        enum: ['casual', 'competitive', 'any'],
+        default: 'any'
+    },
+    teamPreference: {
+        type: String,
+        enum: ['any', 'male', 'female', 'mixed'],
+        default: 'any'
+    },
+    availableSlots: {
         type: Number,
-        required: true,
-        min: [1, "At least 1 player is needed for matchmaking"]
+        min: 1,
+        max: 4,
+        required: true
     },
-    representativeId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    },
-    joinedPlayers: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
+    interestedPlayers: [{
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted', 'rejected'],
+            default: 'pending'
+        },
+        requestedAt: {
+            type: Date,
+            default: Date.now
+        }
     }],
     status: {
         type: String,
-        enum: ['open', 'full', 'cancelled'],
+        enum: ['open', 'full', 'cancelled', 'completed'],
         default: 'open'
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    deadline: {
+        type: Date,
+        required: true
     }
 }, { timestamps: true });
 

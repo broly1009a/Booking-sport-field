@@ -7,10 +7,24 @@ const bookingSchema = new Schema({
         ref: 'User',
         required: [true, "User ID is required!"]
     },
+    bookingType: {
+        type: String,
+        enum: ['private', 'shared'],
+        default: 'private'
+    },
     fieldId: {
         type: Schema.Types.ObjectId,
         ref: 'SportField',
         required: [true, "Field ID is required!"]
+    },
+    requiredSlots: {
+        type: Number,
+        default: 1,
+        min: 1
+    },
+    maxParticipants: {
+        type: Number,
+        default: 4
     },
     startTime: {
         type: Date,
@@ -46,7 +60,33 @@ const bookingSchema = new Schema({
     notes: {
         type: String,
         default: ''
-    }
+    },
+    joinDeadline: {
+        type: Date
+    },
+    pricePerSlot: {
+        type: Number,
+        min: 0
+    },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    participantDetails: [{
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        paymentStatus: {
+            type: String,
+            enum: ['pending', 'paid', 'refunded'],
+            default: 'pending'
+        },
+        joinedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 }, { timestamps: true });
 module.exports = mongoose.model("Booking", bookingSchema);
 
