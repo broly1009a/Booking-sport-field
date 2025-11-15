@@ -240,6 +240,21 @@ class UserController {
             next(error);
         }
     };
+
+    /**
+    * method: POST
+    * router(/api/v1/user/sync-emails)
+    * author: Copilot
+    * description: Đồng bộ email từ Firebase cho tất cả user chưa có email
+    */
+    syncEmailsFromFirebase = async (req, res, next) => {
+        try {
+            const result = await UserService.syncEmailsFromFirebase();
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    };
 }
 
 module.exports = new UserController;

@@ -56,6 +56,20 @@ const userSchema = new Schema({
         type: String,
         required: [true, "Số điện thoại là bắt buộc."],
     },
+    email: {
+        type: String,
+        required: [true, "Email là bắt buộc."],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        validate: {
+            validator: function (value) {
+                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return regex.test(value);
+            },
+            message: "Email không hợp lệ."
+        }
+    },
     gender: {
         type: String,
         enum: {

@@ -26,6 +26,7 @@ router.patch('/update-account-info/:id', UserController.updateAccountInfo);
 router.get('/get-account-email/:firebaseUID', UserController.getEmailByFirebaseUID);
 router.patch('/disable-account/:firebaseUID', UserController.disableAccount);
 router.patch('/enable-account/:firebaseUID', UserController.enableAccount);
+router.post('/sync-emails', UserController.syncEmailsFromFirebase);
 
 router.get('/:id', UserController.getUserById);
 

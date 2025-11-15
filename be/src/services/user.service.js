@@ -44,6 +44,7 @@ class UserService {
                 lname,
                 dob,
                 phoneNumber,
+                email,
                 gender,
                 role,
                 firebaseUID: userRecord.uid,
@@ -240,6 +241,7 @@ class UserService {
                 lname,
                 dob,
                 phoneNumber,
+                email,
                 gender,
                 role,
                 restaurant,
@@ -339,6 +341,57 @@ class UserService {
             accountStatus
         };
     };
+
+        /**
+        * Đồng bộ email từ Firebase cho tất cả user chưa có email
+        */
+        syncEmailsFromFirebase = async () => {
+            try {
+                // Lấy tất cả user chưa có email hoặc email null
+                const usersWithoutEmail = await User.find({
+                    $or: [
+                        { email: { $exists: false } },
+                        { email: null },
+                        { email: '' }
+                    ]
+                });
+
+                console.log(`[Sync Email] Tìm thấy ${usersWithoutEmail.length} user chưa có email`);
+
+                let successCount = 0;
+                let failCount = 0;
+
+                for (const user of usersWithoutEmail) {
+                    try {
+                        // Lấy email từ Firebase
+                        const firebaseUser = await admin.auth().getUser(user.firebaseUID);
+                        
+                        if (firebaseUser.email) {
+                            // Cập nhật email vào MongoDB
+                            user.email = firebaseUser.email;
+                            await user.save();
+                            successCount++;
+                            console.log(`✓ Đã sync email cho user ${user.firebaseUID}: ${firebaseUser.email}`);
+                        } else {
+                            failCount++;
+                            console.log(`✗ User ${user.firebaseUID} không có email trên Firebase`);
+                        }
+                    } catch (error) {
+                        failCount++;
+                        console.error(`✗ Lỗi sync email cho user ${user.firebaseUID}:`, error.message);
+                    }
+                }
+
+                return {
+                    success: true,
+                    message: `Đã đồng bộ ${successCount}/${usersWithoutEmail.length} user. Thất bại: ${failCount}`,
+                    data: { successCount, failCount, total: usersWithoutEmail.length }
+                };
+            } catch (error) {
+                console.error('[Sync Email] Lỗi:', error);
+                throw { message: 'Lỗi khi đồng bộ email: ' + error.message, status: 500 };
+            }
+        };
 
         /**
         * Lấy danh sách staff chưa được gán vào cụm sân nào

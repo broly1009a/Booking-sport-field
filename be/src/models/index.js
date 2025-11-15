@@ -11,6 +11,8 @@ const ConsumablePurchase = require('./consumablePurchase.model');
 const EquipmentRental = require('./equipmentRental.model');
 const Blacklist = require('./blacklist.model');
 const FieldComplex = require('./fieldComplex.model');
+const Notification = require('./notification.model');
+
 module.exports = {
     Guest,
     User,
@@ -24,5 +26,6 @@ module.exports = {
     Maintenance,
     ConsumablePurchase,
     EquipmentRental,
-    Blacklist
+    Blacklist,
+    Notification
 };

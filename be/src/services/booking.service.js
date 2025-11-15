@@ -6,6 +6,7 @@ const Schedule = require('../models/schedule.model');
 const ConsumablePurchase = require('../models/consumablePurchase.model');
 const EquipmentRental = require('../models/equipmentRental.model');
 const mongoose = require('mongoose');
+const notificationService = require('./notification.service');
 class BookingService {
     async createBooking(bookingData) {
         const { startTime, endTime, fieldId, userId, participants = [], customerName, phoneNumber } = bookingData;
@@ -54,6 +55,21 @@ class BookingService {
         // Nếu mọi thứ hợp lệ, tạo booking
         const booking = await new bookingModel(bookingData).save();
 
+        // Gửi thông báo cho chủ sân và nhân viên
+        try {
+            const populatedField = await SportField.findById(fieldId).populate('fieldComplexId');
+            if (populatedField && populatedField.fieldComplexId) {
+                await notificationService.notifyFieldComplex(
+                    populatedField.fieldComplexId._id,
+                    '🎉 Booking mới',
+                    `Sân ${populatedField.name} vừa được đặt từ ${start.toLocaleString('vi-VN')} đến ${end.toLocaleString('vi-VN')}. Khách hàng: ${customerName || user.fname + ' ' + user.lname}, SĐT: ${phoneNumber || user.phoneNumber}`
+                );
+            }
+        } catch (notifyError) {
+            console.error('Lỗi khi gửi thông báo:', notifyError);
+            // Không throw error để không ảnh hưởng đến quá trình tạo booking
+        }
+
         // Cập nhật trạng thái các timeSlot trong Schedule thành 'booked'
         // Tìm schedule theo fieldId và ngày (00:00 UTC)
         const bookingDate = new Date(startTime);
@@ -101,6 +117,20 @@ class BookingService {
 
         if (bookingData.status === 'cancelled' && updatedBooking) {
             await this.releaseScheduleSlots(updatedBooking);
+            
+            // Gửi thông báo khi booking bị hủy
+            try {
+                const populatedField = await SportField.findById(updatedBooking.fieldId._id).populate('fieldComplexId');
+                if (populatedField && populatedField.fieldComplexId) {
+                    await notificationService.notifyFieldComplex(
+                        populatedField.fieldComplexId._id,
+                        '❌ Booking bị hủy',
+                        `Booking sân ${populatedField.name} lúc ${updatedBooking.startTime.toLocaleString('vi-VN')} đã bị hủy.`
+                    );
+                }
+            } catch (notifyError) {
+                console.error('Lỗi khi gửi thông báo hủy booking:', notifyError);
+            }
         }
 
         return updatedBooking;

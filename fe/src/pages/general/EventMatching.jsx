@@ -352,7 +352,7 @@ const EventMatching = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <ScheduleIcon fontSize="small" color="action" />
                       <Typography variant="body2">
-                        {dayjs(event.startTime).format('DD/MM/YYYY HH:mm')}
+                        {dayjs(event.startTime).subtract(7, 'hour').format('DD/MM/YYYY HH:mm')}
                       </Typography>
                     </Box>
 
@@ -391,7 +391,7 @@ const EventMatching = () => {
                     )}
 
                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-                      Deadline: {dayjs(event.deadline).format('DD/MM/YYYY HH:mm')}
+                      Deadline: {dayjs(event.deadline).subtract(7, 'hour').format('DD/MM/YYYY HH:mm')}
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -501,12 +501,12 @@ const EventMatching = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Thời gian:</strong> {dayjs(selectedEvent.startTime).format('DD/MM/YYYY HH:mm')}
+                    <strong>Thời gian:</strong> {dayjs(selectedEvent.startTime).subtract(7, 'hour').format('DD/MM/YYYY HH:mm')}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Deadline:</strong> {dayjs(selectedEvent.deadline).format('DD/MM/YYYY HH:mm')}
+                    <strong>Deadline:</strong> {dayjs(selectedEvent.deadline).subtract(7, 'hour').format('DD/MM/YYYY HH:mm')}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>

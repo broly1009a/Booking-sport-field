@@ -3,6 +3,26 @@ const Event = require('../models/event.model');
 const FieldComplex = require('../models/fieldComplex.model');
 const { sendEventNotification } = require('../configs/nodemailer.config');
 
+// Helper: Chuyển đổi thời gian Việt Nam sang UTC
+// Việt Nam là UTC+7, nên để lưu đúng trong DB (UTC), cần trừ 7 giờ
+function toUTC(vietnamDate) {
+    const date = new Date(vietnamDate);
+    // Chuyển sang UTC bằng cách trừ 7 giờ
+    return new Date(date.getTime() - 7 * 60 * 60 * 1000);
+}
+
+// Helper: Chuyển đổi UTC sang thời gian Việt Nam để hiển thị
+function toVietnamTime(utcDate) {
+    const date = new Date(utcDate);
+    // Thêm 7 giờ để hiển thị theo giờ Việt Nam
+    return new Date(date.getTime() + 7 * 60 * 60 * 1000);
+}
+
+// Helper: Lấy thời gian hiện tại theo múi giờ Việt Nam
+function nowInVietnam() {
+    return new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
+}
+
 // Helper: Gửi email thông báo
 async function sendEventEmailNotification(event, type, additionalInfo = {}) {
     try {
@@ -57,7 +77,7 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                             <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #28a745;">
                                 <p style="margin: 5px 0;"><strong>Tên event:</strong> ${event.name}</p>
                                 <p style="margin: 5px 0;"><strong>Mô tả:</strong> ${event.description}</p>
-                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${new Date(event.startTime).toLocaleString('vi-VN')} - ${new Date(event.endTime).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${toVietnamTime(event.startTime).toLocaleString('vi-VN')} - ${toVietnamTime(event.endTime).toLocaleString('vi-VN')}</p>
                                 <p style="margin: 5px 0;"><strong>Số người tham gia:</strong> ${acceptedPlayers.length + 1}/${event.maxPlayers}</p>
                                 <p style="margin: 5px 0;"><strong>Sân:</strong> ${event.fieldId?.name || 'N/A'} - ${event.fieldId?.location || ''}</p>
                                 <p style="margin: 5px 0;"><strong>Giá ước tính/người:</strong> ${event.estimatedPrice?.toLocaleString('vi-VN')}đ</p>
@@ -79,7 +99,7 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                                 <p style="margin: 5px 0;"><strong>Loại:</strong> Event Matching - Ghép đội</p>
                                 <p style="margin: 5px 0;"><strong>Tên event:</strong> ${event.name}</p>
                                 <p style="margin: 5px 0;"><strong>Sân:</strong> ${event.fieldId?.name || 'N/A'}</p>
-                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${new Date(event.startTime).toLocaleString('vi-VN')} - ${new Date(event.endTime).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${toVietnamTime(event.startTime).toLocaleString('vi-VN')} - ${toVietnamTime(event.endTime).toLocaleString('vi-VN')}</p>
                                 <p style="margin: 5px 0;"><strong>Số người:</strong> ${acceptedPlayers.length + 1} người</p>
                                 <p style="margin: 5px 0;"><strong>Người tạo:</strong> ${event.createdBy?.fname} ${event.createdBy?.lname} - ${event.createdBy?.phoneNumber || 'N/A'}</p>
                                 <p style="margin: 5px 0;"><strong>Giảm giá:</strong> ${event.discountPercent}%</p>
@@ -117,7 +137,7 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                                 <p style="margin: 5px 0;"><strong>Tên event:</strong> ${event.name}</p>
                                 <p style="margin: 5px 0;"><strong>Lý do:</strong> Không đủ số lượng người tham gia tối thiểu</p>
                                 <p style="margin: 5px 0;"><strong>Số người đã có:</strong> ${additionalInfo.acceptedCount}/${event.minPlayers}</p>
-                                <p style="margin: 5px 0;"><strong>Thời gian dự kiến:</strong> ${new Date(event.startTime).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Thời gian dự kiến:</strong> ${toVietnamTime(event.startTime).toLocaleString('vi-VN')}</p>
                             </div>
                             <p style="text-align: center; color: #666; margin-top: 20px;">
                                 Rất tiếc về sự bất tiện này. Bạn có thể tạo event mới hoặc tham gia event khác! 😊
@@ -137,7 +157,7 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                             <div style="margin: 20px 0; padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545;">
                                 <p style="margin: 5px 0;"><strong>Tên event:</strong> ${event.name}</p>
                                 <p style="margin: 5px 0;"><strong>Sân:</strong> ${event.fieldId?.name || 'N/A'}</p>
-                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${new Date(event.startTime).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Thời gian:</strong> ${toVietnamTime(event.startTime).toLocaleString('vi-VN')}</p>
                                 <p style="margin: 5px 0;"><strong>Lý do:</strong> Thiếu người (${additionalInfo.acceptedCount}/${event.minPlayers})</p>
                             </div>
                             <p style="text-align: center; color: #666; margin-top: 20px;">
@@ -176,7 +196,7 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
                                 <p style="margin: 5px 0;"><strong>Số người hiện tại:</strong> ${additionalInfo.acceptedCount}/${event.minPlayers}</p>
                                 <p style="margin: 5px 0; color: #dc3545;"><strong>Còn thiếu:</strong> ${event.minPlayers - additionalInfo.acceptedCount} người</p>
                                 <p style="margin: 5px 0;"><strong>Thời gian còn lại:</strong> ${additionalInfo.timeLeft}</p>
-                                <p style="margin: 5px 0;"><strong>Deadline:</strong> ${new Date(event.deadline).toLocaleString('vi-VN')}</p>
+                                <p style="margin: 5px 0;"><strong>Deadline:</strong> ${toVietnamTime(event.deadline).toLocaleString('vi-VN')}</p>
                             </div>
                             <p style="text-align: center; color: #666; margin-top: 20px;">
                                 Hãy mời thêm bạn bè hoặc giảm số người tối thiểu (minPlayers) để event không bị hủy!
@@ -207,10 +227,10 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
 // 1. Kiểm tra và xử lý event đã qua deadline
 async function checkEventDeadlines() {
     try {
-        console.log('[Event Cron] 🔍 Kiểm tra event deadlines...', new Date());
+        // console.log('[Event Cron] 🔍 Kiểm tra event deadlines...', new Date());
         
-        const now = new Date();
-        
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
+        console.log('[Event Cron] 🔍 Kiểm tra event deadlines...', now);
         // Tìm các event đã qua deadline nhưng vẫn 'open'
         const expiredEvents = await Event.find({
             status: 'open',
@@ -266,9 +286,10 @@ async function checkEventDeadlines() {
 // 2. Gửi cảnh báo trước deadline (2 giờ trước)
 async function sendDeadlineWarnings() {
     try {
-        console.log('[Event Cron] ⚠️ Kiểm tra event cần cảnh báo...', new Date());
+        // console.log('[Event Cron] ⚠️ Kiểm tra event cần cảnh báo...', new Date());
         
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
+        console.log('[Event Cron] ⚠️ Kiểm tra event cần cảnh báo...', now); 
         const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
         
         // Tìm event sắp đến deadline (trong vòng 2 giờ) và vẫn thiếu người
@@ -282,7 +303,15 @@ async function sendDeadlineWarnings() {
         .populate('createdBy', 'fname lname email phoneNumber role')
         .populate({
             path: 'fieldId',
-            select: 'name location pricePerHour complex'
+            select: 'name location pricePerHour complex',
+            populate: {
+                path: 'complex',
+                select: 'name owner staffs',
+                populate: [
+                    { path: 'owner', select: 'email fname lname role' },
+                    { path: 'staffs', select: 'email fname lname role' }
+                ]
+            }
         })
         .populate('interestedPlayers.userId', 'fname lname email phoneNumber role');
         
@@ -317,10 +346,10 @@ async function sendDeadlineWarnings() {
 // 3. Tự động chuyển event sang completed sau khi kết thúc
 async function completeFinishedEvents() {
     try {
-        console.log('[Event Cron] 🏁 Kiểm tra event đã kết thúc...', new Date());
+        // console.log('[Event Cron] 🏁 Kiểm tra event đã kết thúc...', new Date());
         
-        const now = new Date();
-        
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
+        console.log('[Event Cron] 🏁 Kiểm tra event đã kết thúc...', now);
         // Tìm event đã qua endTime nhưng vẫn 'confirmed'
         const finishedEvents = await Event.find({
             status: 'confirmed',
@@ -344,9 +373,9 @@ async function completeFinishedEvents() {
 // 4. Xóa event cũ đã cancelled hoặc completed (sau 7 ngày)
 async function cleanupOldEvents() {
     try {
-        console.log('[Event Cron] 🧹 Dọn dẹp event cũ...', new Date());
+        console.log('[Event Cron] 🧹 Dọon dẹp event cũ...', new Date());
         
-        const sevenDaysAgo = new Date();
+        const sevenDaysAgo = new Date(Date.now() + 7 * 60 * 60 * 1000);
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
         // Xóa event đã cancelled/completed cách đây 7 ngày
