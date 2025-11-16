@@ -98,6 +98,12 @@ const UserService = {
         return handleApiCall(() =>
             api.get(`/user/${id}`)
         );
+    },
+    // router.post('/sync-emails', UserController.syncEmailsFromFirebase);
+    syncEmailsFromFirebase: async () => {
+        return handleApiCall(() =>
+            api.post('/user/sync-emails')
+        );
     }
 }
 
