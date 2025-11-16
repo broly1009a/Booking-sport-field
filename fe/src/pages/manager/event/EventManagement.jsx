@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, Table, TableBody, TableCell, TableHead, TableRow,
-  IconButton, Tooltip, Avatar, useMediaQuery
+  IconButton, Tooltip, Avatar, useMediaQuery, TextField, InputAdornment, MenuItem,
+  Pagination
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -11,7 +12,9 @@ import {
   Cancel as RejectIcon,
   PersonRemove as RemoveIcon,
   SwapHoriz as ConvertIcon,
-  Visibility as ViewIcon
+  Visibility as ViewIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
@@ -22,6 +25,10 @@ const EventManagement = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [openDetail, setOpenDetail] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 6;
   const isMobile = useMediaQuery('(max-width:900px)');
 
   useEffect(() => {
@@ -139,26 +146,107 @@ const EventManagement = () => {
     }
   };
 
+  // Filter and search logic
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.fieldId?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  const paginatedEvents = filteredEvents.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <Box sx={{ p: isMobile ? 2 : 4, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
       <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ mb: 3, fontWeight: 'bold', color: '#1976d2' }}>
         Quản lý sự kiện của tôi
       </Typography>
 
-      {events.length === 0 ? (
+      {/* Search and Filter Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Tìm kiếm theo tên, mô tả, sân..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                select
+                size="small"
+                label="Trạng thái"
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FilterIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              >
+                <MenuItem value="all">Tất cả</MenuItem>
+                <MenuItem value="open">Đang mở</MenuItem>
+                <MenuItem value="full">Đã đủ người</MenuItem>
+                <MenuItem value="confirmed">Đã xác nhận</MenuItem>
+                <MenuItem value="cancelled">Đã hủy</MenuItem>
+                <MenuItem value="completed">Hoàn thành</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Typography variant="body2" color="text.secondary" align={isMobile ? 'left' : 'right'}>
+                {filteredEvents.length} sự kiện
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {filteredEvents.length === 0 ? (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 8 }}>
             <Typography variant="h6" color="text.secondary">
-              Chưa có sự kiện nào
+              {events.length === 0 ? 'Chưa có sự kiện nào' : 'Không tìm thấy sự kiện phù hợp'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Tạo sự kiện mới từ lịch sân
+              {events.length === 0 ? 'Tạo sự kiện mới từ lịch sân' : 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm'}
             </Typography>
           </CardContent>
         </Card>
       ) : (
-        <Grid container spacing={3}>
-          {events.map((event) => {
+        <>
+          <Grid container spacing={3}>
+            {paginatedEvents.map((event) => {
             const acceptedCount = event.interestedPlayers?.filter(p => p.status === 'accepted').length || 0;
             const pendingCount = event.interestedPlayers?.filter(p => p.status === 'pending').length || 0;
 
@@ -244,6 +332,22 @@ const EventManagement = () => {
             );
           })}
         </Grid>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size={isMobile ? 'small' : 'medium'}
+              showFirstButton
+              showLastButton
+            />
+          </Box>
+        )}
+      </>
       )}
 
       {/* Dialog chi tiết event */}

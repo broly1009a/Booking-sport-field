@@ -68,6 +68,43 @@ class FeedbackService {
             ratingPercentages
         };
     }
+
+    async getFeedbackSummaryByComplex(complexId) {
+        const SportField = require('../models/sportField.model');
+        
+        // Lấy tất cả các sân thuộc cụm sân
+        const fields = await SportField.find({ complex: complexId, isdeleted: false }).select('_id').lean();
+        const fieldIds = fields.map(field => field._id);
+
+        // Lấy tất cả feedback của các sân trong cụm
+        const feedbacks = await Feedback.find({ fieldId: { $in: fieldIds } }).lean();
+
+        const totalFeedbacks = feedbacks.length;
+        const ratingCounts = [0, 0, 0, 0, 0];
+        let sumRatings = 0;
+
+        feedbacks.forEach(feedback => {
+            const ratingIndex = feedback.rating - 1;
+            ratingCounts[ratingIndex]++;
+            sumRatings += feedback.rating;
+        });
+
+        const averageRating = totalFeedbacks > 0 ? (sumRatings / totalFeedbacks).toFixed(1) : 0;
+
+        const ratingPercentages = ratingCounts.map((count, index) => ({
+            rating: index + 1,
+            count,
+            percentage: totalFeedbacks > 0 ? ((count / totalFeedbacks) * 100).toFixed(1) : 0
+        }));
+
+        return {
+            complexId,
+            totalFields: fieldIds.length,
+            averageRating: parseFloat(averageRating),
+            totalFeedbacks,
+            ratingPercentages
+        };
+    }
 }
 
 module.exports = new FeedbackService();

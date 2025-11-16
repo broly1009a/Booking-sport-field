@@ -6,9 +6,9 @@ export const scheduleService = {
     return handleApiCall(() => api.get('/schedule'));
   },
 
-  getSchedulesByType: async (typeId, date) => {
+  getSchedulesByComplexId: async (complexId, date) => {
     return handleApiCall(() =>
-      api.get(`/schedule/type/${typeId}/schedules`, { params: { date } })
+      api.get(`/schedule/complex/${complexId}/schedules`, { params: { date } })
     );
   },
 

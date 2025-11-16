@@ -134,9 +134,9 @@ class ScheduleService {
     const updated = await Schedule.findById(schedule._id).populate({ path: 'fieldId', select: '_id name location' });
     return updated;
 }
-async getSchedulesByType(typeId, date) {
-    // Lấy tất cả sân thuộc type
-    const fields = await SportField.find({ type: typeId });
+async getSchedulesByComplexId(fieldComplexId, date) {
+    // Lấy tất cả sân thuộc complex
+    const fields = await SportField.find({ complex: fieldComplexId });
     const fieldIds = fields.map(f => f._id);
 
     // Nếu truyền vào date, lấy đúng ngày đó, không thì lấy hôm nay

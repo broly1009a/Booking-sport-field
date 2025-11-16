@@ -30,7 +30,7 @@ import MatchmakingHistory from './pages/general/MatchmakingHistory';
 import WalletHistory from './pages/general/WalletHistory';
 import AnalyticsDashboard from './pages/manager/statistics/AnalyticsDashboard';
 import Voucher from './pages/general/voucher';
-import Event from './pages/general/Event';
+// import Event from './pages/general/Event';
 import EventDashboard from './pages/manager/event/EventDashboard';
 import About from './pages/general/About';
 import NewsList from './pages/general/newsList';
@@ -51,6 +51,7 @@ import RegisterStaff from './pages/admin/fieldComplex/RegisterStaff';
 import EventManagement from './pages/manager/event/EventManagement';
 import EventSchedule from './pages/manager/event/EventSchedule';
 import EventMatching from './pages/general/EventMatching';
+import FieldComplexList from './pages/general/fieldComplexList';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -92,6 +93,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <SignOut />,
+          </ProtectedRoute>
+        )
+      },
+       {
+        path: "field-complex",
+        element: (
+          <ProtectedRoute>
+            <FieldComplexList />,
           </ProtectedRoute>
         )
       },

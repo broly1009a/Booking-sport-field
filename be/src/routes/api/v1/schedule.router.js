@@ -3,7 +3,7 @@ const router = express.Router();
 const ScheduleController = require('../../../controllers/schedule.controller');
 
 router.get('/', ScheduleController.getAllSchedules);
-router.get('/type/:typeId/schedules', ScheduleController.getSchedulesByType);
+router.get('/complex/:complexId/schedules', ScheduleController.getSchedulesByComplexId);
 router.get('/field/:fieldId', ScheduleController.getSchedulesByFieldId);
 router.patch('/field/:fieldId/update-all-time-slots', ScheduleController.updateAllSchedulesStatusByFieldId);
 router.patch('/:id/update-time-slots', ScheduleController.updateTimeSlotsStatusByBookingAndMaintenance);

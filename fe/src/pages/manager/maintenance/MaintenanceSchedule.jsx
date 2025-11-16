@@ -18,7 +18,7 @@ import { useParams } from "react-router-dom";
 import scheduleService from '../../../services/api/scheduleService';
 import MaintenanceDialog from '../../../components/dialogs/MaintenanceDialog';
 const MaintenanceSchedule = () => {
-    const { typeId } = useParams(); 
+    const { complexId } = useParams(); 
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [sportFields, setSportFields] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
@@ -31,9 +31,9 @@ const MaintenanceSchedule = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Lấy lịch theo typeId và ngày
-        if (!typeId) return;
-        const res = await scheduleService.getSchedulesByType(typeId, selectedDate.format('YYYY-MM-DD'));
+        // Lấy lịch theo complexId và ngày
+        if (!complexId) return;
+        const res = await scheduleService.getSchedulesByComplexId(complexId, selectedDate.format('YYYY-MM-DD'));
         if (res && res.data) {
           setSportFields(res.data.sportFields || []);
           setTimeSlots(res.data.timeSlots || []);
@@ -44,7 +44,7 @@ const MaintenanceSchedule = () => {
       }
     };
     fetchData();
-  }, [typeId, selectedDate]);
+  }, [complexId, selectedDate]);
 
   useEffect(() => {
     setSelectedSlots([]);
@@ -66,11 +66,13 @@ const MaintenanceSchedule = () => {
       const end = new Date(slot.endTime);
       if (slotDateTime >= start && slotDateTime < end) {
         if (slot.status === 'maintenance') return 'maintenance';
+        if (slot.status === 'event') return 'event'; // Thêm trạng thái event
         if (slot.status === 'booked') return 'booked';
       }
     }
     return 'available';
   };
+
 
   const handleSlotClick = (fieldId, slotTime) => {
     const status = getSlotStatus(fieldId, slotTime);
@@ -129,7 +131,7 @@ const MaintenanceSchedule = () => {
     toast.success('Đặt lịch bảo trì thành công!');
     // reload lại lịch
     const fetchData = async () => {
-      const res = await scheduleService.getSchedulesByType('', selectedDate.format('YYYY-MM-DD'));
+      const res = await scheduleService.getSchedulesByComplexId(complexId, selectedDate.format('YYYY-MM-DD'));
       if (res && res.data) {
         setSportFields(res.data.sportFields || []);
         setTimeSlots(res.data.timeSlots || []);
@@ -207,10 +209,14 @@ const MaintenanceSchedule = () => {
           <Box sx={{ width: 20, height: 20, bgcolor: '#9e9e9e', mr: 1 }} />
           <Typography fontSize={isMobile ? 12 : 14}>Bảo trì</Typography>
         </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                  <Box sx={{ width: 20, height: 20, bgcolor: '#f44336', mr: 1 }} />
-                  <Typography fontSize={isMobile ? 12 : 14}>Đã đặt</Typography>
-                </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+          <Box sx={{ width: 20, height: 20, bgcolor: '#fff59d', mr: 1 }} />
+          <Typography fontSize={isMobile ? 12 : 14}>Sự kiện</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+          <Box sx={{ width: 20, height: 20, bgcolor: '#f44336', mr: 1 }} />
+          <Typography fontSize={isMobile ? 12 : 14}>Đã đặt</Typography>
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Box sx={{
             width: 20,
@@ -292,6 +298,7 @@ const MaintenanceSchedule = () => {
                   );
                   let cellBg;
                   if (status === 'maintenance') cellBg = '#9e9e9e';
+                  else if (status === 'event') cellBg = '#fff59d';
                   else if (status === 'booked') cellBg =  '#f44336'
                   else if (status === 'past') cellBg = '#e0e0e0';
                   else if (isSelected) cellBg = '#4caf50';
@@ -313,7 +320,8 @@ const MaintenanceSchedule = () => {
                       onClick={() => handleSlotClick(field._id, time)}
                     >
                       {status === 'maintenance' && <LockIcon sx={{ color: 'white', fontSize: isMobile ? 16 : 20 }} />}
-                        {status === 'booked' && <StarIcon sx={{ color: 'yellow', fontSize: isMobile ? 16 : 20 }} />}
+                      {status === 'event' && <StarIcon sx={{ color: '#fff59d', fontSize: isMobile ? 16 : 20 }} />}
+                      {status === 'booked' && <StarIcon sx={{ color: 'yellow', fontSize: isMobile ? 16 : 20 }} />}
                       {status === 'past' && <CloseIcon sx={{ color: '#bdbdbd', fontSize: isMobile ? 16 : 20 }} />}
                     </TableCell>
                   );

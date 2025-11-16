@@ -10,5 +10,6 @@ router.get('/get_feedbacks_by_user/:userId', FeedbackController.getFeedbacksByUs
 router.put('/update_feedback/:feedbackId', FeedbackController.updateFeedback);
 router.delete('/delete_feedback/:feedbackId', FeedbackController.deleteFeedback);
 router.get('/feedback_summary/:productId', FeedbackController.getFeedbackSummary);
+router.get('/feedback_summary_by_complex/:complexId', FeedbackController.getFeedbackSummaryByComplex);
 
 module.exports = router;

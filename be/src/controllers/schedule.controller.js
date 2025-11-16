@@ -89,11 +89,11 @@ class ScheduleController {
             next(error);
         }
     }
-    async getSchedulesByType(req, res, next) {
+    async getSchedulesByComplexId(req, res, next) {
     try {
-        const { typeId } = req.params;
+        const { complexId } = req.params;
         const { date } = req.query;
-        const data = await ScheduleService.getSchedulesByType(typeId, date);
+        const data = await ScheduleService.getSchedulesByComplexId(complexId, date);
         res.status(200).json({ success: true, data });
     } catch (error) {
         next(error);

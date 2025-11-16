@@ -19,5 +19,8 @@ export const feedbackService = {
         handleApiCall(() => api.delete(`/feedback/delete_feedback/${feedbackId}`)),
     getFeedbackSummary: (productId) =>
         handleApiCall(() => api.get(`/feedback/feedback_summary/${productId}`)),
+    getFeedbackSummaryByComplex: (complexId) =>
+        handleApiCall(() => api.get(`/feedback/feedback_summary_by_complex/${complexId}`)),
 };
 
+export default feedbackService;

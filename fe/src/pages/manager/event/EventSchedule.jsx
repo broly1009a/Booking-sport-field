@@ -18,7 +18,7 @@ import { useParams } from "react-router-dom";
 import scheduleService from '../../../services/api/scheduleService';
 import EventDialog from '../../../components/dialogs/EventDialog';
 const EventSchedule = () => {
-    const { typeId } = useParams(); 
+    const { complexId } = useParams(); 
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [sportFields, setSportFields] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
@@ -31,9 +31,9 @@ const EventSchedule = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Lấy lịch theo typeId và ngày
-        if (!typeId) return;
-        const res = await scheduleService.getSchedulesByType(typeId, selectedDate.format('YYYY-MM-DD'));
+        // Lấy lịch theo complexId và ngày
+        if (!complexId) return;
+        const res = await scheduleService.getSchedulesByComplexId(complexId, selectedDate.format('YYYY-MM-DD'));
         if (res && res.data) {
           setSportFields(res.data.sportFields || []);
           setTimeSlots(res.data.timeSlots || []);
@@ -44,7 +44,7 @@ const EventSchedule = () => {
       }
     };
     fetchData();
-  }, [typeId, selectedDate]);
+  }, [complexId, selectedDate]);
 
   useEffect(() => {
     setSelectedSlots([]);
@@ -130,7 +130,7 @@ const EventSchedule = () => {
     toast.success('Đặt lịch sự kiện thành công!');
     // reload lại lịch
     const fetchData = async () => {
-      const res = await scheduleService.getSchedulesByType(typeId, selectedDate.format('YYYY-MM-DD'));
+      const res = await scheduleService.getSchedulesByComplexId(complexId, selectedDate.format('YYYY-MM-DD'));
       if (res && res.data) {
         setSportFields(res.data.sportFields || []);
         setTimeSlots(res.data.timeSlots || []);
