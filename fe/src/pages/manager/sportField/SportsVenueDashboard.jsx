@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { FaSort, FaFilter, FaSearch, FaEdit, FaTrash, FaWifi, FaParking, FaShower, FaRestroom, FaChair } from "react-icons/fa";
-import { MdSportsSoccer, MdSportsBasketball, MdSportsVolleyball } from "react-icons/md";
+import { MdSportsSoccer, MdSportsBasketball, MdSportsVolleyball, MdEvent } from "react-icons/md";
 import CreateVenue from "./CreateVenue";
 import UpdateVenue from "./UpdateVenue";
 import sportFieldService from '../../../services/api/sportFieldService';
@@ -313,6 +313,13 @@ const SportsVenueDashboard = () => {
                           }}
                         >
                           <MdSportsSoccer className="h-5 w-5" />
+                        </button>
+                        <button className="text-gray-600 hover:text-green-900"
+                          onClick={() => {
+                            navigate(`/manager/event-schedule/${venue.type._id}`);
+                          }}
+                        >
+                          <MdEvent className="h-5 w-5" />
                         </button>
                       </div>
                     </td>
