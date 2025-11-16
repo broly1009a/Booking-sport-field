@@ -2,7 +2,8 @@ const fieldComplexService = require('../services/fieldComplex.service');
 
 const createFieldComplex = async (req, res) => {
     try {
-        const fieldComplex = await fieldComplexService.createFieldComplex(req.body);
+        const imageFiles = req.files || [];
+        const fieldComplex = await fieldComplexService.createFieldComplex(req.body, imageFiles);
         res.status(201).json(fieldComplex);
     } catch (err) {
         res.status(400).json({ error: err.message });
@@ -30,7 +31,8 @@ const getFieldComplexById = async (req, res) => {
 
 const updateFieldComplex = async (req, res) => {
     try {
-        const complex = await fieldComplexService.updateFieldComplex(req.params.id, req.body);
+        const imageFiles = req.files || [];
+        const complex = await fieldComplexService.updateFieldComplex(req.params.id, req.body, imageFiles);
         if (!complex) return res.status(404).json({ error: 'Not found' });
         res.json(complex);
     } catch (err) {

@@ -2,9 +2,35 @@ const FieldComplex = require('../models/fieldComplex.model');
 const SportField = require('../models/sportField.model');
 const { User } = require('../models/index');
 const admin = require('../configs/firebaseAdmin');
+const cloudinary = require('../configs/cloudinary.config');
+const { v4: uuidv4 } = require('uuid');
+
 class FieldComplexService {
-    async createFieldComplex(data) {
-        const fieldComplex = new FieldComplex(data);
+    async createFieldComplex(data, imageFiles = []) {
+        let imageUrls = [];
+        if (imageFiles.length > 0) {
+            const uploadPromises = imageFiles.map(file =>
+                new Promise((resolve, reject) => {
+                    cloudinary.uploader.upload_stream(
+                        {
+                            folder: 'field_complexes',
+                            public_id: `field_complex_${uuidv4()}`,
+                        },
+                        (error, result) => {
+                            if (error) return reject(new Error(`Lỗi khi tải lên Cloudinary: ${error.message}`));
+                            resolve(result);
+                        }
+                    ).end(file.buffer);
+                })
+            );
+            const results = await Promise.all(uploadPromises);
+            imageUrls = results.map(r => r.secure_url);
+        }
+        
+        const fieldComplex = new FieldComplex({
+            ...data,
+            images: imageUrls.length > 0 ? imageUrls : data.images || []
+        });
         return await fieldComplex.save();
     }
 
@@ -99,7 +125,31 @@ class FieldComplexService {
         };
     }
 
-    async updateFieldComplex(id, data) {
+    async updateFieldComplex(id, data, imageFiles = []) {
+        let imageUrls = [];
+        if (imageFiles.length > 0) {
+            const uploadPromises = imageFiles.map(file =>
+                new Promise((resolve, reject) => {
+                    cloudinary.uploader.upload_stream(
+                        {
+                            folder: 'field_complexes',
+                            public_id: `field_complex_${uuidv4()}`,
+                        },
+                        (error, result) => {
+                            if (error) return reject(new Error(`Lỗi khi tải lên Cloudinary: ${error.message}`));
+                            resolve(result);
+                        }
+                    ).end(file.buffer);
+                })
+            );
+            const results = await Promise.all(uploadPromises);
+            imageUrls = results.map(r => r.secure_url);
+        }
+
+        if (imageUrls.length > 0) {
+            data.images = imageUrls;
+        }
+        
         return await FieldComplex.findByIdAndUpdate(id, data, { new: true });
     }
 
