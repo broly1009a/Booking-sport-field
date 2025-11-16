@@ -54,6 +54,14 @@ const ManagerLayout = () => {
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
+              <ListItemButton component={Link} to="manager/event-management">
+                <ListItemIcon sx={{ color: 'white' }}>
+                  <Event />
+                </ListItemIcon>
+                <ListItemText primary="Quản lí sự kiện" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
               <ListItemButton component={Link} to="manager/field-complex-list">
                 <ListItemIcon sx={{ color: 'white' }}><GiChampions /></ListItemIcon>
                 <ListItemText primary="Cụm sân" />
@@ -72,7 +80,7 @@ const ManagerLayout = () => {
                 <ListItemText primary="Sân Thể Thao" />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding>
+            {/* <ListItem disablePadding>
               <ListItemButton component={Link} to="manager/equipment-list">
                 <ListItemIcon sx={{ color: 'white' }}><Inventory /></ListItemIcon>
                 <ListItemText primary="Thiết Bị" />
@@ -83,7 +91,7 @@ const ManagerLayout = () => {
                 <ListItemIcon sx={{ color: 'white' }}><Inventory /></ListItemIcon>
                 <ListItemText primary="Vật Tư Tiêu Hao" />
               </ListItemButton>
-            </ListItem>
+            </ListItem> */}
             <ListItem disablePadding>
               <ListItemButton component={Link} to="manager/new-list">
                 <ListItemIcon sx={{ color: 'white' }}><Newspaper /></ListItemIcon>
