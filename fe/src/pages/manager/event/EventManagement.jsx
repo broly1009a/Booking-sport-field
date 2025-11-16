@@ -19,6 +19,7 @@ import {
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { eventService } from '../../../services/api/eventService';
+import { walletService } from '../../../services/api/walletService';
 
 const EventManagement = () => {
   const [events, setEvents] = useState([]);
@@ -73,8 +74,29 @@ const EventManagement = () => {
   const handleRejectPlayer = async (eventId, playerId) => {
     setLoading(true);
     try {
+      // Lấy thông tin event để biết giá
+      const event = events.find(e => e._id === eventId) || selectedEvent;
+      
       await eventService.rejectPlayer(eventId, playerId);
       toast.success('Đã từ chối người chơi');
+      
+      // Hoàn tiền nếu người chơi đã thanh toán
+      if (event?.estimatedPrice) {
+        try {
+          const refundData = {
+            userId: playerId,
+            amount: event.estimatedPrice,
+            eventId: eventId,
+            description: `Hoàn tiền do bị từ chối tham gia sự kiện "${event.name}"`
+          };
+          await walletService.refundToWallet(refundData);
+          toast.success('Đã hoàn tiền cho người chơi');
+        } catch (refundError) {
+          console.error('Lỗi hoàn tiền:', refundError);
+          // Vẫn tiếp tục vì đã từ chối thành công
+        }
+      }
+      
       fetchMyEvents();
       if (selectedEvent) handleViewDetail(eventId);
     } catch (error) {

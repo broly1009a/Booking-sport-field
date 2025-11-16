@@ -46,10 +46,10 @@ const EquipmentFormModel = ({ isOpen, onClose, onSubmit, initialData, sportField
         quantity: 0,
         pricePerUnit: 0,
         status: "available",
-        sportField: [],
+        sportField: sportFields.map(f => f._id), // Tự động chọn tất cả sân
       });
     }
-  }, [initialData]);
+  }, [initialData, sportFields]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -148,7 +148,7 @@ const EquipmentFormModel = ({ isOpen, onClose, onSubmit, initialData, sportField
             renderInput={(params) => <TextField {...params} label="Sân áp dụng" size="small" variant="outlined" />}
           />
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-            Lưu ý: Vui lòng kiểm tra kỹ thông tin trước khi lưu.
+            Mặc định: Áp dụng cho tất cả sân. Bạn có thể bỏ chọn hoặc thêm sân theo nhu cầu.
           </Typography>
         </Box>
       </DialogContent>

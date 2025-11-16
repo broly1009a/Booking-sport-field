@@ -28,11 +28,11 @@ import { paymentService } from '../../services/api/paymentService';
 import consumableService from '../../services/api/consumableService';
 import equipmentService from '../../services/api/equipmentService';
 import { useAuth } from '../../contexts/authContext';
-import PayByWalletButton from '../buttons/PayByWalletButton';
 import bookingService from '../../services/api/bookingService';
 import { useNavigate } from 'react-router-dom';
+
 export default function BookingDialog({ open, onClose, selectedSlots, sportField, userId, onConfirm }) {
- console.log('BookingDialog props:' ,sportField);
+  console.log('BookingDialog props:', sportField);
   const [note, setNote] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [openNotification, setOpenNotification] = useState(false);
@@ -42,9 +42,8 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
   const { currentUser } = useAuth();
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [createdBookingId, setCreatedBookingId] = useState(null);
   const navigate = useNavigate();
-const [createdBookingData, setCreatedBookingData] = useState(null);
+
   useEffect(() => {
     const fetchItems = async () => {
       if (!sportField?._id) return;
@@ -141,7 +140,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
         note,
         items // gửi lên BE để lưu thiết bị/đồ tiêu thụ nếu cần
       };
- console.log('Rendering BookingDialog with props:', bookingData);
+      console.log('Rendering BookingDialog with props:', bookingData);
       // Gọi API thanh toán online
       const res = await paymentService.createBookingAndPayment(bookingData);
       console.log('Payment response:', res?.data?.vnpUrl);
@@ -164,80 +163,92 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
     setLoading(false);
   };
   const handleCreateBooking = async () => {
-  if (!customerName || !phoneNumber) {
-    setMessageNotification('Vui lòng nhập đầy đủ tên và số điện thoại');
-    setSeverityNotification('error');
-    setOpenNotification(true);
-    return;
-  }
-  setLoading(true);
-  try {
-    const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
-    const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-    const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-    const totalPrice = calculateTotal(); // Tính tổng cả sân và items
-    const items = selectedItems
-      .filter(item => item.quantity > 0)
-      .map(item => ({
-        productId: item._id,
-        type: item.type,
-        name: item.name,
-        price: item.pricePerUnit || item.price,
-        quantity: item.quantity
-      }));
-
-    const bookingData = {
-      userId,
-      fieldId: sportField._id,
-      fieldName: sportField.name,
-      startTime,
-      endTime,
-      status: 'pending',
-      totalPrice,
-      participants: [],
-      customerName,
-      phoneNumber,
-      note,
-      items
-    };
-
-    const res = await bookingService.createBooking(bookingData);
-    if (res?.data?._id) {
-      setCreatedBookingId(res.data._id);
-      setCreatedBookingData(res.data); // Lưu booking data vào state
-      setMessageNotification('Tạo booking thành công, vui lòng thanh toán bằng ví!');
-      setSeverityNotification('success');
-      setOpenNotification(true);
-    } else {
-      setMessageNotification('Tạo booking thất bại!');
+    if (!customerName || !phoneNumber) {
+      setMessageNotification('Vui lòng nhập đầy đủ tên và số điện thoại');
       setSeverityNotification('error');
       setOpenNotification(true);
+      return;
     }
-  } catch (error) {
-    setMessageNotification('Tạo booking thất bại!');
-    setSeverityNotification('error');
-    setOpenNotification(true);
-  }
-  setLoading(false);
-};
-  const handleCancel = async () => {
-    if (createdBookingId) {
-      try {
-        await bookingService.updateBooking(createdBookingId, { status: 'cancelled' });
-        setMessageNotification('Hủy đặt lịch thành công');
-        setSeverityNotification('success');
-        setOpenNotification(true);
-        onClose();
-      } catch (error) {
-        setMessageNotification('Hủy đặt lịch thất bại');
+    setLoading(true);
+    try {
+      const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
+      const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
+      const totalPrice = calculateTotal();
+      const items = selectedItems
+        .filter(item => item.quantity > 0)
+        .map(item => ({
+          productId: item._id,
+          type: item.type,
+          name: item.name,
+          price: item.pricePerUnit || item.price,
+          quantity: item.quantity
+        }));
+
+      const bookingData = {
+        userId,
+        fieldId: sportField._id,
+        fieldName: sportField.name,
+        startTime,
+        endTime,
+        status: 'pending',
+        totalPrice,
+        participants: [],
+        customerName,
+        phoneNumber,
+        note,
+        items
+      };
+
+      // Tạo booking và thanh toán bằng ví trong 1 bước
+      const res = await bookingService.createBooking(bookingData);
+      
+      if (res?.data?._id) {
+        // Thanh toán bằng ví ngay
+        try {
+          await paymentService.payByWallet({
+            bookingId: res.data._id,
+            userId,
+            amount: totalPrice
+          });
+          
+          setMessageNotification('Đặt sân và thanh toán thành công!');
+          setSeverityNotification('success');
+          setOpenNotification(true);
+          
+          if (onConfirm) onConfirm(res.data, selectedItems);
+          onClose();
+          
+          // Chuyển sang trang success
+          setTimeout(() => {
+            navigate(`/booking-success/${res.data._id}`, { 
+              state: { bookingData: { ...res.data, selectedItems } } 
+            });
+          }, 1000);
+        } catch (payError) {
+          // Nếu thanh toán thất bại, hủy booking
+          await bookingService.updateBooking(res.data._id, { status: 'cancelled' });
+          setMessageNotification(payError?.message || 'Thanh toán ví thất bại!');
+          setSeverityNotification('error');
+          setOpenNotification(true);
+        }
+      } else {
+        setMessageNotification('Tạo booking thất bại!');
         setSeverityNotification('error');
         setOpenNotification(true);
       }
-    } else {
-      onClose();
+    } catch (error) {
+      setMessageNotification(error?.message || 'Đặt sân thất bại!');
+      setSeverityNotification('error');
+      setOpenNotification(true);
     }
+    setLoading(false);
   };
- 
+
+  const handleCancel = () => {
+    onClose();
+  };
+
   return (
     <React.Fragment>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -247,7 +258,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
         <DialogContent sx={{ p: 3 }}>
           <Box sx={{ mb: 2, bgcolor: '#e0f2e9', p: 2, borderRadius: 1 }}>
             <Typography variant="h6" sx={{ color: '#388e3c', mb: 2 }}>Thông tin sân</Typography>
-            
+
             {/* Phần hiển thị ảnh */}
             {sportField.images && sportField.images.length > 0 && (
               <Box sx={{ mb: 2, position: 'relative', borderRadius: 2, overflow: 'hidden' }}>
@@ -291,7 +302,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
               <Typography>
                 <strong>Tiện ích:</strong>{' '}
                 {sportField.amenities?.map(amenity => {
-                  switch(amenity) {
+                  switch (amenity) {
                     case 'parking': return 'Bãi đỗ xe';
                     case 'showers': return 'Phòng tắm';
                     case 'wifi': return 'Wifi';
@@ -352,7 +363,7 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                     <TableCell>{(item.pricePerUnit || item.price).toLocaleString()}đ</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <IconButton onClick={() => handleQuantityChange(item._id, -1)} disabled={!!createdBookingId}>
+                        <IconButton onClick={() => handleQuantityChange(item._id, -1)}>
                           <RemoveIcon />
                         </IconButton>
                         <TextField
@@ -363,9 +374,8 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                           onChange={e =>
                             handleQuantityChange(item._id, parseInt(e.target.value) - item.quantity)
                           }
-                          disabled={!!createdBookingId}
                         />
-                        <IconButton onClick={() => handleQuantityChange(item._id, 1)} disabled={!!createdBookingId}>
+                        <IconButton onClick={() => handleQuantityChange(item._id, 1)}>
                           <AddIcon />
                         </IconButton>
                       </Box>
@@ -388,7 +398,6 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Nhập tên người đặt"
               sx={{ mb: 2 }}
-              disabled={!!createdBookingId}
             />
           </Box>
 
@@ -405,7 +414,6 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
                 )
               }}
               sx={{ mb: 2 }}
-              disabled={!!createdBookingId}
             />
           </Box>
 
@@ -418,59 +426,33 @@ const [createdBookingData, setCreatedBookingData] = useState(null);
               placeholder="Nhập ghi chú"
               multiline
               rows={2}
-              disabled={!!createdBookingId}
             />
           </Box>
 
-          <Typography sx={{ fontWeight: 'bold', color: '#388e3c' }}>
+          <Typography sx={{ fontWeight: 'bold', color: '#388e3c', fontSize: '1.2rem' }}>
             Tổng cộng: {calculateTotal().toLocaleString()}đ
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
-          <Button onClick={handleCancel} sx={{ color: '#388e3c' }}>Hủy</Button>
-          {!createdBookingId && (
-            <>
-              <Button
-                variant="contained"
-                onClick={handleConfirm}
-                sx={{ bgcolor: '#ffca28', color: 'black', '&:hover': { bgcolor: '#ffb300' } }}
-                disabled={loading}
-              >
-                {loading ? 'Đang gửi...' : 'Xác nhận & Thanh toán'}
-              </Button>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleCreateBooking}
-                disabled={loading}
-                sx={{ ml: 1 }}
-              >
-                {loading ? 'Đang tạo booking...' : 'Tạo booking & Thanh toán ví'}
-              </Button>
-            </>
-          )}
-        {createdBookingId && (
-  <PayByWalletButton
-    bookingId={createdBookingId}
-    userId={userId}
-    amount={calculateTotal()}
-    onSuccess={() => {
-      // Dùng createdBookingData từ state thay vì bookingData từ callback
-      console.log('Booking ID:', createdBookingData?._id);
-      console.log('Booking Data:', createdBookingData);
-      setMessageNotification('Thanh toán thành công bằng ví!');
-      setSeverityNotification('success');
-      setOpenNotification(true);
-      if (onConfirm) onConfirm(createdBookingData, selectedItems);
-      onClose();
-      if (createdBookingData?._id) {
-       navigate(`/booking-success/${createdBookingData._id}`, { state: { bookingData: { ...createdBookingData, selectedItems } } });
-      } else {
-        navigate('/booking-history');
-      }
-    }}
-  />
-)}
+        <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5', gap: 1 }}>
+          <Button onClick={handleCancel} sx={{ color: '#388e3c' }}>
+            Hủy
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleConfirm}
+            sx={{ bgcolor: '#ff9800', color: 'white', '&:hover': { bgcolor: '#f57c00' } }}
+            disabled={loading}
+          >
+            {loading ? 'Đang xử lý...' : 'Thanh toán VNPay'}
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleCreateBooking}
+            disabled={loading}
+          >
+            {loading ? 'Đang xử lý...' : 'Thanh toán ví'}
+          </Button>
         </DialogActions>
       </Dialog>
       <NotificationSnackbar

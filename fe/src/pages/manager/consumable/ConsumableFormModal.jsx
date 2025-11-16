@@ -44,10 +44,10 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
         pricePerUnit: 0,
         quantityInStock: 0,
         status: "available",
-        sportField: [],
+        sportField: sportFields.map(f => f._id), // Tự động chọn tất cả sân
       });
     }
-  }, [initialData]);
+  }, [initialData, sportFields]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -140,7 +140,7 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
           className="input"
         />
         <div className="text-sm text-gray-500 mt-2">
-          Lưu ý: Vui lòng kiểm tra kỹ thông tin trước khi lưu.
+          Mặc định: Áp dụng cho tất cả sân. Bạn có thể bỏ chọn hoặc thêm sân theo nhu cầu.
         </div>
       </DialogContent>
       <DialogActions>
