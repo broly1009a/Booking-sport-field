@@ -20,6 +20,7 @@ export const paymentService = {
     // Lấy booking theo paymentId
     getBookingByPaymentId: (paymentId) =>
         handleApiCall(() => api.get(`/payment/booking-by-payment/${paymentId}`)),
-    
+    getPaymentUrlFromBooking: (bookingId) =>
+        handleApiCall(() => api.get(`/payment/payment-url/${bookingId}`)),
 };
 

@@ -114,6 +114,14 @@ class PaymentService {
             console.log('Creating VNPAY URL...');
             const vnpUrl = await this.createPaymentUrl(payment, req);
             console.log('VNPAY URL created:', vnpUrl);
+            
+            // 5. Lưu paymentUrl và expiry (15 phút) vào booking
+            const expiryTime = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+            await Booking.findByIdAndUpdate(booking._id, {
+                paymentUrl: vnpUrl,
+                paymentUrlExpiry: expiryTime
+            });
+            console.log('Payment URL saved to booking with 15min expiry');
             console.log('=== END createBookingAndPayment ===');
 
             return { booking, payment, vnpUrl };
@@ -366,6 +374,33 @@ class PaymentService {
         };
 
         return bookingData;
+    }
+
+    // Lấy payment URL từ booking để tiếp tục thanh toán
+    async getPaymentUrlFromBooking(bookingId) {
+        const booking = await Booking.findById(bookingId);
+        if (!booking) throw new Error('Booking không tồn tại');
+        
+        // Kiểm tra trạng thái booking
+        if (booking.status !== 'pending') {
+            throw new Error('Booking không còn ở trạng thái chờ thanh toán');
+        }
+
+        // Kiểm tra URL đã hết hạn chưa
+        if (!booking.paymentUrl || !booking.paymentUrlExpiry) {
+            throw new Error('Không tìm thấy link thanh toán');
+        }
+
+        const now = new Date();
+        if (now > booking.paymentUrlExpiry) {
+            throw new Error('Link thanh toán đã hết hạn. Vui lòng đặt lại.');
+        }
+
+        return {
+            paymentUrl: booking.paymentUrl,
+            expiryTime: booking.paymentUrlExpiry,
+            remainingMinutes: Math.ceil((booking.paymentUrlExpiry - now) / (1000 * 60))
+        };
     }
 }
 

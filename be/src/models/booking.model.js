@@ -46,8 +46,15 @@ const bookingSchema = new Schema({
     notes: {
         type: String,
         default: ''
+    },
+    paymentUrl: {
+        type: String,
+        default: null
+    },
+    paymentUrlExpiry: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true });
 module.exports = mongoose.model("Booking", bookingSchema);
-
 

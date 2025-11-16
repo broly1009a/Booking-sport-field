@@ -56,6 +56,16 @@ class PaymentController {
             next(error);
         }
     }
+
+    // Lấy payment URL từ booking để tiếp tục thanh toán
+    async getPaymentUrlFromBooking(req, res, next) {
+        try {
+            const result = await PaymentService.getPaymentUrlFromBooking(req.params.bookingId);
+            res.status(200).json({ success: true, data: result });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new PaymentController();

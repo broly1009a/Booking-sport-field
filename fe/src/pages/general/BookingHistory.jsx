@@ -30,8 +30,10 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 import { useAuth } from '../../contexts/authContext';
 import bookingService from '../../services/api/bookingService';
+import { paymentService } from '../../services/api/paymentService';
 import AddFeedbackForm from '../../components/Feedback/AddFeedbackForm';
 import { PublicContext } from "../../contexts/publicContext";
+import { toast } from 'react-toastify';
 const statusMap = {
   pending: { label: 'Đang xử lí', color: 'warning' },
   waiting: { label: 'Chờ xác nhận', color: 'info' },
@@ -169,6 +171,21 @@ const BookingHistory = () => {
     }
   };
 
+  const handleContinuePayment = async (bookingId) => {
+    try {
+      const res = await paymentService.getPaymentUrlFromBooking(bookingId);
+      if (res?.data?.paymentUrl) {
+        const remainingMinutes = res.data.remainingMinutes || 0;
+        toast.info(`Link thanh toán còn ${remainingMinutes} phút. Đang chuyển hướng...`);
+        setTimeout(() => {
+          window.location.href = res.data.paymentUrl;
+        }, 1500);
+      }
+    } catch (error) {
+      toast.error(error?.message || 'Không thể lấy link thanh toán!');
+    }
+  };
+
   return (
     <Box sx={{ p: 4, bgcolor: '#f5f5f5' }}>
       <Typography variant="h4" sx={{ mb: 2, color: '#388e3c' }}>
@@ -248,6 +265,7 @@ const BookingHistory = () => {
               <TableCell>Thời gian</TableCell>
               <TableCell>Trạng thái</TableCell>
               <TableCell>Tổng tiền</TableCell>
+              <TableCell>Thanh toán</TableCell>
               <TableCell>Ghép trận</TableCell>
               <TableCell>Đánh giá</TableCell>
               <TableCell>Chi tiết</TableCell>
@@ -256,11 +274,11 @@ const BookingHistory = () => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">Đang tải...</TableCell>
+                <TableCell colSpan={9} align="center">Đang tải...</TableCell>
               </TableRow>
             ) : bookings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">Bạn chưa có lịch sử đặt sân nào</TableCell>
+                <TableCell colSpan={9} align="center">Bạn chưa có lịch sử đặt sân nào</TableCell>
               </TableRow>
             ) : (
               filteredBookings
@@ -280,6 +298,20 @@ const BookingHistory = () => {
                       />
                     </TableCell>
                     <TableCell>{b.totalPrice?.toLocaleString('vi-VN')}đ</TableCell>
+                    <TableCell>
+                      {b.status === 'pending' ? (
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="warning"
+                          onClick={() => handleContinuePayment(b._id)}
+                        >
+                          Tiếp tục
+                        </Button>
+                      ) : (
+                        <Chip label="Đã thanh toán" color="success" size="small" />
+                      )}
+                    </TableCell>
                     <TableCell>
                       {b.matchmaking && b.matchmaking.length > 0
                         ? (

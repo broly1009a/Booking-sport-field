@@ -25,6 +25,7 @@ import { useAuth } from '../../contexts/authContext';
 import dayjs from 'dayjs';
 import BookingDialog from '../../components/dialogs/bookingDialog';
 import scheduleService from '../../services/api/scheduleService';
+import eventService from '../../services/api/eventService';
 
 const BookingSchedule = () => {
   const { complexId } = useParams();
@@ -84,7 +85,7 @@ const BookingSchedule = () => {
     return 'available';
   };
 
-  const handleSlotClick = (fieldId, slotTime) => {
+  const handleSlotClick = async (fieldId, slotTime) => {
     const status = getSlotStatus(fieldId, slotTime);
     if (status !== 'available') {
       toast.warn(
@@ -101,6 +102,22 @@ const BookingSchedule = () => {
     if (exists) {
       setSelectedSlots(selectedSlots.filter(slot => !(slot.fieldId === fieldId && slot.time === slotDateTime)));
       return;
+    }
+
+    // Kiểm tra conflict trước khi cho phép chọn slot
+    if (currentUser?._id) {
+      try {
+        const slotEnd = dayjs(slotDateTime).add(30, 'minute').format('YYYY-MM-DDTHH:mm:ssZ');
+        const conflictCheck = await eventService.checkTimeConflict(slotDateTime, slotEnd);
+        
+        if (conflictCheck?.hasConflict) {
+          toast.warning('Bạn đã có lịch đặt sân hoặc event khác trùng thời gian này!');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking conflict:', error);
+        // Vẫn cho phép chọn nếu API lỗi
+      }
     }
 
     if (selectedSlots.length === 0) {

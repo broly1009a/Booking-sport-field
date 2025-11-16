@@ -14,4 +14,8 @@ router.get('/vnpay-return', PaymentController.handleVnpayReturnUrl);
 // Thanh toán booking bằng ví
 router.post('/wallet', PaymentController.payBookingByWallet);
 router.get('/booking-by-payment/:paymentId', PaymentController.getBookingByPaymentId);
+
+// Lấy payment URL từ booking để tiếp tục thanh toán
+router.get('/payment-url/:bookingId', PaymentController.getPaymentUrlFromBooking);
+
 module.exports = router;
