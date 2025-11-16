@@ -32,6 +32,7 @@ import {
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { eventService } from '../../services/api/eventService';
+import { walletService } from '../../services/api/walletService';
 import { useAuth } from '../../contexts/authContext';
 
 const EventMatching = () => {
@@ -42,6 +43,7 @@ const EventMatching = () => {
   const [openJoinDialog, setOpenJoinDialog] = useState(false);
   const [joinNote, setJoinNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userSchedule, setUserSchedule] = useState([]);
   const { currentUser } = useAuth();
 
   // Filter states
@@ -63,6 +65,18 @@ const EventMatching = () => {
       }
     } catch (error) {
       toast.error('Không thể tải danh sách sự kiện');
+    }
+  };
+
+  const fetchUserSchedule = async () => {
+    if (!currentUser?._id) return;
+    try {
+      const res = await eventService.getUserSchedule();
+      if (res?.data) {
+        setUserSchedule(res.data);
+      }
+    } catch (error) {
+      console.error('Không thể tải lịch trình:', error);
     }
   };
 
@@ -118,6 +132,7 @@ const EventMatching = () => {
 
   useEffect(() => {
     fetchEvents();
+    fetchUserSchedule();
     // eslint-disable-next-line
   }, []);
 
@@ -152,10 +167,23 @@ const EventMatching = () => {
 
     setLoading(true);
     try {
+      // Kiểm tra conflict trước khi tham gia
+      const conflictCheck = await eventService.checkTimeConflict(
+        selectedEvent.startTime,
+        selectedEvent.endTime
+      );
+
+      if (conflictCheck?.hasConflict) {
+        toast.warning('Bạn đã có lịch đặt sân hoặc event khác trùng thời gian. Vui lòng kiểm tra lại lịch của bạn!');
+        setLoading(false);
+        return;
+      }
+
       await eventService.showInterest(selectedEvent._id, joinNote);
       toast.success('Đã gửi yêu cầu tham gia sự kiện!');
       setOpenJoinDialog(false);
       fetchEvents();
+      fetchUserSchedule(); // Cập nhật lịch trình
     } catch (error) {
       toast.error(error?.message || 'Không thể tham gia sự kiện');
     }
@@ -167,9 +195,31 @@ const EventMatching = () => {
 
     setLoading(true);
     try {
+      // Lấy thông tin event để biết giá
+      const event = events.find(e => e._id === eventId) || selectedEvent;
+      
       await eventService.leaveEvent(eventId);
       toast.success('Đã rời khỏi sự kiện');
+      
+      // Hoàn tiền nếu người chơi đã thanh toán
+      if (event?.estimatedPrice && currentUser?._id) {
+        try {
+          const refundData = {
+            userId: currentUser._id,
+            amount: event.estimatedPrice,
+            eventId: eventId,
+            description: `Hoàn tiền do rời khỏi sự kiện "${event.name}"`
+          };
+          await walletService.refundToWallet(refundData);
+          toast.success('Đã hoàn tiền vào ví của bạn');
+        } catch (refundError) {
+          console.error('Lỗi hoàn tiền:', refundError);
+          // Vẫn tiếp tục vì đã rời sự kiện thành công
+        }
+      }
+      
       fetchEvents();
+      fetchUserSchedule(); // Cập nhật lịch trình
       setOpenDetail(false);
     } catch (error) {
       toast.error(error?.message || 'Không thể rời sự kiện');

@@ -212,6 +212,37 @@ class EventController {
             next(error);
         }
     }
+
+    // Lấy lịch trình của user (bookings + events)
+    async getUserSchedule(req, res, next) {
+        try {
+            const userId = req.user._id;
+            const schedule = await EventService.getUserSchedule(userId);
+            res.status(200).json({ 
+                success: true, 
+                message: 'Lấy lịch trình thành công',
+                data: schedule 
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Kiểm tra xung đột thời gian
+    async checkTimeConflict(req, res, next) {
+        try {
+            const userId = req.user._id;
+            const { startTime, endTime } = req.body;
+            const hasConflict = await EventService.checkTimeConflict(userId, startTime, endTime);
+            res.status(200).json({ 
+                success: true, 
+                hasConflict,
+                message: hasConflict ? 'Có xung đột thời gian' : 'Không có xung đột'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new EventController();

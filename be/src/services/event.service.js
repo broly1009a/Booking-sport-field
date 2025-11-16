@@ -300,6 +300,15 @@ class EventService {
             throw { status: 400, message: 'Event đã đủ số lượng người tham gia' };
         }
 
+        // ✨ Kiểm tra xung đột thời gian trước khi tham gia
+        const hasConflict = await this.checkTimeConflict(userId, event.startTime, event.endTime);
+        if (hasConflict) {
+            throw { 
+                status: 400, 
+                message: 'Bạn đã có lịch đặt sân hoặc event khác trùng thời gian. Vui lòng kiểm tra lại lịch của bạn!' 
+            };
+        }
+
         // Thêm người quan tâm
         event.interestedPlayers.push({
             userId,
@@ -702,6 +711,105 @@ class EventService {
         }
 
         return event;
+    }
+
+    // Lấy lịch trình của user (tất cả bookings và events sắp tới)
+    async getUserSchedule(userId) {
+        const now = new Date();
+        
+        // Lấy tất cả bookings sắp tới của user
+        const bookings = await Booking.find({
+            userId,
+            startTime: { $gte: now },
+            status: { $in: ['pending', 'confirmed', 'waiting'] }
+        })
+        .select('startTime endTime fieldId status')
+        .populate('fieldId', 'name location')
+        .sort({ startTime: 1 });
+
+        // Lấy tất cả events mà user đã tham gia (accepted)
+        const events = await Event.find({
+            'interestedPlayers': {
+                $elemMatch: {
+                    userId,
+                    status: 'accepted'
+                }
+            },
+            startTime: { $gte: now },
+            status: { $in: ['open', 'full', 'confirmed'] }
+        })
+        .select('name startTime endTime fieldId status')
+        .populate('fieldId', 'name location')
+        .sort({ startTime: 1 });
+
+        // Kết hợp và format lại
+        const schedule = [
+            ...bookings.map(b => ({
+                type: 'booking',
+                id: b._id,
+                startTime: b.startTime,
+                endTime: b.endTime,
+                field: b.fieldId,
+                status: b.status
+            })),
+            ...events.map(e => ({
+                type: 'event',
+                id: e._id,
+                name: e.name,
+                startTime: e.startTime,
+                endTime: e.endTime,
+                field: e.fieldId,
+                status: e.status
+            }))
+        ].sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+        return {
+            success: true,
+            status: 200,
+            data: schedule
+        };
+    }
+
+    // Kiểm tra xung đột thời gian
+    async checkTimeConflict(userId, newStartTime, newEndTime) {
+        const start = new Date(newStartTime);
+        const end = new Date(newEndTime);
+
+        // Kiểm tra conflict với bookings
+        const conflictBooking = await Booking.findOne({
+            userId,
+            status: { $in: ['pending', 'confirmed', 'waiting'] },
+            $or: [
+                // Booking bắt đầu trong khoảng thời gian mới
+                { startTime: { $gte: start, $lt: end } },
+                // Booking kết thúc trong khoảng thời gian mới
+                { endTime: { $gt: start, $lte: end } },
+                // Booking bao trùm khoảng thời gian mới
+                { startTime: { $lte: start }, endTime: { $gte: end } }
+            ]
+        });
+
+        if (conflictBooking) {
+            return true;
+        }
+
+        // Kiểm tra conflict với events (chỉ những event đã được accept)
+        const conflictEvent = await Event.findOne({
+            'interestedPlayers': {
+                $elemMatch: {
+                    userId,
+                    status: 'accepted'
+                }
+            },
+            status: { $in: ['open', 'full', 'confirmed'] },
+            $or: [
+                { startTime: { $gte: start, $lt: end } },
+                { endTime: { $gt: start, $lte: end } },
+                { startTime: { $lte: start }, endTime: { $gte: end } }
+            ]
+        });
+
+        return !!conflictEvent;
     }
 }
 

@@ -15,6 +15,14 @@ export const eventService = {
         const response = await handleApiCall(() => api.get('/event/my-events'));
         return response.data;
     },
+    getUserSchedule: async () => {
+        const response = await handleApiCall(() => api.get('/event/my-schedule'));
+        return response.data;
+    },
+    checkTimeConflict: async (startTime, endTime) => {
+        const response = await handleApiCall(() => api.post('/event/check-conflict', { startTime, endTime }));
+        return response.data;
+    },
 
     // Quản lý event
     createEvent: async (data) => {

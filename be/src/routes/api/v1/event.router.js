@@ -10,6 +10,8 @@ router.use(authMiddleware.checkRoles(['CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN']))
 router.get('/search', EventController.searchEvent);
 router.get('/available', EventController.getAvailableEvent);
 router.get('/my-events', EventController.getMyEvent);
+router.get('/my-schedule', EventController.getUserSchedule);
+router.post('/check-conflict', EventController.checkTimeConflict);
 
 // Quản lý event (chỉ chủ sân/staff tạo event)
 router.post('/', EventController.createEvent);

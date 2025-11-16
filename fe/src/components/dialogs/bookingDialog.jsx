@@ -29,6 +29,7 @@ import consumableService from '../../services/api/consumableService';
 import equipmentService from '../../services/api/equipmentService';
 import { useAuth } from '../../contexts/authContext';
 import bookingService from '../../services/api/bookingService';
+import { walletService } from '../../services/api/walletService';
 import { useNavigate } from 'react-router-dom';
 
 export default function BookingDialog({ open, onClose, selectedSlots, sportField, userId, onConfirm }) {
@@ -171,10 +172,34 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
     }
     setLoading(true);
     try {
+      const totalPrice = calculateTotal();
+
+      // Kiểm tra số dư ví trước khi tạo booking
+      try {
+        const walletRes = await walletService.getWallet(userId);
+        const currentBalance = walletRes?.data?.balance || 0;
+
+        if (currentBalance < totalPrice) {
+          const shortage = totalPrice - currentBalance;
+          setMessageNotification(
+            `Số dư ví không đủ! Cần thêm ${shortage.toLocaleString()}đ. Vui lòng nạp tiền vào ví.`
+          );
+          setSeverityNotification('warning');
+          setOpenNotification(true);
+          setLoading(false);
+          return;
+        }
+      } catch (walletError) {
+        setMessageNotification('Không thể kiểm tra số dư ví!');
+        setSeverityNotification('error');
+        setOpenNotification(true);
+        setLoading(false);
+        return;
+      }
+
       const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
       const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
       const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').format('YYYY-MM-DDTHH:mm:ssZ');
-      const totalPrice = calculateTotal();
       const items = selectedItems
         .filter(item => item.quantity > 0)
         .map(item => ({
