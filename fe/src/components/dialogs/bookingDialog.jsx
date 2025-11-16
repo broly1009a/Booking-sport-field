@@ -222,7 +222,8 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
         customerName,
         phoneNumber,
         note,
-        items
+        items,
+        paymentUrlExpiry: new Date(Date.now() + 5 * 60 * 1000) // 5 phút cho wallet payment
       };
 
       // Tạo booking và thanh toán bằng ví trong 1 bước

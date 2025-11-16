@@ -9,10 +9,12 @@ const app = express();
 const mongoose = require('mongoose');
 const { registerScheduleCrons } = require('./src/utils/schedule.cron');
 const { registerEventCrons } = require('./src/utils/event.cron');
+const { registerCancelExpiredBookingsCron } = require('./src/utils/cancelExpiredBookings');
 
 // Đăng ký cron jobs
 registerScheduleCrons();
 registerEventCrons();
+registerCancelExpiredBookingsCron();
 
 app.use(cors(
   {

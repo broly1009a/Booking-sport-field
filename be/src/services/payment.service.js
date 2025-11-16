@@ -277,6 +277,14 @@ class PaymentService {
         if (!booking) throw new Error('Booking không tồn tại');
         if (booking.status !== 'pending') throw new Error('Booking không hợp lệ để thanh toán');
 
+        // Kiểm tra booking đã hết hạn chưa (nếu có expiry)
+        if (booking.paymentUrlExpiry && new Date() > booking.paymentUrlExpiry) {
+            booking.status = 'cancelled';
+            await booking.save();
+            await BookingService.releaseScheduleSlots(booking);
+            throw new Error('Booking đã hết hạn thanh toán. Vui lòng đặt lại.');
+        }
+
         const wallet = await Wallet.findOne({ userId });
         if (!wallet || wallet.balance < amount) throw new Error('Số dư ví không đủ');
 
@@ -401,6 +409,49 @@ class PaymentService {
             expiryTime: booking.paymentUrlExpiry,
             remainingMinutes: Math.ceil((booking.paymentUrlExpiry - now) / (1000 * 60))
         };
+    }
+
+    // Auto-cancel booking pending hết hạn (gọi từ cron job)
+    async cancelExpiredPendingBookings() {
+        const now = new Date();
+        const expiredBookings = await Booking.find({
+            status: 'pending',
+            paymentUrlExpiry: { $lt: now }
+        });
+
+        let cancelledCount = 0;
+        for (const booking of expiredBookings) {
+            try {
+                booking.status = 'cancelled';
+                await booking.save();
+                await BookingService.releaseScheduleSlots(booking);
+                
+                // Hoàn lại tồn kho thiết bị/đồ tiêu thụ nếu có
+                const equipmentRental = await EquipmentRental.findOne({ bookingId: booking._id });
+                if (equipmentRental && equipmentRental.equipments) {
+                    for (const item of equipmentRental.equipments) {
+                        await Equipment.findByIdAndUpdate(item.equipmentId, { 
+                            $inc: { quantity: item.quantity } 
+                        });
+                    }
+                }
+
+                const consumablePurchase = await ConsumablePurchase.findOne({ bookingId: booking._id });
+                if (consumablePurchase && consumablePurchase.consumables) {
+                    for (const item of consumablePurchase.consumables) {
+                        await Consumable.findByIdAndUpdate(item.consumableId, { 
+                            $inc: { quantity: item.quantity } 
+                        });
+                    }
+                }
+
+                cancelledCount++;
+            } catch (error) {
+                console.error(`Error cancelling booking ${booking._id}:`, error);
+            }
+        }
+
+        return { cancelledCount, totalExpired: expiredBookings.length };
     }
 }
 
