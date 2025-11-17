@@ -126,6 +126,8 @@ class FieldComplexService {
     }
 
     async updateFieldComplex(id, data, imageFiles = []) {
+        console.log('Updating Field Complex with data:', data);
+        console.log('Number of image files to upload:', imageFiles);
         let imageUrls = [];
         if (imageFiles.length > 0) {
             const uploadPromises = imageFiles.map(file =>

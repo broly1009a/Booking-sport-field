@@ -15,6 +15,7 @@ const FieldComplexList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [ratingsByComplexId, setRatingsByComplexId] = useState({});
     const itemsPerPage = 9;
 
     useEffect(() => {
@@ -28,10 +29,27 @@ const FieldComplexList = () => {
                 fieldComplexService.getAll(),
                 sportFieldService.getAllSportFields()
             ]);
-            // console.log("Cụm sân:", complexRes);
-            // console.log("Sân thể thao:", fieldsRes);
             setFieldComplexes(complexRes || []);
             setSportFields(fieldsRes || []);
+
+            // Lấy rating cho từng cụm sân
+            if (complexRes && complexRes.length > 0) {
+                const feedbackService = (await import('../../services/api/feedbackService')).default;
+                const ratingPromises = complexRes.map(async (complex) => {
+                    try {
+                        const feedback = await feedbackService.getFeedbackSummaryByComplex(complex._id);
+                        return { id: complex._id, rating: feedback?.averageRating || null };
+                    } catch {
+                        return { id: complex._id, rating: null };
+                    }
+                });
+                const ratings = await Promise.all(ratingPromises);
+                const ratingsMap = {};
+                ratings.forEach(({ id, rating }) => {
+                    ratingsMap[id] = rating;
+                });
+                setRatingsByComplexId(ratingsMap);
+            }
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu:", error);
             toast.error("Không thể tải danh sách cụm sân");
@@ -134,16 +152,23 @@ const FieldComplexList = () => {
                                                 <MdStadium className="text-white text-6xl opacity-50" />
                                             </div>
                                         )}
-                                        <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full shadow-lg">
-                                            <div className="flex items-center space-x-1">
-                                                <FaFutbol className="text-green-600" />
-                                                <span className="font-semibold text-gray-700">
-                                                    {getFieldCount(complex._id)} sân
-                                                </span>
-                                            </div>
+                                        {/* Số sân */}
+                                        <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full shadow-lg flex items-center gap-2">
+                                            <FaFutbol className="text-green-600" />
+                                            <span className="font-semibold text-gray-700">
+                                                {getFieldCount(complex._id)} sân
+                                            </span>
                                         </div>
+                                        {/* Số sao */}
+                                        {typeof ratingsByComplexId[complex._id] === 'number' && (
+                                            <div className="absolute top-4 left-4 bg-yellow-400 px-3 py-1 rounded-full text-white text-sm font-semibold shadow-lg flex items-center gap-1">
+                                                <span>{ratingsByComplexId[complex._id].toFixed(1)}</span>
+                                                <FaFutbol className="text-white" />
+                                                <span className="ml-1">★</span>
+                                            </div>
+                                        )}
                                         {complex.isActive && (
-                                            <div className="absolute top-4 left-4 bg-green-500 px-3 py-1 rounded-full text-white text-sm font-semibold shadow-lg">
+                                            <div className="absolute bottom-4 left-4 bg-green-500 px-3 py-1 rounded-full text-white text-sm font-semibold shadow-lg">
                                                 Đang hoạt động
                                             </div>
                                         )}
