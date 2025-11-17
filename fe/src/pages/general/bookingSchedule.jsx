@@ -25,7 +25,7 @@ import { useAuth } from '../../contexts/authContext';
 import dayjs from 'dayjs';
 import BookingDialog from '../../components/dialogs/bookingDialog';
 import scheduleService from '../../services/api/scheduleService';
-import eventService from '../../services/api/eventService';
+import { eventService } from '../../services/api/eventService';
 
 const BookingSchedule = () => {
   const { complexId } = useParams();
