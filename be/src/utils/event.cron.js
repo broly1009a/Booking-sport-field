@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const Event = require('../models/event.model');
 const FieldComplex = require('../models/fieldComplex.model');
 const { sendEventNotification } = require('../configs/nodemailer.config');
-
+ const walletService = require('../services/wallet.service');
 // Helper: Chuyển đổi thời gian Việt Nam sang UTC
 // Việt Nam là UTC+7, nên để lưu đúng trong DB (UTC), cần trừ 7 giờ
 function toUTC(vietnamDate) {
@@ -267,7 +267,7 @@ async function checkEventDeadlines() {
                 
                 console.log(`✅ Event ${event._id} (${event.name}) auto-confirmed với ${acceptedCount} người`);
             } else {
-                // ❌ Thiếu người → Hủy
+                // Thiếu người → Hủy
                 event.status = 'cancelled';
                 await event.save();
                 
@@ -275,6 +275,33 @@ async function checkEventDeadlines() {
                 await sendEventEmailNotification(event, 'cancelled', { acceptedCount });
                 
                 console.log(`❌ Event ${event._id} (${event.name}) cancelled - thiếu người (${acceptedCount}/${event.minPlayers})`);
+                    // Tự động hoàn tiền cho creator và các acceptedPlayers
+                    try {
+                       
+                        // Creator
+                        if (event.createdBy && event.createdBy._id) {
+                            await walletService.refundToWallet(
+                                event.createdBy._id,
+                                event.estimatedPrice,
+                                event._id,
+                                'event'
+                            );
+                        }
+                        // Accepted players
+                        for (const p of acceptedPlayers) {
+                            if (p.userId && p.userId._id) {
+                                await walletService.refundToWallet(
+                                    p.userId._id,
+                                    event.estimatedPrice,
+                                    event._id,
+                                    'event'
+                                );
+                            }
+                        }
+                        console.log(`[Event Cron] Đã hoàn tiền cho creator và ${acceptedPlayers.length} người chơi event bị huỷ.`);
+                    } catch (refundErr) {
+                        console.error('[Event Cron] Lỗi hoàn tiền event bị huỷ:', refundErr);
+                    }
             }
         }
         

@@ -133,10 +133,12 @@ class WalletService {
             console.log('Checking event for refund:', objectId);
             object = await Event.findById(objectId);
             if (!object) throw { status: 404, message: 'Event không tồn tại.' };
-            // Có thể kiểm tra trạng thái event nếu cần, ví dụ: cancelled
-            statusValid = (object.status === 'cancelled');
-            if (!statusValid) throw { status: 400, message: 'Event không ở trạng thái bị huỷ.' };
-            description = description || 'Hoàn tiền do event bị huỷ';
+                if (!description) {
+                    // Trường hợp hoàn tiền cho toàn bộ event bị huỷ
+                    statusValid = (object.status === 'cancelled');
+                    if (!statusValid) throw { status: 400, message: 'Event không ở trạng thái bị huỷ.' };
+                    description = 'Hoàn tiền do event bị huỷ';
+                }
         } else {
             throw { status: 400, message: 'Loại hoàn tiền không hợp lệ.' };
         }
@@ -173,7 +175,7 @@ class WalletService {
             await WalletTransaction.create({
                 walletId: adminWallet._id,
                 userId: adminUser._id,
-                type: 'deduct',
+                type: 'refund',
                 amount,
                 status: 'completed',
                 description: `Trừ tiền hoàn trả cho userId: ${userId} (${type}Id: ${objectId})`,
