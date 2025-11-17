@@ -329,7 +329,7 @@ class PaymentService {
         if (equipmentRental && equipmentRental.equipments) {
             for (const item of equipmentRental.equipments) {
                 const equipment = await Equipment.findById(item.equipmentId);
-                console.log('Check equipment:', { item, equipment });
+               // console.log('Check equipment:', { item, equipment });
                 if (!equipment) throw new Error(`Thiết bị không tồn tại: ${item.equipmentId}`);
                 if (item.quantity > equipment.quantity) {
                     throw new Error(`Thiết bị '${equipment.name}' chỉ còn ${equipment.quantity}, bạn yêu cầu ${item.quantity}`);
@@ -338,7 +338,7 @@ class PaymentService {
         }
         // Đồ tiêu thụ
         let consumablePurchase = await ConsumablePurchase.findOne({ bookingId: booking._id });
-        console.log('consumablePurchase:', consumablePurchase);
+       // console.log('consumablePurchase:', consumablePurchase);
         // Nếu chưa có consumablePurchase và có items truyền vào
         if (!consumablePurchase && Array.isArray(items) && items.length > 0) {
             const consumableItems = items.filter(i => i.type === 'consumable' && i.quantity > 0);
@@ -357,7 +357,7 @@ class PaymentService {
         if (consumablePurchase && consumablePurchase.consumables) {
             for (const item of consumablePurchase.consumables) {
                 const consumable = await Consumable.findById(item.consumableId);
-                console.log('Check consumable:', { item, consumable });
+               // console.log('Check consumable:', { item, consumable });
                 if (!consumable) throw new Error(`Đồ tiêu thụ không tồn tại: ${item.consumableId}`);
                 if (item.quantity > consumable.quantityInStock) {
                     throw new Error(`Đồ tiêu thụ '${consumable.name}' chỉ còn ${consumable.quantity}, bạn yêu cầu ${item.quantity}`);

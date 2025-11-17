@@ -25,7 +25,7 @@ const policyRouter = require('./policy.router');
 
 const fieldComplexRouter = require('./fieldComplex.router');
 const couponRouter = require('./coupon.router');
-
+const notificationRouter = require('./notification.route');
 router.use('/guest', guestRouter);
 router.use('/user', userRouter);
 router.use('/type', typeRouter);
@@ -51,5 +51,6 @@ router.use('/policy', policyRouter);
 
 router.use('/field-complex', fieldComplexRouter);
 router.use('/coupon', couponRouter);
+router.use('/notification', notificationRouter);
 
 module.exports = router;

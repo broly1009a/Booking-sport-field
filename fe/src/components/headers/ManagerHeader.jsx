@@ -5,6 +5,7 @@ import {
   Tooltip, MenuItem, Link
 } from '@mui/material';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import Notification from '../../components/notifications/Notification';
 import Person3Icon from '@mui/icons-material/Person3';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/authContext';
@@ -51,7 +52,8 @@ function ManagerHeader() {
             </Typography>
 
             <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ flexGrow: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Notification />
               <Tooltip title="Thông tin tài khoản">
                 <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={handleOpenUserMenu}>
                   <Person3Icon />

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const notificationController = require('../../controllers/notification.controller');
-const { verifyToken } = require('../../middlewares/auth.middleware');
+const notificationController = require('../../../controllers/notification.controller');
+const { UserController } = require('../../../controllers/index');
+const { AuthMiddleware } = require('../../../middlewares/index');
 
-router.use(verifyToken);
+router.use(AuthMiddleware.checkRoles(['CUSTOMER', 'STAFF', 'MANAGER', 'ADMIN']));
 
 // GET /api/notifications - Lấy danh sách
 router.get('/', notificationController.getList);

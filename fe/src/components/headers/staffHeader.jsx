@@ -9,7 +9,7 @@ import Person3Icon from '@mui/icons-material/Person3';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/authContext';
 import ProfileDialog from '../dialogs/profileDialog';
-
+import Notification from '../../components/notifications/Notification';
 function StaffHeader() {
   const navigate = useNavigate();
   const { currentUser, isUserLoggedIn } = useAuth();
@@ -51,7 +51,8 @@ function StaffHeader() {
             </Typography>
 
             <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ flexGrow: 0 }}>
+             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Notification />
               <Tooltip title="Thông tin tài khoản">
                 <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={handleOpenUserMenu}>
                   <Person3Icon />
