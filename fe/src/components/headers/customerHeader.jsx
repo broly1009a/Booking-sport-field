@@ -104,13 +104,14 @@ function CustomerHeader() {
                                 letterSpacing: '.3rem',
                                 color: 'inherit',
                                 textDecoration: 'none',
+                                fontSize: '0.95rem',
                             }}
                         >
                             FSF FPT
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -120,7 +121,7 @@ function CustomerHeader() {
                                 Danh sách Sân
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -130,7 +131,7 @@ function CustomerHeader() {
                                 Ghép trận
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -140,7 +141,7 @@ function CustomerHeader() {
                                 Sự kiện
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -150,7 +151,7 @@ function CustomerHeader() {
                                 Ưu đãi hấp dẫn
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -160,7 +161,7 @@ function CustomerHeader() {
                                 Giới thiệu
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -170,7 +171,7 @@ function CustomerHeader() {
                                 TIN TỨC
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -180,7 +181,7 @@ function CustomerHeader() {
                                 Danh sách yêu thích
                             </Link>
                                 <Link
-                                    sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                    sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                     component="button"
                                     color="inherit"
                                     variant="body2"
@@ -198,7 +199,7 @@ function CustomerHeader() {
                                 <Tooltip title="Nạp thêm tiền vào ví">
                                     <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => setShowTopUpDialog(true)}>
                                         <WalletIcon sx={{ color: '#white', mr: 0.5 }} />
-                                        <Typography sx={{ fontWeight: 'bold', color: '#white', mr: 1 }}>
+                                        <Typography sx={{ fontWeight: 'bold', color: '#white', mr: 1, fontSize: '0.85rem' }}>
                                             {wallet?.balance?.toLocaleString()}đ
                                         </Typography>
                                         <AddCircleOutlineIcon color="primary" />
@@ -212,7 +213,7 @@ function CustomerHeader() {
                                 <Box sx={{ display: 'flex' }} style={{ cursor: "pointer" }} onClick={handleOpenUserMenu}>
                                     <Person3Icon sx={{ p: 0 }}> </Person3Icon>
                                     <Link
-                                        sx={{ ml: 1, textAlign: 'center', fontWeight: "bold" }}
+                                        sx={{ ml: 1, textAlign: 'center', fontWeight: "bold", fontSize: '0.85rem' }}
                                         component="button"
                                         color="inherit"
                                         variant="body1"
@@ -242,30 +243,30 @@ function CustomerHeader() {
                                     {/* <Typography sx={{ textAlign: 'center' }} onClick={() => setOpenBookingHistoryDialog(true)}>Xem trạng thái đặt sân</Typography> */}
                                 </MenuItem>
                                 <MenuItem onClick={handleCloseUserMenu}>
-                                    <Typography sx={{ textAlign: 'center' }} onClick={() => setOpenProfileDialog(true)}>Thông tin tài khoản</Typography>
+                                    <Typography sx={{ textAlign: 'center', fontSize: '0.85rem' }} onClick={() => setOpenProfileDialog(true)}>Thông tin tài khoản</Typography>
                                 </MenuItem>
                                 {/* Lịch sử đặt lịch */}
                                 <MenuItem onClick={handleCloseUserMenu}>
-                                    <Typography sx={{ textAlign: 'center' }} onClick={() => navigate('/booking-history')}>Lịch sử đặt sân</Typography>
+                                    <Typography sx={{ textAlign: 'center', fontSize: '0.85rem' }} onClick={() => navigate('/booking-history')}>Lịch sử đặt sân</Typography>
                                 </MenuItem>
                                 {/* Lịch sử ghép trận */}
                                 <MenuItem onClick={handleCloseUserMenu}>
-                                    <Typography sx={{ textAlign: 'center' }} onClick={() => navigate('/matchmaking-history')}>Lịch sử ghép trận</Typography>
+                                    <Typography sx={{ textAlign: 'center', fontSize: '0.85rem' }} onClick={() => navigate('/matchmaking-history')}>Lịch sử ghép trận</Typography>
                                 </MenuItem>
                                 {/* Lịch sử giao dịch ví */}
                                 <MenuItem onClick={handleCloseUserMenu}>
-                                    <Typography sx={{ textAlign: 'center' }} onClick={() => navigate('/wallet-history')}>Lịch sử giao dịch ví</Typography>
+                                    <Typography sx={{ textAlign: 'center', fontSize: '0.85rem' }} onClick={() => navigate('/wallet-history')}>Lịch sử giao dịch ví</Typography>
                                 </MenuItem>
                                 {/* Nạp tiền vào ví */}
                                 <MenuItem onClick={() => {
                                     setShowTopUpDialog(true);
                                     handleCloseUserMenu();
                                 }}>
-                                    <Typography sx={{ textAlign: 'center' }}>Nạp tiền vào ví</Typography>
+                                    <Typography sx={{ textAlign: 'center', fontSize: '0.85rem' }}>Nạp tiền vào ví</Typography>
                                 </MenuItem>
                                 {/* Đăng xuất */}
                                 <MenuItem onClick={handleSignOut}>
-                                    <Typography sx={{ textAlign: 'center' }}>Đăng xuất</Typography>
+                                    <Typography sx={{ textAlign: 'center', fontSize: '0.85rem' }}>Đăng xuất</Typography>
                                 </MenuItem>
                             </Menu>
                         </Box>

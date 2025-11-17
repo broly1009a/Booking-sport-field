@@ -48,13 +48,14 @@ function GuestHeader() {
                                 letterSpacing: '.3rem',
                                 color: 'inherit',
                                 textDecoration: 'none',
+                                fontSize: '0.95rem',
                             }}
                         >
                             FSF FPT
                         </Typography>
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -65,7 +66,7 @@ function GuestHeader() {
                             </Link>
                     
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -74,8 +75,8 @@ function GuestHeader() {
                             >
                                 Ưu đãi hấp dẫn
                             </Link>
-                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                      <Link
+                                          sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -85,7 +86,7 @@ function GuestHeader() {
                                 Giới thiệu
                             </Link>
                             <Link
-                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold" }}
+                                sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body2"
@@ -99,7 +100,7 @@ function GuestHeader() {
                             <Person3Icon sx={{ p: 0 }}> </Person3Icon>
                           {/* direct to /login page */}
                             <Link
-                                sx={{ ml: 1, textAlign: 'center', fontWeight: "bold" }}
+                                sx={{ ml: 1, textAlign: 'center', fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body1"
@@ -109,9 +110,9 @@ function GuestHeader() {
                             >
                                 Đăng nhập
                             </Link>
-                            <Typography sx={{ ml: 1, textAlign: 'center' }}>/</Typography>
+                            <Typography sx={{ ml: 1, textAlign: 'center', fontSize: '0.85rem' }}>/</Typography>
                             <Link
-                                sx={{ ml: 1, textAlign: 'center', fontWeight: "bold" }}
+                                sx={{ ml: 1, textAlign: 'center', fontWeight: "bold", fontSize: '0.85rem' }}
                                 component="button"
                                 color="inherit"
                                 variant="body1"
