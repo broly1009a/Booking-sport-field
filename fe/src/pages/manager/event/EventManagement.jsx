@@ -87,6 +87,7 @@ const EventManagement = () => {
             userId: playerId,
             amount: event.estimatedPrice,
             eventId: eventId,
+            type: 'event',
             description: `Hoàn tiền do bị từ chối tham gia sự kiện "${event.name}"`
           };
           await walletService.refundToWallet(refundData);

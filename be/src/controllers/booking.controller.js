@@ -1,5 +1,6 @@
 const BookingService = require('../services/booking.service');
 
+
 class BookingController {
     async createBooking(req, res, next) {
         try {
@@ -59,33 +60,57 @@ class BookingController {
             next(error);
         }
     }
-    
-  async getPaginatedBookings(req, res, next) {
-    try {
-        const { page, limit, status, from, to, type, search } = req.query;
-        const result = await BookingService.getPaginatedBookings({ page, limit, status, from, to, type, search });
-        res.status(200).json(result);
-    } catch (error) {
-        next(error);
+
+    async getPaginatedBookings(req, res, next) {
+        try {
+            const { page, limit, status, from, to, type, search } = req.query;
+            const result = await BookingService.getPaginatedBookings({ page, limit, status, from, to, type, search });
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
     }
-}
-async roundAllBookingTimesToHour(req, res, next) {
-    try {
-        const result = await BookingService.roundAllBookingTimesToHour();
-        res.status(200).json(result);
-    } catch (error) {
-        next(error);
+
+    async getBookingsByComplexStaff(req, res, next) {
+        try {
+            const { staffId } = req.params;
+            const { page, limit, status, type, from, to, search } = req.query;
+            const result = await BookingService.getBookingsByComplexStaff({ page, limit, status, type, from, to, search, staffId });
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
     }
-}
-async getBookingsByUser(req, res, next) {
-    try {
-        const { userId } = req.params;
-        const bookings = await BookingService.getBookingsByUser(userId);
-        res.status(200).json({ success: true, data: bookings });
-    } catch (error) {
-        next(error);
+
+    async getBookingsByComplexOwner(req, res, next) {
+        try {
+            const { ownerId } = req.params;
+            const { page, limit, status, type, from, to, search } = req.query;
+            const result = await BookingService.getBookingsByComplexOwner({ page, limit, status, type, from, to, search, ownerId });
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
     }
-}
+
+    async roundAllBookingTimesToHour(req, res, next) {
+        try {
+            const result = await BookingService.roundAllBookingTimesToHour();
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getBookingsByUser(req, res, next) {
+        try {
+            const { userId } = req.params;
+            const bookings = await BookingService.getBookingsByUser(userId);
+            res.status(200).json({ success: true, data: bookings });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new BookingController();

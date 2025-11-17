@@ -13,6 +13,7 @@ const EquipmentRental = require('../models/equipmentRental.model');
 const ConsumablePurchase = require('../models/consumablePurchase.model');
 const Equipment = require('../models/equipment.model');
 const Consumable = require('../models/consumable.model');
+const User = require('../models/user.model');
 class PaymentService {
     // Tạo booking và payment cho thanh toán online
     async createBookingAndPayment(bookingData, req) {
@@ -232,6 +233,27 @@ class PaymentService {
                 payment.bookingId,
                 { status: responseData.vnp_ResponseCode === '00' ? 'waiting' : 'cancelled' }
             );
+                // Nếu thanh toán thành công, cộng tiền vào ví admin
+                if (responseData.vnp_ResponseCode === '00') {
+                    const adminUser = await User.findOne({ role: 'ADMIN' });
+                    if (adminUser) {
+                        let adminWallet = await Wallet.findOne({ userId: adminUser._id });
+                        if (!adminWallet) {
+                            adminWallet = await Wallet.create({ userId: adminUser._id, balance: 0 });
+                        }
+                        adminWallet.balance += payment.amount;
+                        await adminWallet.save();
+                        await WalletTransaction.create({
+                            walletId: adminWallet._id,
+                            userId: adminUser._id,
+                            type: 'receive',
+                            amount: payment.amount,
+                            status: 'completed',
+                            description: `Nhận tiền booking #${payment.bookingId} từ khách hàng`,
+                            relatedBookingId: payment.bookingId
+                        });
+                    }
+                }
 
             // Nếu thanh toán thất bại, trả lại slot về available
             if (responseData.vnp_ResponseCode !== '00') {

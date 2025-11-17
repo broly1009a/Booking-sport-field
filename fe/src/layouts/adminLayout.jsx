@@ -16,13 +16,25 @@ import {
   Typography,
 } from "@mui/material";
 import AdminHeader from "../components/headers/adminHeader";
-import People from "@mui/icons-material/People";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PaymentsIcon from "@mui/icons-material/Payments";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import Category from "@mui/icons-material/Category";
 import VoucherIcon from "@mui/icons-material/CardGiftcard";
+import { People } from "@mui/icons-material";
 const drawerWidth = 240;
 
 const menuItems = [
+  {
+    text: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/admin/dashboard",
+  },
+  {
+    text: "Thống kê Chủ Sân",
+    icon: <PaymentsIcon />,
+    path: "/admin/monthly-payout",
+  },
   {
     text: "Quản lí Tài Khoản",
     icon: <People />,

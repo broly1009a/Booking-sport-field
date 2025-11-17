@@ -2,6 +2,7 @@ const { User } = require('../models');
 const bookingModel = require('../models/booking.model');
 const SportField = require('../models/sportField.model');
 const Schedule = require('../models/schedule.model');
+const FieldComplex = require('../models/fieldComplex.model');
 // const Feedback = require('../models/feedback.model');
 const ConsumablePurchase = require('../models/consumablePurchase.model');
 const EquipmentRental = require('../models/equipmentRental.model');
@@ -195,6 +196,111 @@ class BookingService {
             }
         };
     }
+       
+    async getBookingsByComplexOwner({ page = 1, limit = 5, status, type, from, to, search, ownerId }) {
+     
+        const complexes = await FieldComplex.find({ owner: ownerId }).select('_id');
+        const complexIds = complexes.map(c => c._id);
+
+        let fieldFilter = { complex: { $in: complexIds } };
+        if (type) fieldFilter.type = type;
+        if (search) fieldFilter.name = { $regex: search, $options: 'i' };
+        const fields = await SportField.find(fieldFilter).select('_id');
+        const fieldIds = fields.map(f => f._id);
+       
+        const query = { fieldId: { $in: fieldIds } };
+        if (status) query.status = status;
+        if (from || to) {
+            query.startTime = {};
+            if (from) query.startTime.$gte = new Date(from);
+            if (to) query.startTime.$lte = new Date(to);
+        }
+        const skip = (page - 1) * limit;
+        const [bookings, total] = await Promise.all([
+            bookingModel.find(query)
+                .select('_id fieldId startTime endTime status totalPrice participants customerName phoneNumber notes')
+                .populate({ path: 'userId', select: '_id fname lname phoneNumber' })
+                .populate({ path: 'fieldId', select: '_id name location type' })
+                .populate({ path: 'participants', select: '_id fname lname phoneNumber' })
+                .skip(Number(skip))
+                .limit(Number(limit)),
+            bookingModel.countDocuments(query)
+        ]);
+      
+        const data = await Promise.all(bookings.map(async (booking) => {
+            const consumablePurchases = await ConsumablePurchase.find({ bookingId: booking._id })
+                .populate({ path: 'consumables.consumableId', select: '_id name price' });
+            const equipmentRentals = await EquipmentRental.find({ bookingId: booking._id })
+                .populate({ path: 'equipments.equipmentId', select: '_id name price' });
+            return {
+                ...booking.toObject(),
+                consumablePurchases,
+                equipmentRentals
+            };
+        }));
+        return {
+            data,
+            meta: {
+                total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: Number(page),
+                perPage: Number(limit)
+            }
+        };
+    }
+      
+    async getBookingsByComplexStaff({ page = 1, limit = 5, status, type, from, to, search, staffId }) {
+       
+        const complexes = await FieldComplex.find({ staffs: staffId }).select('_id');
+        const complexIds = complexes.map(c => c._id);
+     
+        let fieldFilter = { complex: { $in: complexIds } };
+        if (type) fieldFilter.type = type;
+        if (search) fieldFilter.name = { $regex: search, $options: 'i' };
+        const fields = await SportField.find(fieldFilter).select('_id');
+        const fieldIds = fields.map(f => f._id);
+       
+        const query = { fieldId: { $in: fieldIds } };
+        if (status) query.status = status;
+        if (from || to) {
+            query.startTime = {};
+            if (from) query.startTime.$gte = new Date(from);
+            if (to) query.startTime.$lte = new Date(to);
+        }
+        const skip = (page - 1) * limit;
+        const [bookings, total] = await Promise.all([
+            bookingModel.find(query)
+                .select('_id fieldId startTime endTime status totalPrice participants customerName phoneNumber notes')
+                .populate({ path: 'userId', select: '_id fname lname phoneNumber' })
+                .populate({ path: 'fieldId', select: '_id name location type' })
+                .populate({ path: 'participants', select: '_id fname lname phoneNumber' })
+                .skip(Number(skip))
+                .limit(Number(limit)),
+            bookingModel.countDocuments(query)
+        ]);
+        const data = await Promise.all(bookings.map(async (booking) => {
+            const consumablePurchases = await ConsumablePurchase.find({ bookingId: booking._id })
+                .populate({ path: 'consumables.consumableId', select: '_id name price' });
+            const equipmentRentals = await EquipmentRental.find({ bookingId: booking._id })
+                .populate({ path: 'equipments.equipmentId', select: '_id name price' });
+            return {
+                ...booking.toObject(),
+                consumablePurchases,
+                equipmentRentals
+            };
+        }));
+        return {
+            data,
+            meta: {
+                total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: Number(page),
+                perPage: Number(limit)
+            }
+        };
+    }
+
+
     async roundAllBookingTimesToHour() {
         const bookings = await bookingModel.find();
         for (const booking of bookings) {
@@ -212,6 +318,7 @@ class BookingService {
         }
         return { success: true, message: 'Đã làm tròn thời gian và cập nhật endTime cho tất cả booking.' };
     }
+    
     async getBookingsByUser(userId) {
         return await bookingModel.aggregate([
             { $match: { userId: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId } },
@@ -315,6 +422,8 @@ class BookingService {
             }
         ]);
     }
+
+   
     async releaseScheduleSlots(booking) {
         const { startTime, endTime, fieldId } = booking;
         const bookingDate = new Date(startTime);

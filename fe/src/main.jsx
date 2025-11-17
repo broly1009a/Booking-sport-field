@@ -28,7 +28,7 @@ import MaintenanceSchedule from './pages/manager/maintenance/MaintenanceSchedule
 import VnpayReturn from './pages/general/VnpayReturn';
 import MatchmakingHistory from './pages/general/MatchmakingHistory';
 import WalletHistory from './pages/general/WalletHistory';
-import AnalyticsDashboard from './pages/manager/statistics/AnalyticsDashboard';
+import AnalyticsDashboard from './pages/admin/dashboard/AnalyticsDashboard';
 import Voucher from './pages/general/voucher';
 // import Event from './pages/general/Event';
 import EventDashboard from './pages/manager/event/EventDashboard';
@@ -53,6 +53,8 @@ import EventSchedule from './pages/manager/event/EventSchedule';
 import EventMatching from './pages/general/EventMatching';
 import FieldComplexList from './pages/general/fieldComplexList';
 import FieldComplexDetail from './pages/general/fieldComplexDetail';
+import AdminMonthlyPayoutPage from './pages/admin/statistics/AdminMonthlyPayoutPage';
+import OwnerStatsPage from './pages/manager/statistics/OwnerStatsPage';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -257,7 +259,7 @@ const router = createBrowserRouter([
             path: "dashboard",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER']}>
-                <AnalyticsDashboard />
+                <OwnerStatsPage />
               </ProtectedRoute>
             ),
           },
@@ -442,6 +444,22 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             )
           },
+          {
+            path: "dashboard",
+            element: (
+              <ProtectedRoute >
+                <AnalyticsDashboard />
+              </ProtectedRoute>
+            )
+          },
+          {
+            path: "monthly-payout",
+            element: (
+              <ProtectedRoute >
+                <AdminMonthlyPayoutPage />
+              </ProtectedRoute>
+            )
+          },
         ],
       },
       {
@@ -451,7 +469,7 @@ const router = createBrowserRouter([
             path: "dashboard",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
-                <AnalyticsDashboard />
+                <OwnerStatsPage />
               </ProtectedRoute>
             ),
           },

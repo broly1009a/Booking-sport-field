@@ -208,6 +208,7 @@ const EventMatching = () => {
             userId: currentUser._id,
             amount: event.estimatedPrice,
             eventId: eventId,
+            type: 'event',
             description: `Hoàn tiền do rời khỏi sự kiện "${event.name}"`
           };
           await walletService.refundToWallet(refundData);
