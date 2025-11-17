@@ -306,6 +306,28 @@ class PaymentService {
             await BookingService.releaseScheduleSlots(booking);
             throw new Error('Booking đã hết hạn thanh toán. Vui lòng đặt lại.');
         }
+        // Thiết bị
+        const equipmentRental = await EquipmentRental.findOne({ bookingId: booking._id });
+        if (equipmentRental && equipmentRental.equipments) {
+            for (const item of equipmentRental.equipments) {
+                const equipment = await Equipment.findById(item.equipmentId);
+                if (!equipment) throw new Error(`Thiết bị không tồn tại: ${item.equipmentId}`);
+                if (item.quantity > equipment.quantity) {
+                    throw new Error(`Thiết bị '${equipment.name}' chỉ còn ${equipment.quantity}, bạn yêu cầu ${item.quantity}`);
+                }
+            }
+        }
+        // Đồ tiêu thụ
+        const consumablePurchase = await ConsumablePurchase.findOne({ bookingId: booking._id });
+        if (consumablePurchase && consumablePurchase.consumables) {
+            for (const item of consumablePurchase.consumables) {
+                const consumable = await Consumable.findById(item.consumableId);
+                if (!consumable) throw new Error(`Đồ tiêu thụ không tồn tại: ${item.consumableId}`);
+                if (item.quantity > consumable.quantity) {
+                    throw new Error(`Đồ tiêu thụ '${consumable.name}' chỉ còn ${consumable.quantity}, bạn yêu cầu ${item.quantity}`);
+                }
+            }
+        }
 
         const wallet = await Wallet.findOne({ userId });
         if (!wallet || wallet.balance < amount) throw new Error('Số dư ví không đủ');
