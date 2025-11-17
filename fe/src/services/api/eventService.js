@@ -21,7 +21,7 @@ export const eventService = {
     },
     checkTimeConflict: async (startTime, endTime) => {
         const response = await handleApiCall(() => api.post('/event/check-conflict', { startTime, endTime }));
-        return response.data;
+        return response;
     },
 
     // Quản lý event

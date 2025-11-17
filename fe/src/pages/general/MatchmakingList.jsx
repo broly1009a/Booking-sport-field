@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { 
   Box, 
   Typography, 
@@ -26,6 +27,7 @@ import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 
 const MatchmakingList = () => {
+ 
   const [matchmakings, setMatchmakings] = useState([]);
   const [filteredMatchmakings, setFilteredMatchmakings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -152,12 +154,33 @@ const MatchmakingList = () => {
       navigate(`/yard-detail/${fieldId}`);
     }
   };
-
+   // Gọi API đóng các phòng ghép quá hạn
+    const handleCloseExpired = async () => {
+      setLoading(true);
+      try {
+        const res = await matchmakingService.closeExpiredOpenMatchmakings();
+        if (res && res.success) {
+          toast.success(`Đã đóng ${res.closedCount} phòng ghép quá hạn!`);
+          fetchOpenMatchmakings();
+        } else {
+          toast.error(res?.message || 'Đóng phòng ghép quá hạn thất bại!');
+        }
+      } catch (err) {
+        toast.error('Lỗi khi đóng phòng ghép quá hạn!');
+      }
+      setLoading(false);
+    };
   return (
     <Box sx={{ p: 4, bgcolor: '#f5f5f5' }}>
-      <Typography variant="h4" sx={{ mb: 2, color: '#388e3c' }}>
-        Danh sách phòng ghép trận đang mở
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4" sx={{ color: '#388e3c' }}>
+          Danh sách phòng ghép trận đang mở
+        </Typography>
+        <Button variant="outlined" color="secondary" onClick={handleCloseExpired} disabled={loading}>
+          <RefreshIcon />
+        </Button>
+      </Box>
+   
 
       {/* Filter Section */}
       <Paper sx={{ p: 2, mb: 2 }}>

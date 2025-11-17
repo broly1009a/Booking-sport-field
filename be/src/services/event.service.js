@@ -772,9 +772,11 @@ class EventService {
 
     // Kiểm tra xung đột thời gian
     async checkTimeConflict(userId, newStartTime, newEndTime) {
-        const start = new Date(newStartTime);
-        const end = new Date(newEndTime);
-
+        // console.log(`Kiểm tra xung đột thời gian cho user ${userId} từ ${newStartTime} đến ${newEndTime}`);
+        // Cộng thêm 7 tiếng 
+        const start = new Date(new Date(newStartTime).getTime() + 7 * 60 * 60 * 1000);
+        const end = new Date(new Date(newEndTime).getTime() + 7 * 60 * 60 * 1000);
+        // console.log('Khoảng thời gian cần kiểm tra (UTC+7):', { start, end });
         // Kiểm tra conflict với bookings
         const conflictBooking = await Booking.findOne({
             userId,

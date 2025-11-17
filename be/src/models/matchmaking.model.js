@@ -27,7 +27,7 @@ const matchmakingSchema = new Schema({
     }],
     status: {
         type: String,
-        enum: ['open', 'full', 'cancelled'],
+        enum: ['open', 'full', 'cancelled','expired', 'completed'],
         default: 'open'
     }
 }, { timestamps: true });

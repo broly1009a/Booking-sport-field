@@ -75,9 +75,10 @@ const BookingSuccess = () => {
 
   const bookingData = location.state.bookingData;
   const [selectedItems, setSelectedItems] = useState(
-    bookingData?.selectedItems || []
+    bookingData.selectedItems || []
   );
-  console.log('Booking data:', bookingData);
+  // console.log('Booking data:', bookingData);
+  // console.log('Initial selected items:', bookingData.selectedItems);
   useEffect(() => {
     // Mở popup nếu chưa có mục nào được chọn
     if (selectedItems && selectedItems.length > 0 && !selectedItems.some(item => item.quantity > 0)) {

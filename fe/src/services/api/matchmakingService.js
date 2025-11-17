@@ -29,6 +29,9 @@ export const matchmakingService = {
     },
     getMatchmakingsByUser: async (userId) => {
         return handleApiCall(() => api.get(`/matchmaking/user/${userId}`));
+    },
+    closeExpiredOpenMatchmakings: async () => {
+        return handleApiCall(() => api.post('/matchmaking/close-expired'));
     }
 }
 export default matchmakingService;

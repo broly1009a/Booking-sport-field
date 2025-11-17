@@ -120,6 +120,20 @@ class MatchmakingService {
             .populate('representativeId')
             .sort({ createdAt: -1 });
     }
+    async closeExpiredOpenMatchmakings() {
+    const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
+    const expiredMatchmakings = await matchmakingModel.find({ status: 'open' })
+        .populate('bookingId');
+    const toClose = expiredMatchmakings.filter(m => m.bookingId && m.bookingId.endTime < now);
+
+    let closedCount = 0;
+    for (const m of toClose) {
+        m.status = 'expired'; // hoặc 'closed'
+        await m.save();
+        closedCount++;
+    }
+    return { closedCount, totalExpired: toClose.length };
+}
 }
 
 module.exports = new MatchmakingService();

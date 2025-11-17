@@ -142,12 +142,12 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
         note,
         items // gửi lên BE để lưu thiết bị/đồ tiêu thụ nếu cần
       };
-      console.log('Rendering BookingDialog with props:', bookingData);
+      // console.log('Rendering BookingDialog with props:', bookingData);
       // Gọi API thanh toán online
       const res = await paymentService.createBookingAndPayment(bookingData);
-      console.log('Payment response:', res?.data?.vnpUrl);
-      console.log('Payment response res:', res);
-      console.log('Payment response res vnp:', res?.vnpUrl);
+      // console.log('Payment response:', res?.data?.vnpUrl);
+      // console.log('Payment response res:', res);
+      // console.log('Payment response res vnp:', res?.vnpUrl);
 
       if (res?.vnpUrl) {
         window.location.href = res.vnpUrl; // Đúng!
@@ -233,24 +233,33 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
       if (res?.data?._id) {
         // Thanh toán bằng ví ngay
         try {
+          const items = selectedItems
+            .filter(item => item.quantity > 0)
+            .map(item => ({
+              productId: item._id,
+              type: item.type,
+              name: item.name,
+              price: item.pricePerUnit || item.price,
+              quantity: item.quantity
+            }));
           await paymentService.payBookingByWallet({
             bookingId: res.data._id,
             userId,
-            amount: totalPrice
+            amount: totalPrice,
+            items
           });
-          
           setMessageNotification('Đặt sân và thanh toán thành công!');
           setSeverityNotification('success');
           setOpenNotification(true);
-          
           if (onConfirm) onConfirm(res.data, selectedItems);
           onClose();
-          
           // Chuyển sang trang success
           setTimeout(() => {
-            navigate(`/booking-success/${res.data._id}`, { 
-              state: { bookingData: { ...res.data, selectedItems } } 
-            });
+            navigate(`/booking-success/${res.data._id}`, {state: { bookingData: 
+{ ...res.data, selectedItems: selectedItems.filter(item => item.quantity > 0)
+
+  } 
+} });
           }, 1000);
         } catch (payError) {
           // Nếu thanh toán thất bại, hủy booking

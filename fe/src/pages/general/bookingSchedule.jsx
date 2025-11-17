@@ -108,10 +108,11 @@ const BookingSchedule = () => {
     if (currentUser?._id) {
       try {
         const slotEnd = dayjs(slotDateTime).add(30, 'minute').format('YYYY-MM-DDTHH:mm:ssZ');
+        console.log('Check conflict:', { slotDateTime, slotEnd, userId: currentUser._id });
         const conflictCheck = await eventService.checkTimeConflict(slotDateTime, slotEnd);
-        
+        console.log('Conflict check result:', conflictCheck);
         if (conflictCheck?.hasConflict) {
-          toast.warning('Bạn đã có lịch đặt sân hoặc event khác trùng thời gian này!');
+          toast.warning('Bạn đã có lịch đặt sân hoặc sự kiện khác trùng thời gian này!');
           return;
         }
       } catch (error) {

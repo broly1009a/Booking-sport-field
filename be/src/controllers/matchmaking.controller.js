@@ -86,6 +86,14 @@ async getMatchmakingsByUser(req, res, next) {
         next(error);
     }
 }
+closeExpiredOpenMatchmakings = async (req, res, next) => {
+    try {
+        const result = await MatchmakingService.closeExpiredOpenMatchmakings();
+        res.json({ success: true, ...result });
+    } catch (error) {
+        next(error);
+    }
+}
 }
 
 module.exports = new MatchmakingController();
