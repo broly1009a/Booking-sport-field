@@ -179,8 +179,53 @@ const EventMatching = () => {
         return;
       }
 
-      await eventService.showInterest(selectedEvent._id, joinNote);
-      toast.success('Đã gửi yêu cầu tham gia sự kiện!');
+      // Kiểm tra số dư ví nếu sự kiện yêu cầu thanh toán
+      if (selectedEvent.estimatedPrice && selectedEvent.estimatedPrice > 0) {
+        try {
+          const walletRes = await walletService.getWallet(currentUser._id);
+          const currentBalance = walletRes?.wallet?.balance || 0;
+          console.log("walletRes", walletRes);
+          console.log('Ví hiện tại:', currentBalance, 'Giá event:', selectedEvent.estimatedPrice);
+          if (currentBalance < selectedEvent.estimatedPrice) {
+            const shortage = selectedEvent.estimatedPrice - currentBalance;
+            console.log('Thiếu tiền:', shortage);
+            toast.warning(`Số dư ví không đủ! Cần thêm ${shortage.toLocaleString()}đ. Vui lòng nạp tiền vào ví.`);
+            setLoading(false);
+            return;
+          } else {
+            console.log('Số dư ví đủ để tham gia event');
+          }
+        } catch (walletError) {
+          console.error('Lỗi kiểm tra ví:', walletError);
+          toast.error('Không thể kiểm tra số dư ví!');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Gửi yêu cầu tham gia sự kiện
+      const res = await eventService.showInterest(selectedEvent._id, joinNote);
+
+      // Nếu sự kiện yêu cầu thanh toán, tiến hành thanh toán bằng ví
+      // Lấy interestId từ interestedPlayers trong res?.data?.data
+      const interestId = res?.data?.data?.interestedPlayers?.[res.data.data.interestedPlayers.length - 1]?._id;
+      console.log('Response sau khi bày tỏ ý định tham gia:', interestId);
+      if (selectedEvent.estimatedPrice && selectedEvent.estimatedPrice > 0) {
+        try {
+          await walletService.deductFromWallet({
+            userId: currentUser._id,
+            // eventId: selectedEvent._id,
+            amount: selectedEvent.estimatedPrice,
+            // interestId: res.data.interestId,
+            description: `Thanh toán tham gia sự kiện "${selectedEvent.name} thời gian ${selectedEvent.startTime} - ${selectedEvent.endTime}"`
+          });
+          toast.success('Đã gửi yêu cầu tham gia sự kiện và thanh toán thành công!');
+        } catch (payError) {
+          toast.error('Gửi yêu cầu thành công nhưng thanh toán ví thất bại!');
+        }
+      } else {
+        toast.success('Đã gửi yêu cầu tham gia sự kiện!');
+      }
       setOpenJoinDialog(false);
       fetchEvents();
       fetchUserSchedule(); // Cập nhật lịch trình
@@ -207,7 +252,7 @@ const EventMatching = () => {
           const refundData = {
             userId: currentUser._id,
             amount: event.estimatedPrice,
-            eventId: eventId,
+            objectId: eventId,
             type: 'event',
             description: `Hoàn tiền do rời khỏi sự kiện "${event.name}"`
           };

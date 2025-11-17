@@ -2,6 +2,7 @@ const Wallet = require('../models/wallet.model');
 const WalletTransaction = require('../models/walletTransaction.model');
 const Booking = require('../models/booking.model');
 const User = require('../models/user.model');
+ const Event = require('../models/event.model');
 class WalletService {
     // Lấy thông tin ví của người dùng
     async getWallet(userId) {
@@ -51,7 +52,7 @@ class WalletService {
         await WalletTransaction.create({
             walletId: wallet._id,
             userId,
-            type: 'deduct',
+            type: 'payment',
             amount,
             status: 'completed',
             description,
@@ -122,13 +123,14 @@ class WalletService {
         }
         let object, statusValid = false;
         if (type === 'booking') {
+            console.log('Checking booking for refund:', objectId);
             object = await Booking.findById(objectId);
             if (!object) throw { status: 404, message: 'Booking không tồn tại.' };
             statusValid = (object.status === 'waiting' || object.status === 'cancelled');
             if (!statusValid) throw { status: 400, message: 'Booking không ở trạng thái chờ hoặc đã bị từ chối.' };
             description = description || 'Hoàn tiền do booking bị từ chối';
         } else if (type === 'event') {
-            const Event = require('../models/event.model');
+            console.log('Checking event for refund:', objectId);
             object = await Event.findById(objectId);
             if (!object) throw { status: 404, message: 'Event không tồn tại.' };
             // Có thể kiểm tra trạng thái event nếu cần, ví dụ: cancelled

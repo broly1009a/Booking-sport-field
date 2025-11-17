@@ -86,7 +86,7 @@ const EventManagement = () => {
           const refundData = {
             userId: playerId,
             amount: event.estimatedPrice,
-            eventId: eventId,
+            objectId: eventId,
             type: 'event',
             description: `Hoàn tiền do bị từ chối tham gia sự kiện "${event.name}"`
           };
