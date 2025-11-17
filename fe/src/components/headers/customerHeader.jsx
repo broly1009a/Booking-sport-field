@@ -116,9 +116,9 @@ function CustomerHeader() {
                                 color="inherit"
                                 variant="body2"
                                 underline="hover"
-                                onClick={() => navigate('/yard')}
+                                onClick={() => navigate('/field-complex')}
                             >
-                                Danh sách Sân
+                                Cụm sân
                             </Link>
                             <Link
                                 sx={{ ml: 3, textAlign: 'center', textTransform: "uppercase", fontWeight: "bold", fontSize: '0.85rem' }}

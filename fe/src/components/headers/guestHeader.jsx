@@ -60,9 +60,9 @@ function GuestHeader() {
                                 color="inherit"
                                 variant="body2"
                                 underline="hover"
-                                onClick={() => navigate('/yard')}
+                                onClick={() => navigate('/field-complex')}
                             >
-                                Danh sách Sân
+                                Cụm sân
                             </Link>
                     
                             <Link

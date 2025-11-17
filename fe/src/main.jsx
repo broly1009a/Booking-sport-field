@@ -52,6 +52,7 @@ import EventManagement from './pages/manager/event/EventManagement';
 import EventSchedule from './pages/manager/event/EventSchedule';
 import EventMatching from './pages/general/EventMatching';
 import FieldComplexList from './pages/general/fieldComplexList';
+import FieldComplexDetail from './pages/general/fieldComplexDetail';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -96,11 +97,19 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         )
       },
-       {
+      {
         path: "field-complex",
         element: (
           <ProtectedRoute>
             <FieldComplexList />,
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "field-complex/:id",
+        element: (
+          <ProtectedRoute>
+            <FieldComplexDetail />,
           </ProtectedRoute>
         )
       },
@@ -138,6 +147,14 @@ const router = createBrowserRouter([
       },
       {
         path: "/booking/:typeId",
+        element: (
+          <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
+            <BookingSchedule />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/booking-schedule/:complexId",
         element: (
           <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
             <BookingSchedule />
@@ -263,7 +280,7 @@ const router = createBrowserRouter([
           {
             path: "sport-field-list",
             element: (
-              <ProtectedRoute requiredRoles={['MANAGER','ADMIN']}>
+              <ProtectedRoute requiredRoles={['MANAGER', 'ADMIN']}>
                 <SportsVenueDashboard />
               </ProtectedRoute>
             ),
@@ -332,7 +349,7 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             ),
           },
-            {
+          {
             path: "field-complex-list",
             element: (
               <ProtectedRoute >
@@ -340,7 +357,7 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             )
           },
-            {
+          {
             path: "field-complex-detail/:id",
             element: (
               <ProtectedRoute >
@@ -377,7 +394,7 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             ),
           },
-           {
+          {
             path: "update-user/:id",
             element: (
               <ProtectedRoute>
@@ -409,7 +426,7 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             )
           },
-              {
+          {
             path: "field-complex-form/:id?",
             element: (
               <ProtectedRoute >
@@ -417,7 +434,7 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             )
           },
-            {
+          {
             path: "register-staff/:complexId",
             element: (
               <ProtectedRoute >
@@ -438,10 +455,10 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             ),
           },
-           {
+          {
             path: "sport-field-list",
             element: (
-              <ProtectedRoute requiredRoles={['MANAGER','STAFF']}>
+              <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
                 <SportsVenueDashboard />
               </ProtectedRoute>
             ),

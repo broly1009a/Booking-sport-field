@@ -28,8 +28,10 @@ const FieldComplexList = () => {
                 fieldComplexService.getAll(),
                 sportFieldService.getAllSportFields()
             ]);
-            setFieldComplexes(complexRes?.data || []);
-            setSportFields(fieldsRes?.data || []);
+            // console.log("Cụm sân:", complexRes);
+            // console.log("Sân thể thao:", fieldsRes);
+            setFieldComplexes(complexRes || []);
+            setSportFields(fieldsRes || []);
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu:", error);
             toast.error("Không thể tải danh sách cụm sân");
@@ -58,7 +60,7 @@ const FieldComplexList = () => {
     };
 
     const handleComplexClick = (complex) => {
-        navigate(`/booking-schedule/${complex._id}`);
+        navigate(`/field-complex/${complex._id}`);
     };
 
     if (loading) {

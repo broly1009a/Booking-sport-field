@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { 
-    FaMapMarkerAlt, FaUsers, FaFutbol, FaPhoneAlt, 
-    FaCalendarAlt, FaUserTie, FaInfoCircle, FaStar 
+import {
+    FaMapMarkerAlt, FaUsers, FaFutbol, FaPhoneAlt,
+    FaCalendarAlt, FaUserTie, FaInfoCircle, FaStar
 } from "react-icons/fa";
 import { MdStadium, MdLocationOn, MdEvent } from "react-icons/md";
 import { fieldComplexService } from "../../services/api/fieldComplexService";
@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import feedbackService from '../../services/api/feedbackService';
 
 const FieldComplexDetail = () => {
+        const [showAllFields, setShowAllFields] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
     const [complexData, setComplexData] = useState(null);
@@ -27,22 +28,22 @@ const FieldComplexDetail = () => {
                     sportFieldService.getAllSportFields(),
                     feedbackService.getFeedbackSummaryByComplex(id)
                 ]);
-                
-                if (complexRes?.data) {
-                    setComplexData(complexRes.data);
+
+                if (complexRes) {
+                    setComplexData(complexRes);
                 }
-                
+
                 // Lọc các sân thuộc cụm này
-                if (fieldsRes?.data) {
-                    const fieldsInComplex = fieldsRes.data.filter(
+                if (fieldsRes) {
+                    const fieldsInComplex = fieldsRes.filter(
                         field => field.complex === id
                     );
                     setSportFields(fieldsInComplex);
                 }
 
                 // Set feedback summary
-                if (feedbackRes?.data) {
-                    setFeedbackSummary(feedbackRes.data);
+                if (feedbackRes) {
+                    setFeedbackSummary(feedbackRes);
                 }
             } catch (error) {
                 console.error("Lỗi khi tải dữ liệu:", error);
@@ -167,7 +168,7 @@ const FieldComplexDetail = () => {
                                 Vị trí
                             </h3>
                             <p className="text-gray-600 mb-4">{complexData.location}</p>
-                            
+
                             {complexData.coordinates?.latitude && complexData.coordinates?.longitude && (
                                 <>
                                     <div className="text-sm text-gray-500 mb-3">
@@ -176,7 +177,7 @@ const FieldComplexDetail = () => {
                                     <div className="h-48 rounded-lg overflow-hidden">
                                         <iframe
                                             title="Complex Location Map"
-                                            src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d500.2!2d${complexData.coordinates.longitude}!3d${complexData.coordinates.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1svi!2s!4v1234567890`}
+                                            src={`https://maps.google.com/maps?q=${complexData.coordinates.latitude},${complexData.coordinates.longitude}&z=15&output=embed`}
                                             width="100%"
                                             height="100%"
                                             style={{ border: 0 }}
@@ -211,7 +212,16 @@ const FieldComplexDetail = () => {
                                 </div>
                             </div>
                         </div>
-
+                        {/* Booking Button */}
+                        <div className="bg-white rounded-xl shadow-md p-6">
+                            <button
+                                onClick={handleBookingClick}
+                                className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-lg shadow-lg"
+                            >
+                                <FaCalendarAlt />
+                                Xem lịch & Đặt sân
+                            </button>
+                        </div>
                         {/* Feedback Summary Card */}
                         {feedbackSummary && feedbackSummary.totalFeedbacks > 0 && (
                             <div className="bg-white rounded-xl shadow-md p-6">
@@ -231,7 +241,7 @@ const FieldComplexDetail = () => {
                                             {feedbackSummary.totalFeedbacks} đánh giá
                                         </p>
                                     </div>
-                                    
+
                                     <div className="space-y-2">
                                         {feedbackSummary.ratingPercentages.slice().reverse().map((item) => (
                                             <div key={item.rating} className="flex items-center gap-2">
@@ -239,7 +249,7 @@ const FieldComplexDetail = () => {
                                                     {item.rating} <FaStar className="inline text-yellow-400 text-xs" />
                                                 </span>
                                                 <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                                                    <div 
+                                                    <div
                                                         className="bg-yellow-400 h-full rounded-full transition-all duration-300"
                                                         style={{ width: `${item.percentage}%` }}
                                                     />
@@ -291,16 +301,7 @@ const FieldComplexDetail = () => {
                             </div>
                         )}
 
-                        {/* Booking Button */}
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <button
-                                onClick={handleBookingClick}
-                                className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-lg shadow-lg"
-                            >
-                                <FaCalendarAlt />
-                                Xem lịch & Đặt sân
-                            </button>
-                        </div>
+
                     </div>
                 </div>
 
@@ -351,74 +352,95 @@ const FieldComplexDetail = () => {
                             <p className="text-gray-500 text-lg">Chưa có sân nào trong cụm này</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {sportFields.map((field) => (
-                                <div
-                                    key={field._id}
-                                    onClick={() => handleFieldClick(field._id)}
-                                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 duration-300"
-                                >
-                                    <div className="relative h-48">
-                                        <img
-                                            src={
-                                                field.images && field.images.length > 0
-                                                    ? field.images[0]
-                                                    : "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?ixlib=rb-4.0.3"
-                                            }
-                                            alt={field.name}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                e.target.src = "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?ixlib=rb-4.0.3";
-                                            }}
-                                        />
-                                        {(() => {
-                                            let statusInfo = { color: "bg-gray-500", text: "Không xác định" };
-                                            switch (field.status) {
-                                                case "available":
-                                                    statusInfo = { color: "bg-green-500", text: "Còn trống" };
-                                                    break;
-                                                case "booked":
-                                                    statusInfo = { color: "bg-red-500", text: "Đã đặt" };
-                                                    break;
-                                                case "maintenance":
-                                                    statusInfo = { color: "bg-yellow-500", text: "Bảo trì" };
-                                                    break;
-                                            }
-                                            return (
-                                                <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-white text-sm font-semibold ${statusInfo.color}`}>
-                                                    {statusInfo.text}
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
-                                    <div className="p-4">
-                                        <h4 className="font-semibold text-lg mb-2 text-gray-900">
-                                            {field.name}
-                                        </h4>
-                                        <p className="text-gray-600 text-sm mb-3 line-clamp-1">
-                                            {field.location}
-                                        </p>
-                                        <div className="flex justify-between items-center mb-3">
-                                            <span className="text-gray-600 text-sm">
-                                                Sức chứa: {field.capacity} người
-                                            </span>
-                                            <span className="text-green-600 font-bold text-lg">
-                                                {field.pricePerHour?.toLocaleString()}đ/h
-                                            </span>
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {(showAllFields ? sportFields : sportFields.slice(0, 3)).map((field) => (
+                                    <div
+                                        key={field._id}
+                                        onClick={() => handleFieldClick(field._id)}
+                                        className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 duration-300"
+                                    >
+                                        <div className="relative h-48">
+                                            <img
+                                                src={
+                                                    field.images && field.images.length > 0
+                                                        ? field.images[0]
+                                                        : "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?ixlib=rb-4.0.3"
+                                                }
+                                                alt={field.name}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.src = "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?ixlib=rb-4.0.3";
+                                                }}
+                                            />
+                                            {(() => {
+                                                let statusInfo = { color: "bg-gray-500", text: "Không xác định" };
+                                                switch (field.status) {
+                                                    case "available":
+                                                        statusInfo = { color: "bg-green-500", text: "Còn trống" };
+                                                        break;
+                                                    case "booked":
+                                                        statusInfo = { color: "bg-red-500", text: "Đã đặt" };
+                                                        break;
+                                                    case "maintenance":
+                                                        statusInfo = { color: "bg-yellow-500", text: "Bảo trì" };
+                                                        break;
+                                                }
+                                                return (
+                                                    <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-white text-sm font-semibold ${statusInfo.color}`}>
+                                                        {statusInfo.text}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleFieldClick(field._id);
-                                            }}
-                                            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
-                                        >
-                                            Xem chi tiết
-                                        </button>
+                                        <div className="p-4">
+                                            <h4 className="font-semibold text-lg mb-2 text-gray-900">
+                                                {field.name}
+                                            </h4>
+                                            <p className="text-gray-600 text-sm mb-3 line-clamp-1">
+                                                {field.location}
+                                            </p>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <span className="text-gray-600 text-sm">
+                                                    Sức chứa: {field.capacity} người
+                                                </span>
+                                                <span className="text-green-600 font-bold text-lg">
+                                                    {field.pricePerHour?.toLocaleString()}đ/h
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleFieldClick(field._id);
+                                                }}
+                                                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                                            >
+                                                Xem chi tiết
+                                            </button>
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
+                            {sportFields.length > 3 && (
+                                <div className="flex justify-center mt-6">
+                                    {!showAllFields ? (
+                                        <button
+                                            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                            onClick={() => setShowAllFields(true)}
+                                        >
+                                            Xem thêm
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+                                            onClick={() => navigate('/yard')}
+                                        >
+                                            Xem sân khác
+                                        </button>
+                                    )}
                                 </div>
-                            ))}
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
