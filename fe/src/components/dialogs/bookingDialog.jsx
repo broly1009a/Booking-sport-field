@@ -44,6 +44,7 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const navigate = useNavigate();
+  const [openConfirmWallet, setOpenConfirmWallet] = useState(false);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -177,7 +178,7 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
       // Kiểm tra số dư ví trước khi tạo booking
       try {
         const walletRes = await walletService.getWallet(userId);
-        const currentBalance = walletRes?.data?.balance || 0;
+        const currentBalance = walletRes?.wallet?.balance || 0;
 
         if (currentBalance < totalPrice) {
           const shortage = totalPrice - currentBalance;
@@ -232,7 +233,7 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
       if (res?.data?._id) {
         // Thanh toán bằng ví ngay
         try {
-          await paymentService.payByWallet({
+          await paymentService.payBookingByWallet({
             bookingId: res.data._id,
             userId,
             amount: totalPrice
@@ -273,6 +274,15 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
 
   const handleCancel = () => {
     onClose();
+  };
+
+  const handleWalletClick = () => {
+    setOpenConfirmWallet(true);
+  };
+
+  const handleConfirmWallet = async () => {
+    setOpenConfirmWallet(false);
+    await handleCreateBooking();
   };
 
   return (
@@ -474,11 +484,21 @@ export default function BookingDialog({ open, onClose, selectedSlots, sportField
           <Button
             variant="contained"
             color="success"
-            onClick={handleCreateBooking}
+            onClick={handleWalletClick}
             disabled={loading}
           >
             {loading ? 'Đang xử lý...' : 'Thanh toán ví'}
           </Button>
+              <Dialog open={openConfirmWallet} onClose={() => setOpenConfirmWallet(false)}>
+                <DialogTitle>Xác nhận thanh toán bằng ví</DialogTitle>
+                <DialogContent>
+                  <Typography>Bạn có chắc chắn muốn thanh toán bằng ví với số tiền <strong>{calculateTotal().toLocaleString()}đ</strong>?</Typography>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setOpenConfirmWallet(false)} color="inherit">Hủy</Button>
+                  <Button onClick={handleConfirmWallet} color="success" variant="contained">Xác nhận</Button>
+                </DialogActions>
+              </Dialog>
         </DialogActions>
       </Dialog>
       <NotificationSnackbar

@@ -58,14 +58,14 @@ class BookingService {
 
         // Gửi thông báo cho chủ sân và nhân viên
         try {
-            const populatedField = await SportField.findById(fieldId).populate('fieldComplexId');
-            if (populatedField && populatedField.fieldComplexId) {
-                await notificationService.notifyFieldComplex(
-                    populatedField.fieldComplexId._id,
-                    '🎉 Booking mới',
-                    `Sân ${populatedField.name} vừa được đặt từ ${start.toLocaleString('vi-VN')} đến ${end.toLocaleString('vi-VN')}. Khách hàng: ${customerName || user.fname + ' ' + user.lname}, SĐT: ${phoneNumber || user.phoneNumber}`
-                );
-            }
+                const populatedField = await SportField.findById(fieldId).populate('complex');
+                if (populatedField && populatedField.complex) {
+                    await notificationService.notifyFieldComplex(
+                        populatedField.complex._id,
+                        '🎉 Booking mới',
+                        `Sân ${populatedField.name} vừa được đặt từ ${start.toLocaleString('vi-VN')} đến ${end.toLocaleString('vi-VN')}. Khách hàng: ${customerName || user.fname + ' ' + user.lname}, SĐT: ${phoneNumber || user.phoneNumber}`
+                    );
+                }
         } catch (notifyError) {
             console.error('Lỗi khi gửi thông báo:', notifyError);
             // Không throw error để không ảnh hưởng đến quá trình tạo booking
@@ -121,14 +121,14 @@ class BookingService {
             
             // Gửi thông báo khi booking bị hủy
             try {
-                const populatedField = await SportField.findById(updatedBooking.fieldId._id).populate('fieldComplexId');
-                if (populatedField && populatedField.fieldComplexId) {
-                    await notificationService.notifyFieldComplex(
-                        populatedField.fieldComplexId._id,
-                        '❌ Booking bị hủy',
-                        `Booking sân ${populatedField.name} lúc ${updatedBooking.startTime.toLocaleString('vi-VN')} đã bị hủy.`
-                    );
-                }
+                    const populatedField = await SportField.findById(updatedBooking.fieldId._id).populate('complex');
+                    if (populatedField && populatedField.complex) {
+                        await notificationService.notifyFieldComplex(
+                            populatedField.complex._id,
+                            '❌ Booking bị hủy',
+                            `Booking sân ${populatedField.name} lúc ${updatedBooking.startTime.toLocaleString('vi-VN')} đã bị hủy.`
+                        );
+                    }
             } catch (notifyError) {
                 console.error('Lỗi khi gửi thông báo hủy booking:', notifyError);
             }
