@@ -22,6 +22,13 @@ const statisticService = {
         if (month) params.append('month', month);
         if (year) params.append('year', year);
         return handleApiCall(() => api.get(`/statistic/owner-monthly-payout-list?${params.toString()}`));
+    },
+    getStaffStats: async (staffId, from, to) => {
+        const params = new URLSearchParams();
+        if (staffId) params.append('staffId', staffId);
+        if (from) params.append('from', from);
+        if (to) params.append('to', to);
+        return handleApiCall(() => api.get(`/statistic/staff-stats?${params.toString()}`));
     }
 };
 

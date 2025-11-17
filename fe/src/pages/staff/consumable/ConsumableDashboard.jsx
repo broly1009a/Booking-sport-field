@@ -26,9 +26,10 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-const ConsumableDashboard = () => {
-  const { sportFields } = useContext(PublicContext);
+import { useAuth } from '../../../contexts/authContext';
+import sportFieldService from '../../../services/api/sportFieldService';
+const ConsumableDashboardStaff = () => {
+  const { sportFields, setSportFields } = useContext(PublicContext);
   const [consumables, setConsumables] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -38,7 +39,7 @@ const ConsumableDashboard = () => {
   // Modal xem danh sách sân
   const [fieldModalOpen, setFieldModalOpen] = useState(false);
   const [fieldModalList, setFieldModalList] = useState([]);
-
+  const { currentUser } = useAuth();
   const fetchData = async () => {
     try {
       const consumableData = await consumableService.getAllConsumables();
@@ -48,9 +49,23 @@ const ConsumableDashboard = () => {
     }
   };
 
+  // Fetch sport fields for staff
   useEffect(() => {
+    const fetchSportFieldsByStaff = async () => {
+      try {
+        // You may need to get staffId from context or auth
+        const staffId = currentUser?._id;
+        if (staffId) {
+          const res = await sportFieldService.getSportFieldsByStaff(staffId);
+          setSportFields(res);
+        }
+      } catch (error) {
+        toast.error("Không thể tải danh sách sân của bạn");
+      }
+    };
+    fetchSportFieldsByStaff();
     fetchData();
-  }, []);
+  }, [setSportFields]);
 
   const handleCreateOrUpdate = async (data) => {
     if (editingItem) {
@@ -235,4 +250,4 @@ const ConsumableDashboard = () => {
   );
 };
 
-export default ConsumableDashboard;
+export default ConsumableDashboardStaff;

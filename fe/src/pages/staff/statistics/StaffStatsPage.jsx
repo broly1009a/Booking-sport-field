@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Container, Card, CardContent, Grid, Typography, Paper, TextField, Button } from "@mui/material";
+import { Box, Container, Card, CardContent, Grid, Typography, Switch, FormControlLabel, Paper, TextField, Button } from "@mui/material";
 import { styled } from "@mui/system";
-import { FaBookmark, FaMoneyBillWave, FaLayerGroup } from "react-icons/fa";
+import { FaUsers, FaBookmark, FaMoneyBillWave, FaLayerGroup } from "react-icons/fa";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, BarChart, Bar } from "recharts";
+import { format } from "date-fns";
 import statisticService from "../../../services/api/statisticService";
 import { useTheme } from "@mui/material/styles";
+import * as XLSX from "xlsx";
 import { useAuth } from "../../../contexts/authContext";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
 const STATUS_LABELS = {
   confirmed: "Đã xác nhận",
   pending: "Đang chờ",
@@ -39,7 +41,7 @@ const DashboardCard = ({ title, value, icon: Icon, color }) => (
   </StyledCard>
 );
 
-const OwnerStatsPage = () => {
+const StaffStatsPage = () => {
   const { currentUser } = useAuth();
   const ownerId = currentUser?._id;
   console.log('Owner ID:', ownerId);
@@ -52,7 +54,7 @@ const OwnerStatsPage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
-      const res = await statisticService.getOwnerStats(ownerId, fromDate, toDate);
+      const res = await statisticService.getStaffStats(ownerId, fromDate, toDate);
       console.log('Owner Stats Response:', res);
       if (res && res.data) setStats(res.data);
       setLoading(false);
@@ -108,7 +110,7 @@ const OwnerStatsPage = () => {
           <Grid item xs={12} sm={6} md={3}>
             <DashboardCard
               title="Số dư ví"
-              value={(typeof stats?.walletBalance === 'number' ? stats.walletBalance.toLocaleString('vi-VN') + "đ" : "0đ")}
+               value={(typeof stats?.walletBalance === 'number' ? stats.walletBalance.toLocaleString('vi-VN') + "đ" : "0đ")}
               icon={FaMoneyBillWave}
               color={theme.palette.primary.main}
             />
@@ -167,4 +169,4 @@ const OwnerStatsPage = () => {
   );
 };
 
-export default OwnerStatsPage;
+export default StaffStatsPage;

@@ -55,6 +55,11 @@ import FieldComplexList from './pages/general/fieldComplexList';
 import FieldComplexDetail from './pages/general/fieldComplexDetail';
 import AdminMonthlyPayoutPage from './pages/admin/statistics/AdminMonthlyPayoutPage';
 import OwnerStatsPage from './pages/manager/statistics/OwnerStatsPage';
+import SportsVenueDashboardStaff from './pages/staff/sportField/SportsVenueDashboard';
+import ConsumableDashboardStaff from './pages/staff/consumable/ConsumableDashboard';
+import EquipmentDashboardStaff from './pages/staff/equipment/EquipmentDashboard';
+import BookingListStaff from './pages/staff/booking/BookingList';
+import StaffStatsPage from './pages/staff/statistics/StaffStatsPage';
 /**
  * Roles include GUEST, CUSTOMER, ADMIN, MANAGER
  */
@@ -148,7 +153,7 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: "/booking/:typeId",
+        path: "/booking/:complexId",
         element: (
           <ProtectedRoute requiredRoles={['GUEST', 'CUSTOMER']}>
             <BookingSchedule />
@@ -312,7 +317,7 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "maintenance-schedule/:typeId",
+            path: "maintenance-schedule/:complexId",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER']}>
                 <MaintenanceSchedule />
@@ -368,7 +373,7 @@ const router = createBrowserRouter([
             )
           },
           {
-            path: "event-schedule/:typeId",
+            path: "event-schedule/:complexId",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER']}>
                 <EventSchedule />
@@ -469,7 +474,7 @@ const router = createBrowserRouter([
             path: "dashboard",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
-                <OwnerStatsPage />
+                <StaffStatsPage />
               </ProtectedRoute>
             ),
           },
@@ -477,7 +482,7 @@ const router = createBrowserRouter([
             path: "sport-field-list",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
-                <SportsVenueDashboard />
+                <SportsVenueDashboardStaff />
               </ProtectedRoute>
             ),
           },
@@ -485,7 +490,7 @@ const router = createBrowserRouter([
             path: "equipment-list",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
-                <EquipmentDashboard />
+                <EquipmentDashboardStaff />
               </ProtectedRoute>
             ),
           },
@@ -493,7 +498,7 @@ const router = createBrowserRouter([
             path: "consumable-list",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
-                <ConsumableDashboard />
+                <ConsumableDashboardStaff />
               </ProtectedRoute>
             ),
           },
@@ -501,7 +506,7 @@ const router = createBrowserRouter([
             path: "booking-list",
             element: (
               <ProtectedRoute requiredRoles={['MANAGER', 'STAFF']}>
-                <BookingList />
+                <BookingListStaff />
               </ProtectedRoute>
             ),
           },

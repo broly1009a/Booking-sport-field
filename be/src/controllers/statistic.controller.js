@@ -2,6 +2,17 @@ const StatisticService = require('../services/statistic.service');
 
 class StatisticController {
 
+    async getStaffStats(req, res, next) {
+        try {
+            const { staffId, from, to } = req.query;
+            if (!staffId) return res.status(400).json({ success: false, message: 'staffId is required' });
+            const stats = await StatisticService.getStaffStats(staffId, { from, to });
+            res.status(200).json({ success: true, data: stats });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getOwnerMonthlyPayoutList(req, res, next) {
         try {
             const { ownerId, month, year } = req.query;

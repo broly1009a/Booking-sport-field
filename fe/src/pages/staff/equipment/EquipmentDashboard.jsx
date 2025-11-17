@@ -26,9 +26,10 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-const EquipmentDashboard = () => {
-  const { types, sportFields } = useContext(PublicContext);
+import { useAuth } from '../../../contexts/authContext';
+import sportFieldService from '../../../services/api/sportFieldService';
+const EquipmentDashboardStaff = () => {
+  const { types, sportFields, setSportFields } = useContext(PublicContext);
   const [equipments, setEquipments] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -41,7 +42,7 @@ const EquipmentDashboard = () => {
   const [fieldSearch, setFieldSearch] = useState("");
   const [fieldPage, setFieldPage] = useState(1);
   const fieldsPerPage = 10;
-
+  const { currentUser } = useAuth();
   const fetchData = async () => {
     try {
       const equipmentData = await equipmentService.getAllEquipment();
@@ -52,8 +53,23 @@ const EquipmentDashboard = () => {
   };
 
   useEffect(() => {
+    // Fetch sport fields for staff
+    const fetchSportFieldsByStaff = async () => {
+      try {
+        const staffId = currentUser?._id;
+        console.log("Staff ID:", staffId);  
+        if (staffId) {
+          const res = await sportFieldService.getSportFieldsByStaff(staffId);
+          console.log("Fetched sport fields for staff:", res);
+          setSportFields(res);
+        }
+      } catch (error) {
+        toast.error("Không thể tải danh sách sân của bạn");
+      }
+    };
+    fetchSportFieldsByStaff();
     fetchData();
-  }, []);
+  }, [setSportFields]);
 
   const handleCreateOrUpdate = async (data) => {
     if (editingItem) {
@@ -274,4 +290,4 @@ const EquipmentDashboard = () => {
   );
 };
 
-export default EquipmentDashboard;
+export default EquipmentDashboardStaff;

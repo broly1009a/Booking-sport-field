@@ -41,6 +41,12 @@ export const sportFieldService = {
     },
     deleteSportField: async (id) => {
         return handleApiCall(() => api.delete(`/sport-field/${id}`));
+    },
+    getSportFieldsByStaff: async (staffId) => {
+        return handleApiCall(() => api.get(`/sport-field/by-staff/${staffId}`));
+    },
+    getSportFieldsByOwner: async (ownerId) => {
+        return handleApiCall(() => api.get(`/sport-field/by-owner/${ownerId}`));
     }
 };
 

@@ -6,6 +6,7 @@ const { cloudinaryFileMiddleware } = require('../../../middlewares/index');
 
 router.get('/', SportFieldController.getAllSportFields);
 router.get('/by-staff/:staffId', SportFieldController.getSportFieldsByStaff);
+router.get('/by-owner/:ownerId', SportFieldController.getSportFieldsByOwner);
 router.get('/:id', SportFieldController.getSportFieldById);
 router.post('/', cloudinaryFileMiddleware.array('images', 10), SportFieldController.createSportField);
 router.put('/:id', cloudinaryFileMiddleware.array('images', 10), SportFieldController.updateSportField);

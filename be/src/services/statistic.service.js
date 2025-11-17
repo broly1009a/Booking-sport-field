@@ -7,6 +7,57 @@ const Event = require('../models/event.model');
 const Payment = require('../models/payment.model');
 const Wallet = require('../models/wallet.model');
 class StatisticsService {
+
+                /**
+                 * Thống kê cho staff (các cụm sân staff được giao)
+                 * @param {String} staffId - id của staff
+                 * @param {Object} param1 - {from, to} ngày lọc
+                 */
+                async getStaffStats(staffId, { from, to }) {
+                    // Lấy danh sách complex mà staff được giao
+                    const complexes = await Complex.find({ staffs: staffId });
+                    const complexIds = complexes.map(c => c._id);
+                    // Lấy danh sách sân thuộc các complex
+                    const fields = await SportField.find({ complex: { $in: complexIds } });
+                    const fieldIds = fields.map(f => f._id);
+
+                    // Filter ngày
+                    let dateFilter = {};
+                    if (from || to) {
+                        dateFilter.createdAt = {};
+                        if (from) dateFilter.createdAt.$gte = new Date(from);
+                        if (to) dateFilter.createdAt.$lte = new Date(to);
+                    }
+
+                    // Booking của các sân staff
+                    const bookings = await Booking.find({ fieldId: { $in: fieldIds }, ...dateFilter });
+                    const totalBookings = bookings.length;
+                    const bookingStatusCounts = bookings.reduce((acc, b) => {
+                        acc[b.status] = (acc[b.status] || 0) + 1;
+                        return acc;
+                    }, {});
+
+                    // Event của các sân staff
+                    const events = await Event.find({ fieldId: { $in: fieldIds }, ...dateFilter });
+                    const totalEvents = events.length;
+                    const eventStatusCounts = events.reduce((acc, e) => {
+                        acc[e.status] = (acc[e.status] || 0) + 1;
+                        return acc;
+                    }, {});
+
+                    // Doanh thu từ payment liên quan booking của staff
+                    const payments = await Payment.find({ bookingId: { $in: bookings.map(b => b._id) }, status: 'completed', ...dateFilter });
+                    const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+                    return {
+                        totalFields: fieldIds.length,
+                        totalBookings,
+                        bookingStatusCounts,
+                        totalEvents,
+                        eventStatusCounts,
+                        totalRevenue
+                    };
+                }
             /**
              * Lấy danh sách cần thanh toán tiền hàng tháng cho chủ sân
              * @param {String} ownerId

@@ -11,4 +11,7 @@ router.get('/owner-stats', StatisticController.getOwnerStats);
 // GET /api/v1/statistic/owner-monthly-payout-list?ownerId=...&month=...&year=...
 router.get('/owner-monthly-payout-list', StatisticController.getOwnerMonthlyPayoutList);
 
+// GET /api/v1/statistic/staff-stats?staffId=...&from=...&to=...
+router.get('/staff-stats', StatisticController.getStaffStats);
+
 module.exports = router;

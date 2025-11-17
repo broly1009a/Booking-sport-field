@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from '../../../contexts/authContext';
 import { fieldComplexService } from '../../../services/api/fieldComplexService';
-const SportsVenueDashboard = () => {
+const SportsVenueDashboardStaff = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterFieldComplex, setFilterFieldComplex] = useState("all");
@@ -22,7 +22,11 @@ const SportsVenueDashboard = () => {
   const [fieldComplexes, setFieldComplexes] = useState([]);
   const location = useLocation();
   const { complex, owner } = location.state || {};
+   const { types, sportFields, setSportFields } = useContext(PublicContext);
+  const navigate = useNavigate();
+  const itemsPerPage = 5;
   useEffect(() => {
+    // Lấy danh sách cụm sân như cũ
     const fetchFieldComplexes = async () => {
       try {
         const response = await fieldComplexService.getAll();
@@ -37,13 +41,26 @@ const SportsVenueDashboard = () => {
     };
     fetchFieldComplexes();
 
-  
+
+    // Luôn gọi API lấy danh sách sân theo staff
+    const fetchSportFieldsByStaff = async () => {
+      if (currentUser?._id) {
+        try {
+          const res = await sportFieldService.getSportFieldsByStaff(currentUser._id);
+          setSportFields(res);
+        } catch (error) {
+          toast.error("Không thể tải danh sách sân của bạn");
+        }
+      }
+    };
+    fetchSportFieldsByStaff();
+
     const params = new URLSearchParams(location.search);
     const complexId = params.get('complex');
     if (complexId) {
       setFilterFieldComplex(complexId);
     }
-  }, [location.search, currentUser]);
+  }, [location.search, currentUser, setSportFields]);
   // XÓA
   const handleDeleteVenue = async (venue) => {
     setVenueToDelete(venue);
@@ -64,9 +81,7 @@ const SportsVenueDashboard = () => {
   const cancelDeleteVenue = () => {
     setVenueToDelete(null);
   };
-  const { types, sportFields, setSportFields } = useContext(PublicContext);
-  const navigate = useNavigate();
-  const itemsPerPage = 5;
+ 
   const getStatusColor = (status) => {
     switch (status) {
       case "available":
@@ -400,4 +415,4 @@ const SportsVenueDashboard = () => {
   );
 };
 
-export default SportsVenueDashboard;
+export default SportsVenueDashboardStaff;

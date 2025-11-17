@@ -33,6 +33,14 @@ export const bookingService = {
   roundAllBookingTimesToHour: async () => {
     return handleApiCall(() => api.patch('/booking/round-all-times'));
   },
+  getBookingsByComplexStaff: async (staffId, params) => {
+    // params: { page, limit, status, type, from, to, search }
+    return handleApiCall(() => api.get(`/booking/complex-staff/${staffId}`, { params }));
+  },
+  getBookingsByComplexOwner: async (ownerId, params) => {
+    // params: { page, limit, status, type, from, to, search }
+    return handleApiCall(() => api.get(`/booking/complex-owner/${ownerId}`, { params }));
+  }
 };
 
 export default bookingService;
