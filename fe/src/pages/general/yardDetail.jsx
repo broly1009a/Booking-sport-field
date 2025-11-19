@@ -156,8 +156,8 @@ const YardDetail = () => {
                             </div>
                             <button
                                 onClick={() => {
-                                    if (fieldData?.type?._id) {
-                                        navigate(`/booking/${fieldData.type._id}`);
+                                    if (fieldData?.complex) {
+                                        navigate(`/booking/${fieldData?.complex}`);
                                     } else {
                                         alert("Không tìm thấy loại sân!");
                                     }

@@ -52,14 +52,14 @@ const eventSchema = new Schema({
     minPlayers: {
         type: Number,
         required: true,
-        min: 4,
+        min: 1,
         max: 8,
-        default: 4
+        default: 1
     },
     maxPlayers: {
         type: Number,
         required: true,
-        min: 4,
+        min: 2,
         max: 8,
         default: 8
     },

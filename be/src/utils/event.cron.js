@@ -29,7 +29,7 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
         const acceptedPlayers = event.interestedPlayers.filter(p => p.status === 'accepted');
         
         // 1. Lấy danh sách người chơi (Creator + Accepted players)
-        const players = [event.createdBy, ...acceptedPlayers.map(p => p.userId)];
+        const players = acceptedPlayers.map(p => p.userId);
         const playerEmails = players
             .filter(user => user && user.email)
             .map(user => user.email);
@@ -233,7 +233,7 @@ async function checkEventDeadlines() {
         console.log('[Event Cron] 🔍 Kiểm tra event deadlines...', now);
         // Tìm các event đã qua deadline nhưng vẫn 'open'
         const expiredEvents = await Event.find({
-            status: 'open',
+            status: { $in: ['open', 'full'] },
             deadline: { $lte: now }
         })
         .populate('createdBy', 'fname lname email phoneNumber role')
@@ -423,7 +423,7 @@ function registerEventCrons() {
     console.log('[Event Cron] 📅 Đang đăng ký cron jobs cho Event...');
     
     // Kiểm tra deadline mỗi 5 phút
-    cron.schedule('*/5 * * * *', checkEventDeadlines);
+    cron.schedule('*/10 * * * * *', checkEventDeadlines);
     console.log('[Event Cron] ✓ Đã đăng ký: Kiểm tra deadline (mỗi 5 phút)');
     
     // Gửi cảnh báo mỗi 30 phút
@@ -431,7 +431,7 @@ function registerEventCrons() {
     console.log('[Event Cron] ✓ Đã đăng ký: Gửi cảnh báo (mỗi 30 phút)');
     
     // Hoàn thành event mỗi 10 phút
-    cron.schedule('*/10 * * * *', completeFinishedEvents);
+    cron.schedule('*/10 * * * * *', completeFinishedEvents);
     console.log('[Event Cron] ✓ Đã đăng ký: Hoàn thành event (mỗi 10 phút)');
     
     // Dọn dẹp event cũ mỗi ngày lúc 3:00 AM

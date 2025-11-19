@@ -67,12 +67,12 @@ const ManagerLayout = () => {
                 <ListItemText primary="Cụm sân" />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding>
+            {/* <ListItem disablePadding>
               <ListItemButton component={Link} to="manager/type-list">
                 <ListItemIcon sx={{ color: 'white' }}><Category /></ListItemIcon>
                 <ListItemText primary="Loại Sân" />
               </ListItemButton>
-            </ListItem>
+            </ListItem> */}
 
             <ListItem disablePadding>
               <ListItemButton component={Link} to="manager/sport-field-list">

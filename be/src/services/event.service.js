@@ -49,10 +49,10 @@ class EventService {
             availableSlots: { $gt: 0 },
             deadline: { $gt: new Date() }
         })
-        .populate('createdBy', 'name email avatar')
-        .populate('fieldId', 'name location pricePerHour')
-        .populate('interestedPlayers.userId', 'name email avatar')
-        .sort({ startTime: 1 });
+            .populate('createdBy', 'name email avatar')
+            .populate('fieldId', 'name location pricePerHour')
+            .populate('interestedPlayers.userId', 'name email avatar')
+            .sort({ startTime: 1 });
 
         return {
             success: true,
@@ -73,10 +73,10 @@ class EventService {
         const participated = await Event.find({
             'interestedPlayers.userId': userId
         })
-        .populate('createdBy', 'name email avatar')
-        .populate('fieldId', 'name location pricePerHour')
-        .populate('interestedPlayers.userId', 'name email avatar')
-        .sort({ startTime: -1 });
+            .populate('createdBy', 'name email avatar')
+            .populate('fieldId', 'name location pricePerHour')
+            .populate('interestedPlayers.userId', 'name email avatar')
+            .sort({ startTime: -1 });
 
         return {
             success: true,
@@ -110,11 +110,11 @@ class EventService {
         const minPlayers = parseInt(data.minPlayers) || 4;
         const maxPlayers = parseInt(data.maxPlayers) || 8;
 
-        if (minPlayers < 4 || minPlayers > 8) {
+        if (minPlayers < 1 || minPlayers > 8) {
             throw { status: 400, message: 'Số người tối thiểu phải từ 4 đến 8' };
         }
 
-        if (maxPlayers < 4 || maxPlayers > 8) {
+        if (maxPlayers < 2 || maxPlayers > 8) {
             throw { status: 400, message: 'Số người tối đa phải từ 4 đến 8' };
         }
 
@@ -171,45 +171,45 @@ class EventService {
             estimatedPrice: Math.round(estimatedPrice),
             interestedPlayers: []
         });
-         // Kiểm tra trùng lịch sự kiện
-            const overlappingEvent = await Event.findOne({
-                fieldId: data.fieldId,
-                $or: [
-                    {
-                        startTime: { $lt: endTime },
-                        endTime: { $gt: startTime }
-                    }
-                ]
-            });
+        // Kiểm tra trùng lịch sự kiện
+        const overlappingEvent = await Event.findOne({
+            fieldId: data.fieldId,
+            $or: [
+                {
+                    startTime: { $lt: endTime },
+                    endTime: { $gt: startTime }
+                }
+            ]
+        });
         if (overlappingEvent) {
             throw { status: 400, message: 'Lịch sự kiện trùng với một sự kiện đã tồn tại' };
         }
         await event.save();
         const populatedEvent = await event.populate(['createdBy', 'fieldId']);
-        
+
         // Cập nhật trạng thái schedule
-         const bookingDate = new Date(startTime);
+        const bookingDate = new Date(startTime);
         const scheduleDate = new Date(Date.UTC(
             bookingDate.getUTCFullYear(),
             bookingDate.getUTCMonth(),
             bookingDate.getUTCDate(),
             0, 0, 0, 0
         ));
-        
+
         console.log('Đang cập nhật schedule cho event:', {
             fieldId: data.fieldId,
             scheduleDate,
             startTime,
             endTime
         });
-        
+
         const schedule = await Schedule.findOne({ fieldId: data.fieldId, date: scheduleDate });
         if (schedule) {
             console.log('Tìm thấy schedule, đang cập nhật time slots...');
             let updated = false;
             const start = startTime.getTime();
             const end = endTime.getTime();
-            
+
             for (const slot of schedule.timeSlots) {
                 if (
                     slot.startTime < end &&
@@ -235,7 +235,7 @@ class EventService {
             console.error('Không tìm thấy schedule cho fieldId và date này');
             throw { status: 404, message: 'Không tìm thấy schedule cho sân và ngày này. Vui lòng tạo schedule trước.' };
         }
-        
+
         return {
             success: true,
             status: 201,
@@ -303,9 +303,9 @@ class EventService {
         // ✨ Kiểm tra xung đột thời gian trước khi tham gia
         const hasConflict = await this.checkTimeConflict(userId, event.startTime, event.endTime);
         if (hasConflict) {
-            throw { 
-                status: 400, 
-                message: 'Bạn đã có lịch đặt sân hoặc event khác trùng thời gian. Vui lòng kiểm tra lại lịch của bạn!' 
+            throw {
+                status: 400,
+                message: 'Bạn đã có lịch đặt sân hoặc event khác trùng thời gian. Vui lòng kiểm tra lại lịch của bạn!'
             };
         }
 
@@ -319,7 +319,7 @@ class EventService {
 
         await event.save();
         const populatedEvent = await event.populate(['createdBy', 'fieldId', 'interestedPlayers.userId']);
-        
+
         return {
             success: true,
             status: 200,
@@ -345,8 +345,8 @@ class EventService {
 
         // Các trường được phép cập nhật
         const allowedUpdates = [
-            'name', 'description', 'image', 'playerLevel', 
-            'playStyle', 'teamPreference', 'deadline', 
+            'name', 'description', 'image', 'playerLevel',
+            'playStyle', 'teamPreference', 'deadline',
             'minPlayers', 'maxPlayers'
         ];
 
@@ -361,7 +361,7 @@ class EventService {
         if (updates.minPlayers || updates.maxPlayers) {
             const minPlayers = updates.minPlayers || event.minPlayers;
             const maxPlayers = updates.maxPlayers || event.maxPlayers;
-            
+
             if (minPlayers < 4 || minPlayers > 8) {
                 throw { status: 400, message: 'Số người tối thiểu phải từ 4 đến 8' };
             }
@@ -380,7 +380,7 @@ class EventService {
         Object.assign(event, updates);
         await event.save();
         const populatedEvent = await event.populate(['createdBy', 'fieldId', 'interestedPlayers.userId']);
-        
+
         return {
             success: true,
             status: 200,
@@ -406,7 +406,7 @@ class EventService {
 
         event.status = 'cancelled';
         await event.save();
-        
+
         return {
             success: true,
             status: 200,
@@ -457,7 +457,7 @@ class EventService {
 
         await event.save();
         const populatedEvent = await event.populate(['createdBy', 'fieldId', 'interestedPlayers.userId']);
-        
+
         return {
             success: true,
             status: 200,
@@ -500,7 +500,7 @@ class EventService {
         playerInterest.status = 'rejected';
         await event.save();
         const populatedEvent = await event.populate(['createdBy', 'fieldId', 'interestedPlayers.userId']);
-        
+
         return {
             success: true,
             status: 200,
@@ -529,7 +529,7 @@ class EventService {
         }
 
         const player = event.interestedPlayers[playerIndex];
-        
+
         // Nếu người này đã accepted thì cần hoàn lại slot
         if (player.status === 'accepted') {
             event.availableSlots += 1;
@@ -541,7 +541,7 @@ class EventService {
         event.interestedPlayers.splice(playerIndex, 1);
         await event.save();
         const populatedEvent = await event.populate(['createdBy', 'fieldId', 'interestedPlayers.userId']);
-        
+
         return {
             success: true,
             status: 200,
@@ -606,12 +606,12 @@ class EventService {
             bookingType: 'event-matching', // Loại đặc biệt cho matching
             userId: event.createdBy._id,
             status: 'confirmed', // Tự động confirmed vì đã có đủ người
-            totalPrice: Math.round(discountedPrice),
+            totalPrice: pricePerPerson,
             participants,
             participantDetails,
             maxParticipants: event.maxPlayers,
-            customerName: event.createdBy.name || '',
-            phoneNumber: event.createdBy.phone || '',
+            customerName: `${event.createdBy.fname} ${event.createdBy.lname}` || 'Người dùng không tên',
+            phoneNumber: event.createdBy.phoneNumber || 'Chưa cập nhật',
             notes: `Event matching: ${event.name}. Giảm ${event.discountPercent}%. Giá/người: ${pricePerPerson.toLocaleString()}đ`
         });
 
@@ -624,7 +624,7 @@ class EventService {
 
         const populatedEvent = await event.populate(['createdBy', 'fieldId', 'interestedPlayers.userId']);
         const populatedBooking = await booking.populate(['fieldId', 'participants']);
-        
+
         return {
             success: true,
             status: 201,
@@ -693,7 +693,7 @@ class EventService {
         // Tự động đóng nếu quá deadline
         if (event.status === 'open' && now > event.deadline) {
             const acceptedCount = event.interestedPlayers.filter(p => p.status === 'accepted').length + 1;
-            
+
             if (acceptedCount >= event.minPlayers) {
                 // Đủ người, chuyển sang confirmed
                 event.status = 'confirmed';
@@ -716,16 +716,16 @@ class EventService {
     // Lấy lịch trình của user (tất cả bookings và events sắp tới)
     async getUserSchedule(userId) {
         const now = new Date();
-        
+
         // Lấy tất cả bookings sắp tới của user
         const bookings = await Booking.find({
             userId,
             startTime: { $gte: now },
             status: { $in: ['pending', 'confirmed', 'waiting'] }
         })
-        .select('startTime endTime fieldId status')
-        .populate('fieldId', 'name location')
-        .sort({ startTime: 1 });
+            .select('startTime endTime fieldId status')
+            .populate('fieldId', 'name location')
+            .sort({ startTime: 1 });
 
         // Lấy tất cả events mà user đã tham gia (accepted)
         const events = await Event.find({
@@ -738,9 +738,9 @@ class EventService {
             startTime: { $gte: now },
             status: { $in: ['open', 'full', 'confirmed'] }
         })
-        .select('name startTime endTime fieldId status')
-        .populate('fieldId', 'name location')
-        .sort({ startTime: 1 });
+            .select('name startTime endTime fieldId status')
+            .populate('fieldId', 'name location')
+            .sort({ startTime: 1 });
 
         // Kết hợp và format lại
         const schedule = [
