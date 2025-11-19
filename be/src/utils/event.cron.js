@@ -28,8 +28,8 @@ async function sendEventEmailNotification(event, type, additionalInfo = {}) {
     try {
         const acceptedPlayers = event.interestedPlayers.filter(p => p.status === 'accepted');
         
-        // 1. Lấy danh sách người chơi (Creator + Accepted players)
-        const players = [event.createdBy, ...acceptedPlayers.map(p => p.userId)];
+        // 1. Lấy danh sách người chơi (chỉ accepted players, không bao gồm creator)
+        const players = acceptedPlayers.map(p => p.userId);
         const playerEmails = players
             .filter(user => user && user.email)
             .map(user => user.email);
@@ -231,9 +231,9 @@ async function checkEventDeadlines() {
         
         const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         console.log('[Event Cron] 🔍 Kiểm tra event deadlines...', now);
-        // Tìm các event đã qua deadline nhưng vẫn 'open'
+        // Tìm các event đã qua deadline nhưng vẫn 'open' hoặc 'full'
         const expiredEvents = await Event.find({
-            status: 'open',
+            status: { $in: ['open', 'full'] },
             deadline: { $lte: now }
         })
         .populate('createdBy', 'fname lname email phoneNumber role')
@@ -256,7 +256,7 @@ async function checkEventDeadlines() {
         for (const event of expiredEvents) {
             const acceptedPlayers = event.interestedPlayers.filter(p => p.status === 'accepted');
             const acceptedCount = acceptedPlayers.length + 1; // +1 cho creator
-            
+            console.log(`[Event Cron] Xử lý event ${event._id} (${event.name}): ${acceptedCount} người (min cần ${event.minPlayers})`);
             if (acceptedCount >= event.minPlayers) {
                 // ✅ Đủ người → Tự động confirm
                 event.status = 'confirmed';
@@ -423,7 +423,7 @@ function registerEventCrons() {
     console.log('[Event Cron] 📅 Đang đăng ký cron jobs cho Event...');
     
     // Kiểm tra deadline mỗi 5 phút
-    cron.schedule('*/5 * * * *', checkEventDeadlines);
+    cron.schedule('*/10 * * * * *', checkEventDeadlines);
     console.log('[Event Cron] ✓ Đã đăng ký: Kiểm tra deadline (mỗi 5 phút)');
     
     // Gửi cảnh báo mỗi 30 phút

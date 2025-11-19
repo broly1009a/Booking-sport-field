@@ -323,7 +323,7 @@ const EventManagement = () => {
                         Chi tiết
                       </Button>
 
-                      {event.status === 'open' && acceptedCount >= event.minPlayers && !event.bookingId && (
+                      {(event.status === 'open' || event.status === 'full') && acceptedCount >= event.minPlayers && !event.bookingId && (
                         <Button
                           size="small"
                           variant="contained"
@@ -524,7 +524,7 @@ const EventManagement = () => {
             </DialogContent>
             <DialogActions sx={{ p: 2, bgcolor: '#f5f5f5' }}>
               <Button onClick={() => setOpenDetail(false)}>Đóng</Button>
-              {selectedEvent.status === 'open' && 
+              {(selectedEvent.status === 'open' || selectedEvent.status === 'full') && 
                selectedEvent.interestedPlayers?.filter(p => p.status === 'accepted').length >= selectedEvent.minPlayers &&
                !selectedEvent.bookingId && (
                 <Button

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Typography, TextField, Box, Table, TableHead, TableRow, TableCell, TableBody,
-  MenuItem, Select, FormControl, InputLabel, Grid
+  MenuItem, Select, FormControl, InputLabel, Grid, RadioGroup, FormControlLabel, Radio
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { formatTimeVN } from '../../utils/handleFormat';
@@ -18,8 +18,10 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
     playerLevel: 'any',
     playStyle: 'casual',
     teamPreference: 'random',
-    discountPercent: 20
+    discountPercent: 20,
+    estimatedPrice: 0
   });
+  const [mode, setMode] = useState('discount'); // 'discount' or 'price'
   const [loading, setLoading] = useState(false);
 
   if (!sportField || !selectedSlots || selectedSlots.length === 0) return null;
@@ -33,11 +35,45 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
   const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').toDate().toISOString();
   const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').toDate().toISOString();
   
-  console.log('Calculated startTime:', startTime);
-  console.log('Calculated endTime:', endTime);
+  const duration = selectedSlots.length * 0.5; // giờ
+  const fieldPrice = sportField.pricePerHour || sportField.price;
+
+  const calculateEstimatedPrice = (discountPercent, maxPlayers) => {
+    return Math.round(fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers);
+  };
+
+  const calculateDiscountPercent = (estimatedPrice, maxPlayers) => {
+    return Math.round(100 * (1 - (estimatedPrice * maxPlayers) / (fieldPrice * duration)));
+  };
+
+  useEffect(() => {
+    setFormData(prev => {
+      const newData = { ...prev };
+      if (mode === 'discount') {
+        newData.estimatedPrice = calculateEstimatedPrice(newData.discountPercent, newData.maxPlayers);
+      } else {
+        newData.discountPercent = calculateDiscountPercent(newData.estimatedPrice, newData.maxPlayers);
+      }
+      return newData;
+    });
+  }, [mode]);
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      if (field === 'maxPlayers') {
+        if (mode === 'discount') {
+          newData.estimatedPrice = calculateEstimatedPrice(newData.discountPercent, newData.maxPlayers);
+        } else {
+          newData.discountPercent = calculateDiscountPercent(newData.estimatedPrice, newData.maxPlayers);
+        }
+      } else if (field === 'discountPercent' && mode === 'discount') {
+        newData.estimatedPrice = calculateEstimatedPrice(newData.discountPercent, newData.maxPlayers);
+      } else if (field === 'estimatedPrice' && mode === 'price') {
+        newData.discountPercent = calculateDiscountPercent(newData.estimatedPrice, newData.maxPlayers);
+      }
+      return newData;
+    });
   };
 
   const handleConfirm = async () => {
@@ -54,16 +90,31 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
       return;
     }
 
+    // Validate thời gian bắt đầu phải sau hiện tại ít nhất 2 tiếng để deadline hợp lệ
+    const now = dayjs();
+    const minStartTime = now.add(2, 'hour');
+    if (dayjs(startTime).isBefore(minStartTime)) {
+      toast.error('Thời gian bắt đầu phải sau thời gian hiện tại ít nhất 2 tiếng để có deadline đăng ký hợp lệ!');
+      return;
+    }
+
     setLoading(true);
     try {
       const deadline = dayjs(startTime).subtract(2, 'hour').toDate().toISOString();
       
       const eventData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        minPlayers: formData.minPlayers,
+        maxPlayers: formData.maxPlayers,
+        playerLevel: formData.playerLevel,
+        playStyle: formData.playStyle,
+        teamPreference: formData.teamPreference,
         fieldId: sportField._id,
         startTime,
         endTime,
-        deadline
+        deadline,
+        ...(mode === 'price' ? { estimatedPrice: formData.estimatedPrice } : { discountPercent: formData.discountPercent })
       };
       
       console.log('=== EVENT DATA BEING SENT ===');
@@ -88,7 +139,8 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
         playerLevel: 'any',
         playStyle: 'casual',
         teamPreference: 'random',
-        discountPercent: 20
+        discountPercent: 20,
+        estimatedPrice: 0
       });
       onClose();
     } catch (err) {
@@ -106,8 +158,10 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
       playerLevel: 'any',
       playStyle: 'casual',
       teamPreference: 'random',
-      discountPercent: 20
+      discountPercent: 20,
+      estimatedPrice: 0
     });
+    setMode('discount');
     onClose();
   };
 //   console.log('Selected Slots:', selectedSlots);
@@ -244,17 +298,47 @@ console.log('Sport Field:', sportField);
             </FormControl>
           </Grid>
 
-          <Grid item xs={6}>
-            <TextField
-              label="Giảm giá (%)"
-              type="number"
-              value={formData.discountPercent}
-              onChange={e => handleChange('discountPercent', parseInt(e.target.value))}
-              fullWidth
-              inputProps={{ min: 0, max: 50 }}
-              helperText={`Giá gốc giảm ${formData.discountPercent}%`}
-            />
+          <Grid item xs={12}>
+            <FormControl component="fieldset">
+              <Typography variant="body1" sx={{ mb: 1 }}>Chọn cách tính giá:</Typography>
+              <RadioGroup
+                row
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
+              >
+                <FormControlLabel value="discount" control={<Radio />} label="Nhập % giảm giá" />
+                <FormControlLabel value="price" control={<Radio />} label="Nhập giá ước tính" />
+              </RadioGroup>
+            </FormControl>
           </Grid>
+
+          {mode === 'discount' && (
+            <Grid item xs={6}>
+              <TextField
+                label="Giảm giá (%)"
+                type="number"
+                value={formData.discountPercent}
+                onChange={e => handleChange('discountPercent', parseInt(e.target.value))}
+                fullWidth
+                inputProps={{ min: 0, max: 50 }}
+                helperText={`Giá ước tính: ${calculateEstimatedPrice(formData.discountPercent, formData.maxPlayers).toLocaleString()}đ`}
+              />
+            </Grid>
+          )}
+
+          {mode === 'price' && (
+            <Grid item xs={6}>
+              <TextField
+                label="Giá ước tính (đ)"
+                type="number"
+                value={formData.estimatedPrice}
+                onChange={e => handleChange('estimatedPrice', parseInt(e.target.value))}
+                fullWidth
+                inputProps={{ min: 0 }}
+                helperText={`Giảm giá: ${calculateDiscountPercent(formData.estimatedPrice, formData.maxPlayers)}%`}
+              />
+            </Grid>
+          )}
         </Grid>
 
         <Box sx={{ mt: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 1 }}>
