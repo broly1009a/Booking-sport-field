@@ -117,7 +117,7 @@ class PaymentService {
             console.log('VNPAY URL created:', vnpUrl);
             
             // 5. Lưu paymentUrl và expiry (15 phút) vào booking
-            const expiryTime = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+            const expiryTime = new Date(Date.now() + 7 * 60 * 60 * 1000 + 15 * 60 * 1000); // UTC+7 + 15 phút
             await Booking.findByIdAndUpdate(booking._id, {
                 paymentUrl: vnpUrl,
                 paymentUrlExpiry: expiryTime
@@ -484,24 +484,27 @@ class PaymentService {
     // Lấy payment URL từ booking để tiếp tục thanh toán
     async getPaymentUrlFromBooking(bookingId) {
         const booking = await Booking.findById(bookingId);
-        if (!booking) throw new Error('Booking không tồn tại');
+        if (!booking) {
+            return { success: false, message: 'Booking không tồn tại' };
+        }
         
         // Kiểm tra trạng thái booking
         if (booking.status !== 'pending') {
-            throw new Error('Booking không còn ở trạng thái chờ thanh toán');
+            return { success: false, message: 'Booking không còn ở trạng thái chờ thanh toán' };
         }
 
         // Kiểm tra URL đã hết hạn chưa
         if (!booking.paymentUrl || !booking.paymentUrlExpiry) {
-            throw new Error('Không tìm thấy link thanh toán');
+            return { success: false, message: 'Không tìm thấy link thanh toán' };
         }
 
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         if (now > booking.paymentUrlExpiry) {
-            throw new Error('Link thanh toán đã hết hạn. Vui lòng đặt lại.');
+            return { success: false, message: 'Link thanh toán đã hết hạn. Vui lòng đặt lại.' };
         }
 
         return {
+            success: true,
             paymentUrl: booking.paymentUrl,
             expiryTime: booking.paymentUrlExpiry,
             remainingMinutes: Math.ceil((booking.paymentUrlExpiry - now) / (1000 * 60))
@@ -510,7 +513,7 @@ class PaymentService {
 
     // Auto-cancel booking pending hết hạn (gọi từ cron job)
     async cancelExpiredPendingBookings() {
-        const now = new Date();
+         const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const expiredBookings = await Booking.find({
             status: 'pending',
             paymentUrlExpiry: { $lt: now }

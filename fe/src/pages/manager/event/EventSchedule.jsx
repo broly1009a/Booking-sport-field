@@ -11,7 +11,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import StarIcon from '@mui/icons-material/Star';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
-import { eventService } from '../../../services/api/eventService';
+// import { eventService } from '../../../services/api/eventService';
 
 
 import { useParams } from "react-router-dom";

@@ -89,11 +89,12 @@ class EventService {
     // Tạo event matching mới
     async createEvent(data, userId) {
         // Validate thời gian
-        const now = new Date();
+          const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const startTime = new Date(data.startTime);
         const endTime = new Date(data.endTime);
         const deadline = data.deadline ? new Date(data.deadline) : new Date(startTime.getTime() - 2 * 60 * 60 * 1000); // 2h trước
-
+        console.log('deadline:', deadline);
+        console.log('now:', now);
         if (startTime <= now) {
             throw { status: 400, message: 'Thời gian bắt đầu phải lớn hơn thời gian hiện tại' };
         }
@@ -104,6 +105,10 @@ class EventService {
 
         if (deadline >= startTime) {
             throw { status: 400, message: 'Deadline phải trước thời gian bắt đầu' };
+        }
+
+        if (deadline <= now) {
+            throw { status: 400, message: 'Deadline phải sau thời gian hiện tại' };
         }
 
         // Validate số lượng người chơi
@@ -145,10 +150,25 @@ class EventService {
         //     throw { status: 400, message: 'Bạn đã có một event đang mở. Vui lòng hoàn thành hoặc hủy event đó trước khi tạo mới' };
         // }
 
-        // Tính giá ước tính (giảm theo discountPercent, mặc định 20%)
-        const discountPercent = data.discountPercent || 20;
+        // Tính giá ước tính (linh hoạt: nếu truyền estimatedPrice thì tính discountPercent, ngược lại nếu truyền discountPercent thì tính estimatedPrice, mặc định 20%)
         const duration = (endTime - startTime) / (1000 * 60 * 60); // giờ
-        const estimatedPrice = fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers;
+        let discountPercent, estimatedPrice;
+
+        if (data.estimatedPrice !== undefined && data.discountPercent !== undefined) {
+            throw { status: 400, message: 'Không thể truyền cả estimatedPrice và discountPercent cùng lúc' };
+        } else if (data.estimatedPrice !== undefined) {
+            estimatedPrice = data.estimatedPrice;
+            discountPercent = 100 * (1 - (estimatedPrice * maxPlayers) / (fieldPrice * duration));
+            if (discountPercent < 0 || discountPercent > 100) {
+                throw { status: 400, message: 'Giá ước tính không hợp lệ, dẫn đến tỷ lệ giảm giá không hợp lệ (0-100%)' };
+            }
+        } else if (data.discountPercent !== undefined) {
+            discountPercent = data.discountPercent;
+            estimatedPrice = fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers;
+        } else {
+            discountPercent = 20;
+            estimatedPrice = fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers;
+        }
 
         // Tạo event mới
         const event = new Event({
@@ -588,7 +608,7 @@ class EventService {
         const fieldPrice = field.pricePerHour || field.price;
         const totalPrice = fieldPrice * duration;
         const discountedPrice = totalPrice * (1 - event.discountPercent / 100);
-        const pricePerPerson = Math.round(discountedPrice / totalPlayers);
+        const pricePerPerson = Math.round(discountedPrice / participants.length);
 
         // Tạo danh sách participants
         const participants = [event.createdBy._id, ...acceptedPlayers.map(p => p.userId._id)];
@@ -606,12 +626,12 @@ class EventService {
             bookingType: 'event-matching', // Loại đặc biệt cho matching
             userId: event.createdBy._id,
             status: 'confirmed', // Tự động confirmed vì đã có đủ người
-            totalPrice: Math.round(discountedPrice),
+            totalPrice: Math.round(pricePerPerson * participants.length),
             participants,
             participantDetails,
             maxParticipants: event.maxPlayers,
-            customerName: event.createdBy.name || '',
-            phoneNumber: event.createdBy.phone || '',
+            customerName: `${event.createdBy.fname} ${event.createdBy.lname}` || 'Người dùng không tên',
+            phoneNumber: event.createdBy.phoneNumber || 'Chưa cập nhật',
             notes: `Event matching: ${event.name}. Giảm ${event.discountPercent}%. Giá/người: ${pricePerPerson.toLocaleString()}đ`
         });
 
@@ -688,7 +708,7 @@ class EventService {
         const event = await Event.findById(eventId);
         if (!event) return;
 
-        const now = new Date();
+          const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
 
         // Tự động đóng nếu quá deadline
         if (event.status === 'open' && now > event.deadline) {
@@ -715,7 +735,7 @@ class EventService {
 
     // Lấy lịch trình của user (tất cả bookings và events sắp tới)
     async getUserSchedule(userId) {
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         
         // Lấy tất cả bookings sắp tới của user
         const bookings = await Booking.find({

@@ -111,6 +111,16 @@ class BookingController {
             next(error);
         }
     }
+
+    async getBookingsByParticipant(req, res, next) {
+        try {
+            const { userId } = req.params;
+            const bookings = await BookingService.getBookingsByParticipant(userId);
+            res.status(200).json({ success: true, data: bookings });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new BookingController();

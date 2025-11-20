@@ -77,7 +77,7 @@ class StatisticsService {
                     from = new Date(year, month - 1, 1, 0, 0, 0);
                     to = new Date(year, month, 0, 23, 59, 59); // ngày cuối tháng
                 } else {
-                    const now = new Date();
+                    const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
                     from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
                     to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
                 }

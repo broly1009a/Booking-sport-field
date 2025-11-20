@@ -142,10 +142,25 @@ const BookingHistory = () => {
     const fetchBookings = async () => {
       if (!currentUser?._id) return;
       setLoading(true);
-      const res = await bookingService.getBookingsByUser(currentUser._id);
-      const data = (res?.data || []).reverse();
-      setBookings(data);
-      applyFilters(data);
+      try {
+        const [userBookingsRes, participantBookingsRes] = await Promise.all([
+          bookingService.getBookingsByUser(currentUser._id),
+          bookingService.getBookingsByParticipant(currentUser._id)
+        ]);
+        const userBookings = userBookingsRes?.data || [];
+        const participantBookings = participantBookingsRes?.data || [];
+        const combinedBookings = [...userBookings, ...participantBookings];
+        // Remove duplicates based on _id if any
+        const uniqueBookings = combinedBookings.filter((booking, index, self) =>
+          index === self.findIndex(b => b._id === booking._id)
+        );
+        const data = uniqueBookings.reverse();
+        setBookings(data);
+        applyFilters(data);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        toast.error('Không thể tải lịch sử đặt sân!');
+      }
       setLoading(false);
     };
     fetchBookings();
@@ -163,26 +178,79 @@ const BookingHistory = () => {
     setOpenFeedbackDialog(false);
     // Reload bookings to update feedback status
     if (currentUser?._id) {
-      bookingService.getBookingsByUser(currentUser._id).then(res => {
-        const data = (res?.data || []).reverse();
+      Promise.all([
+        bookingService.getBookingsByUser(currentUser._id),
+        bookingService.getBookingsByParticipant(currentUser._id)
+      ]).then(([userRes, participantRes]) => {
+        const userBookings = userRes?.data || [];
+        const participantBookings = participantRes?.data || [];
+        const combinedBookings = [...userBookings, ...participantBookings];
+        const uniqueBookings = combinedBookings.filter((booking, index, self) =>
+          index === self.findIndex(b => b._id === booking._id)
+        );
+        const data = uniqueBookings.reverse();
         setBookings(data);
         applyFilters(data);
+      }).catch(error => {
+        console.error('Error reloading bookings:', error);
+        toast.error('Không thể tải lại lịch sử đặt sân!');
       });
     }
   };
 
+  const handleWalletPayment = async (bookingId) => {
+    if (window.confirm('Bạn có muốn thanh toán bằng ví không?')) {
+      const booking = bookings.find(b => b._id === bookingId);
+      if (!booking) {
+        toast.error('Không tìm thấy booking!');
+        return;
+      }
+      const amount = booking.totalPrice;
+      const walletRes = await paymentService.payBookingByWallet({bookingId, userId: currentUser._id, amount});
+      toast.success('Thanh toán bằng ví thành công!');
+      if (currentUser?._id) {
+        Promise.all([
+          bookingService.getBookingsByUser(currentUser._id),
+          bookingService.getBookingsByParticipant(currentUser._id)
+        ]).then(([userRes, participantRes]) => {
+          const userBookings = userRes?.data || [];
+          const participantBookings = participantRes?.data || [];
+          const combinedBookings = [...userBookings, ...participantBookings];
+          const uniqueBookings = combinedBookings.filter((booking, index, self) =>
+            index === self.findIndex(b => b._id === booking._id)
+          );
+          const data = uniqueBookings.reverse();
+          setBookings(data);
+          applyFilters(data);
+        }).catch(error => {
+          console.error('Error reloading bookings:', error);
+        });
+      }
+    }
+  };
+
   const handleContinuePayment = async (bookingId) => {
+    // console.log('Initiating continue payment for booking ID:', bookingId);
     try {
       const res = await paymentService.getPaymentUrlFromBooking(bookingId);
-      if (res?.data?.paymentUrl) {
+      // console.log('Hello from continue payment, received response:', res);
+      if (!res.data.success) {
+        toast.error(res.data.message || 'Không thể lấy link thanh toán!');
+        return;
+      }
+      console.log('Payment URL response:', res.data.paymentUrl);
+      if (res.data.paymentUrl) {
         const remainingMinutes = res.data.remainingMinutes || 0;
         toast.info(`Link thanh toán còn ${remainingMinutes} phút. Đang chuyển hướng...`);
         setTimeout(() => {
           window.location.href = res.data.paymentUrl;
         }, 1500);
+      } else {
+        // Pay by wallet
+        handleWalletPayment(bookingId);
       }
     } catch (error) {
-      toast.error(error?.message || 'Không thể lấy link thanh toán!');
+      toast.error(error?.message || 'Không thể thanh toán!');
     }
   };
 
@@ -313,7 +381,9 @@ const BookingHistory = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {b.matchmaking && b.matchmaking.length > 0
+                      {b.participants && b.participants.length > 0
+                        ? `Xé vé (${b.participants.length - 1})`
+                        : b.matchmaking && b.matchmaking.length > 0
                         ? (
                           <Chip
                             label={`Đã tạo (${b.matchmaking[0].status === 'open' ? 'Đang mở' : 'Đã đủ'})`}
@@ -493,8 +563,8 @@ const BookingHistory = () => {
               <Typography>Ngày tạo: {dayjs.utc(selectedBooking.createdAt).format('HH:mm DD/MM/YYYY')}</Typography>
               <Typography>Ngày cập nhật: {dayjs.utc(selectedBooking.updatedAt).format('HH:mm DD/MM/YYYY')}</Typography>
               <Typography>
-                Người tham gia: {selectedBooking.participants && selectedBooking.participants.length > 0
-                  ? selectedBooking.participants.map(p => p?.fname ? `${p.fname} ${p.lname}` : p).join(', ')
+                Người tham gia: {selectedBooking.participants && selectedBooking.participants.length > 1
+                  ? selectedBooking.participants.slice(1).map(p => p?.fname ? `${p.fname} ${p.lname}` : p).join(', ')
                   : 'Chỉ có bạn'}
               </Typography>
               {selectedBooking.feedbacks && selectedBooking.feedbacks.length > 0 && (
@@ -521,8 +591,13 @@ const BookingHistory = () => {
               )}
               <Divider sx={{ my: 2 }} />
              
-              <Typography variant="subtitle2" fontWeight="bold">Ghép trận:</Typography>
-              {selectedBooking.matchmaking && selectedBooking.matchmaking.length > 0 ? (
+              <Typography variant="subtitle2" fontWeight="bold">{selectedBooking.participants && selectedBooking.participants.length > 0 ? 'Xé vé:' : 'Ghép trận:'}</Typography>
+              {selectedBooking.participants && selectedBooking.participants.length > 0 ? (
+                <Box>
+                  <Typography>Đồng đội: {selectedBooking.participants.slice(1).map(p => `${p.fname} ${p.lname}`).join(', ')}</Typography>
+                  <Typography>Số người: {selectedBooking.participants.length - 1}</Typography>
+                </Box>
+              ) : selectedBooking.matchmaking && selectedBooking.matchmaking.length > 0 ? (
                 <Chip
                   label={`Đã tạo (${selectedBooking.matchmaking[0].status === 'open' ? 'Đang mở' : 'Đã đủ'})`}
                   color={selectedBooking.matchmaking[0].status === 'open' ? 'info' : 'success'}
