@@ -40,6 +40,9 @@ export const bookingService = {
   getBookingsByComplexOwner: async (ownerId, params) => {
     // params: { page, limit, status, type, from, to, search }
     return handleApiCall(() => api.get(`/booking/complex-owner/${ownerId}`, { params }));
+  },
+  getBookingsByParticipant: async (userId) => {
+    return handleApiCall(() => api.get(`/booking/participant/${userId}`));
   }
 };
 

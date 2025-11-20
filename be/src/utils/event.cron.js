@@ -423,7 +423,7 @@ function registerEventCrons() {
     console.log('[Event Cron] 📅 Đang đăng ký cron jobs cho Event...');
     
     // Kiểm tra deadline mỗi 5 phút
-    cron.schedule('*/10 * * * * *', checkEventDeadlines);
+    cron.schedule('*/5 * * * *', checkEventDeadlines);
     console.log('[Event Cron] ✓ Đã đăng ký: Kiểm tra deadline (mỗi 5 phút)');
     
     // Gửi cảnh báo mỗi 30 phút

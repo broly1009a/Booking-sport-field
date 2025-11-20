@@ -53,9 +53,9 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
 
   const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
   
-  console.log('Sorted Slots:', sortedSlots);
-  console.log('First slot time:', sortedSlots[0].time);
-  console.log('Last slot time:', sortedSlots[sortedSlots.length - 1].time);
+  // console.log('Sorted Slots:', sortedSlots);
+  // console.log('First slot time:', sortedSlots[0].time);
+  // console.log('Last slot time:', sortedSlots[sortedSlots.length - 1].time);
   
   const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').toDate().toISOString();
   const endTime = dayjs(sortedSlots[sortedSlots.length - 1].time).add(7 + 0.5, 'hour').toDate().toISOString();
@@ -88,7 +88,8 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
       return newData;
     });
   };
-
+    // const now = new Date();
+    // console.log('Current time:', now);
   const handleConfirm = async () => {
     if (!formData.name.trim()) {
       toast.error('Vui lòng nhập tên sự kiện!');
@@ -104,8 +105,9 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
     }
 
     // Validate thời gian bắt đầu phải sau hiện tại ít nhất 2 tiếng để deadline hợp lệ
-    const now = dayjs();
-    const minStartTime = now.add(2, 'hour');
+    const now = new Date();
+    // console.log('Current time:', now.toString());
+    const minStartTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
     if (dayjs(startTime).isBefore(minStartTime)) {
       toast.error('Thời gian bắt đầu phải sau thời gian hiện tại ít nhất 2 tiếng để có deadline đăng ký hợp lệ!');
       return;
@@ -144,17 +146,17 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
         ...(mode === 'price' ? { estimatedPrice: formData.estimatedPrice } : { discountPercent: formData.discountPercent })
       };
       
-      console.log('=== EVENT DATA BEING SENT ===');
-      console.log('Event Data:', JSON.stringify(eventData, null, 2));
-      console.log('startTime type:', typeof eventData.startTime);
-      console.log('endTime type:', typeof eventData.endTime);
-      console.log('============================');
+      // console.log('=== EVENT DATA BEING SENT ===');
+      // console.log('Event Data:', JSON.stringify(eventData, null, 2));
+      // console.log('startTime type:', typeof eventData.startTime);
+      // console.log('endTime type:', typeof eventData.endTime);
+      // console.log('============================');
       
       const result = await eventService.createEvent(eventData);
       
-      console.log('=== EVENT RESPONSE ===');
-      console.log('Result:', JSON.stringify(result, null, 2));
-      console.log('======================');
+      // console.log('=== EVENT RESPONSE ===');
+      // console.log('Result:', JSON.stringify(result, null, 2));
+      // console.log('======================');
       
       toast.success('Tạo sự kiện matching thành công!');
       if (onConfirm) onConfirm();
@@ -195,7 +197,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
   };
 //   console.log('Selected Slots:', selectedSlots);
 // log ra thông tin sân đặt
-console.log('Sport Field:', sportField);
+// console.log('Sport Field:', sportField);
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ bgcolor: '#1976d2', color: 'white', textAlign: 'center' }}>
@@ -229,7 +231,7 @@ console.log('Sport Field:', sportField);
             </TableBody>
           </Table>
           <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
-            Deadline đăng ký: {formData.deadline ? formatTimeVN(dayjs(formData.deadline)) : formatTimeVN(dayjs(startTime).subtract(2, 'hour'))}
+            Deadline đăng ký: {formData.deadline ? formatTimeVN(dayjs(formData.deadline)) : formatTimeVN(dayjs(startTime).subtract(9, 'hour'))}
           </Typography>
         </Box>
 

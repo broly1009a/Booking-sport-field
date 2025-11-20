@@ -6,6 +6,7 @@ router.get('/complex-owner/:ownerId', BookingController.getBookingsByComplexOwne
 router.get('/paginated', BookingController.getPaginatedBookings);
 router.patch('/round-all-times', BookingController.roundAllBookingTimesToHour);
 router.get('/user/:userId', BookingController.getBookingsByUser);
+router.get('/participant/:userId', BookingController.getBookingsByParticipant);
 router.get('/', BookingController.getAllBookings);
 router.get('/:id', BookingController.getBookingById);
 router.post('/', BookingController.createBooking);

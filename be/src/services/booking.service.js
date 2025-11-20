@@ -423,6 +423,122 @@ class BookingService {
         ]);
     }
 
+    async getBookingsByParticipant(userId) {
+        return await bookingModel.aggregate([
+            { $match: { participants: typeof userId === 'string' ? new mongoose.Types.ObjectId(userId) : userId } },
+            {
+                $lookup: {
+                    from: 'matchmakings',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'matchmaking'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'sportfields',
+                    localField: 'fieldId',
+                    foreignField: '_id',
+                    as: 'field'
+                }
+            },
+            {
+                $unwind: { path: '$field', preserveNullAndEmptyArrays: true }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'participants',
+                    foreignField: '_id',
+                    as: 'participants'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: { path: '$user', preserveNullAndEmptyArrays: true }
+            },
+            {
+                $lookup: {
+                    from: 'feedbacks',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'feedbacks'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'consumablepurchases',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'consumablePurchases'
+                }
+            },
+            {
+                $unwind: { path: '$consumablePurchases', preserveNullAndEmptyArrays: true }
+            },
+            {
+                $lookup: {
+                    from: 'consumables',
+                    let: { consumables: { $ifNull: ['$consumablePurchases.consumables', []] } },
+                    pipeline: [
+                        { $match: { $expr: { $in: ['$_id', { $map: { input: '$$consumables', as: 'c', in: '$$c.consumableId' } }] } } },
+                        { $project: { _id: 1, name: 1, price: 1 } }
+                    ],
+                    as: 'consumableDetails'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'equipmentrentals',
+                    localField: '_id',
+                    foreignField: 'bookingId',
+                    as: 'equipmentRentals'
+                }
+            },
+            {
+                $unwind: { path: '$equipmentRentals', preserveNullAndEmptyArrays: true }
+            },
+            {
+                $lookup: {
+                    from: 'equipment',
+                    let: { equipments: { $ifNull: ['$equipmentRentals.equipments', []] } },
+                    pipeline: [
+                        { $match: { $expr: { $in: ['$_id', { $map: { input: '$$equipments', as: 'e', in: '$$e.equipmentId' } }] } } },
+                        { $project: { _id: 1, name: 1, price: 1 } }
+                    ],
+                    as: 'equipmentDetails'
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    field: 1,
+                    user: 1,
+                    startTime: 1,
+                    endTime: 1,
+                    totalPrice: 1,
+                    customerName: 1,
+                    phoneNumber: 1,
+                    consumablePurchases: 1,
+                    consumableDetails: 1,
+                    equipmentRentals: 1,
+                    equipmentDetails: 1,
+                    status: 1,
+                    feedbacks: 1,
+                    participants: 1,
+                    matchmaking: 1
+                }
+            }
+        ]);
+    }
+
    
     async releaseScheduleSlots(booking) {
         const { startTime, endTime, fieldId } = booking;
