@@ -106,6 +106,10 @@ class EventService {
             throw { status: 400, message: 'Deadline phải trước thời gian bắt đầu' };
         }
 
+        if (deadline <= now) {
+            throw { status: 400, message: 'Deadline phải sau thời gian hiện tại' };
+        }
+
         // Validate số lượng người chơi
         const minPlayers = parseInt(data.minPlayers) || 4;
         const maxPlayers = parseInt(data.maxPlayers) || 8;

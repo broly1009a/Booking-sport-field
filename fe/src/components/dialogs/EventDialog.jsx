@@ -19,7 +19,8 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
     playStyle: 'casual',
     teamPreference: 'random',
     discountPercent: 20,
-    estimatedPrice: 0
+    estimatedPrice: 0,
+    deadline: ''
   });
   const [mode, setMode] = useState('discount'); // 'discount' or 'price'
   const [loading, setLoading] = useState(false);
@@ -98,10 +99,24 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
       return;
     }
 
+    // Validate deadline nếu có
+    let deadline;
+    if (formData.deadline) {
+      deadline = dayjs(formData.deadline);
+      if (deadline.isBefore(now)) {
+        toast.error('Deadline phải sau thời gian hiện tại!');
+        return;
+      }
+      if (deadline.isAfter(dayjs(startTime))) {
+        toast.error('Deadline phải trước thời gian bắt đầu sự kiện!');
+        return;
+      }
+    } else {
+      deadline = dayjs(startTime).subtract(2, 'hour');
+    }
+
     setLoading(true);
     try {
-      const deadline = dayjs(startTime).subtract(2, 'hour').toDate().toISOString();
-      
       const eventData = {
         name: formData.name,
         description: formData.description,
@@ -113,7 +128,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
         fieldId: sportField._id,
         startTime,
         endTime,
-        deadline,
+        deadline: deadline.toISOString(),
         ...(mode === 'price' ? { estimatedPrice: formData.estimatedPrice } : { discountPercent: formData.discountPercent })
       };
       
@@ -140,7 +155,8 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
         playStyle: 'casual',
         teamPreference: 'random',
         discountPercent: 20,
-        estimatedPrice: 0
+        estimatedPrice: 0,
+        deadline: ''
       });
       onClose();
     } catch (err) {
@@ -159,7 +175,8 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
       playStyle: 'casual',
       teamPreference: 'random',
       discountPercent: 20,
-      estimatedPrice: 0
+      estimatedPrice: 0,
+      deadline: ''
     });
     setMode('discount');
     onClose();
@@ -200,7 +217,7 @@ console.log('Sport Field:', sportField);
             </TableBody>
           </Table>
           <Typography variant="caption" sx={{ color: '#666', mt: 1, display: 'block' }}>
-            Deadline đăng ký: {formatTimeVN(dayjs(startTime).subtract(2, 'hour'))}
+            Deadline đăng ký: {formData.deadline ? formatTimeVN(dayjs(formData.deadline)) : formatTimeVN(dayjs(startTime).subtract(2, 'hour'))}
           </Typography>
         </Box>
 
@@ -296,6 +313,18 @@ console.log('Sport Field:', sportField);
                 <MenuItem value="balanced">Cân bằng</MenuItem>
               </Select>
             </FormControl>
+          </Grid>
+
+          <Grid item xs={6}>
+            <TextField
+              label="Deadline đăng ký (tùy chọn)"
+              type="datetime-local"
+              value={formData.deadline}
+              onChange={e => handleChange('deadline', e.target.value)}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              helperText="Để trống sẽ mặc định 2 giờ trước bắt đầu"
+            />
           </Grid>
 
           <Grid item xs={12}>
