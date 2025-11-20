@@ -117,7 +117,7 @@ class PaymentService {
             console.log('VNPAY URL created:', vnpUrl);
             
             // 5. Lưu paymentUrl và expiry (15 phút) vào booking
-            const expiryTime = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+            const expiryTime = new Date(Date.now() + 7 * 60 * 60 * 1000 + 15 * 60 * 1000); // UTC+7 + 15 phút
             await Booking.findByIdAndUpdate(booking._id, {
                 paymentUrl: vnpUrl,
                 paymentUrlExpiry: expiryTime
@@ -496,7 +496,7 @@ class PaymentService {
             throw new Error('Không tìm thấy link thanh toán');
         }
 
-        const now = new Date();
+          const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         if (now > booking.paymentUrlExpiry) {
             throw new Error('Link thanh toán đã hết hạn. Vui lòng đặt lại.');
         }
@@ -510,7 +510,7 @@ class PaymentService {
 
     // Auto-cancel booking pending hết hạn (gọi từ cron job)
     async cancelExpiredPendingBookings() {
-        const now = new Date();
+         const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const expiredBookings = await Booking.find({
             status: 'pending',
             paymentUrlExpiry: { $lt: now }

@@ -18,7 +18,7 @@ class BookingService {
         const start = new Date(startTime);
         const end = new Date(endTime);
 
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         if (start >= end) {
             throw { status: 400, message: 'Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.' };
         }

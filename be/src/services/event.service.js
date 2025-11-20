@@ -89,11 +89,12 @@ class EventService {
     // Tạo event matching mới
     async createEvent(data, userId) {
         // Validate thời gian
-        const now = new Date();
+          const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         const startTime = new Date(data.startTime);
         const endTime = new Date(data.endTime);
         const deadline = data.deadline ? new Date(data.deadline) : new Date(startTime.getTime() - 2 * 60 * 60 * 1000); // 2h trước
-
+        console.log('deadline:', deadline);
+        console.log('now:', now);
         if (startTime <= now) {
             throw { status: 400, message: 'Thời gian bắt đầu phải lớn hơn thời gian hiện tại' };
         }
@@ -707,7 +708,7 @@ class EventService {
         const event = await Event.findById(eventId);
         if (!event) return;
 
-        const now = new Date();
+          const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
 
         // Tự động đóng nếu quá deadline
         if (event.status === 'open' && now > event.deadline) {
@@ -734,7 +735,7 @@ class EventService {
 
     // Lấy lịch trình của user (tất cả bookings và events sắp tới)
     async getUserSchedule(userId) {
-        const now = new Date();
+        const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
         
         // Lấy tất cả bookings sắp tới của user
         const bookings = await Booking.find({

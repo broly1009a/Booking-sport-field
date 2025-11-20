@@ -25,7 +25,31 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
   const [mode, setMode] = useState('discount'); // 'discount' or 'price'
   const [loading, setLoading] = useState(false);
 
-  if (!sportField || !selectedSlots || selectedSlots.length === 0) return null;
+  useEffect(() => {
+    if (!sportField || !selectedSlots || selectedSlots.length === 0) return;
+    const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
+    const startTime = dayjs(sortedSlots[0].time).add(7, 'hour').toDate().toISOString();
+    const duration = selectedSlots.length * 0.5; // giờ
+    const fieldPrice = sportField.pricePerHour || sportField.price;
+
+    const calculateEstimatedPrice = (discountPercent, maxPlayers) => {
+      return Math.round(fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers);
+    };
+
+    setFormData(prev => {
+      const newData = { ...prev };
+      if (mode === 'discount') {
+        newData.estimatedPrice = calculateEstimatedPrice(newData.discountPercent, newData.maxPlayers);
+      } else {
+        newData.discountPercent = Math.round(100 * (1 - (newData.estimatedPrice * newData.maxPlayers) / (fieldPrice * duration)));
+      }
+      return newData;
+    });
+  }, [mode, sportField, selectedSlots]);
+
+  if (!sportField || !selectedSlots || selectedSlots.length === 0) {
+    return null;
+  }
 
   const sortedSlots = [...selectedSlots].sort((a, b) => new Date(a.time) - new Date(b.time));
   
@@ -46,18 +70,6 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
   const calculateDiscountPercent = (estimatedPrice, maxPlayers) => {
     return Math.round(100 * (1 - (estimatedPrice * maxPlayers) / (fieldPrice * duration)));
   };
-
-  useEffect(() => {
-    setFormData(prev => {
-      const newData = { ...prev };
-      if (mode === 'discount') {
-        newData.estimatedPrice = calculateEstimatedPrice(newData.discountPercent, newData.maxPlayers);
-      } else {
-        newData.discountPercent = calculateDiscountPercent(newData.estimatedPrice, newData.maxPlayers);
-      }
-      return newData;
-    });
-  }, [mode]);
 
   const handleChange = (field, value) => {
     setFormData(prev => {
@@ -102,7 +114,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
     // Validate deadline nếu có
     let deadline;
     if (formData.deadline) {
-      deadline = dayjs(formData.deadline);
+      deadline = dayjs(formData.deadline).add(7, 'hour'); // Cộng 7 tiếng để UTC
       if (deadline.isBefore(now)) {
         toast.error('Deadline phải sau thời gian hiện tại!');
         return;
