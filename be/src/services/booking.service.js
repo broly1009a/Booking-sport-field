@@ -6,6 +6,7 @@ const FieldComplex = require('../models/fieldComplex.model');
 // const Feedback = require('../models/feedback.model');
 const ConsumablePurchase = require('../models/consumablePurchase.model');
 const EquipmentRental = require('../models/equipmentRental.model');
+const Matchmaking = require('../models/matchmaking.model');
 const mongoose = require('mongoose');
 const notificationService = require('./notification.service');
 class BookingService {
@@ -131,6 +132,16 @@ class BookingService {
                     }
             } catch (notifyError) {
                 console.error('Lỗi khi gửi thông báo hủy booking:', notifyError);
+            }
+
+            // Hủy matchmaking liên quan nếu booking sắp diễn ra
+            try {
+                const now = new Date(Date.now() + 7 * 60 * 60 * 1000);
+                if (updatedBooking.startTime > now) {
+                    await Matchmaking.updateMany({ bookingId: updatedBooking._id }, { status: 'cancelled' });
+                }
+            } catch (matchmakingError) {
+                console.error('Lỗi khi hủy matchmaking:', matchmakingError);
             }
         }
 
