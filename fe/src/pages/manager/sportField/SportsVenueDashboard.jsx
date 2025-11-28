@@ -29,6 +29,8 @@ const SportsVenueDashboard = () => {
       try {
         const response = await fieldComplexService.getAll();
         let complexes = response;
+        // console.log("Field complexes fetched:", complexes);
+        // console.log("Current user:", currentUser.role);
         if (currentUser.role !== 'ADMIN') {
           complexes = response.filter(fc => fc.owner && fc.owner._id === currentUser._id);
         }
@@ -43,7 +45,9 @@ const SportsVenueDashboard = () => {
     const fetchSportFieldsByStaff = async () => {
       if (currentUser?._id) {
         try {
-          const res = await sportFieldService.getSportFieldsByOwner(currentUser._id);
+          const res = currentUser.role === 'ADMIN' 
+            ? await sportFieldService.getAllSportFields()
+            : await sportFieldService.getSportFieldsByOwner(currentUser._id);
           setSportFields(res);
         } catch (error) {
           toast.error("Không thể tải danh sách sân của bạn");
