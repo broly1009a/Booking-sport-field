@@ -33,7 +33,9 @@ dayjs.extend(utc);
 const statusMap = {
   open: { label: 'Đang mở', color: 'info' },
   full: { label: 'Đã đủ', color: 'success' },
-  closed: { label: 'Đã đóng', color: 'default' }
+  cancelled: { label: 'Đã hủy', color: 'error' },
+  expired: { label: 'Đã hết hạn', color: 'warning' },
+  completed: { label: 'Đã hoàn thành', color: 'success' }
 };
 
 const MatchmakingHistory = () => {
@@ -191,7 +193,9 @@ const MatchmakingHistory = () => {
                 <MenuItem value="all">Tất cả</MenuItem>
                 <MenuItem value="open">Đang mở</MenuItem>
                 <MenuItem value="full">Đã đủ</MenuItem>
-                <MenuItem value="closed">Đã đóng</MenuItem>
+                <MenuItem value="cancelled">Đã hủy</MenuItem>
+                <MenuItem value="expired">Đã hết hạn</MenuItem>
+                <MenuItem value="completed">Đã hoàn thành</MenuItem>
               </Select>
             </FormControl>
           </Grid>

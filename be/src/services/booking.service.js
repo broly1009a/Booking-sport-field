@@ -158,8 +158,8 @@ class BookingService {
         if (status) query.status = status;
         if (from || to) {
             query.startTime = {};
-            if (from) query.startTime.$gte = new Date(from);
-            if (to) query.startTime.$lte = new Date(to);
+            if (from) query.startTime.$gte = new Date(new Date(from).getTime() + 7 * 60 * 60 * 1000);
+            if (to) query.startTime.$lte = new Date(new Date(to).getTime() + 7 * 60 * 60 * 1000);
         }
 
         let fieldFilter = {};
@@ -223,8 +223,8 @@ class BookingService {
         if (status) query.status = status;
         if (from || to) {
             query.startTime = {};
-            if (from) query.startTime.$gte = new Date(from);
-            if (to) query.startTime.$lte = new Date(to);
+            if (from) query.startTime.$gte = new Date(new Date(from).getTime() + 7 * 60 * 60 * 1000);
+            if (to) query.startTime.$lte = new Date(new Date(to).getTime() + 7 * 60 * 60 * 1000);
         }
         const skip = (page - 1) * limit;
         const [bookings, total] = await Promise.all([
@@ -275,8 +275,8 @@ class BookingService {
         if (status) query.status = status;
         if (from || to) {
             query.startTime = {};
-            if (from) query.startTime.$gte = new Date(from);
-            if (to) query.startTime.$lte = new Date(to);
+            if (from) query.startTime.$gte = new Date(new Date(from).getTime() + 7 * 60 * 60 * 1000);
+            if (to) query.startTime.$lte = new Date(new Date(to).getTime() + 7 * 60 * 60 * 1000);
         }
         const skip = (page - 1) * limit;
         const [bookings, total] = await Promise.all([
