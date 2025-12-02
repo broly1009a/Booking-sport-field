@@ -206,7 +206,7 @@ const BookingHistory = () => {
         return;
       }
       const amount = booking.totalPrice;
-      const walletRes = await paymentService.payBookingByWallet({bookingId, userId: currentUser._id, amount});
+      const walletRes = await paymentService.payBookingByWallet({ bookingId, userId: currentUser._id, amount });
       toast.success('Thanh toán bằng ví thành công!');
       if (currentUser?._id) {
         Promise.all([
@@ -298,10 +298,10 @@ const BookingHistory = () => {
               >
                 <MenuItem value="all">Tất cả</MenuItem>
                 <MenuItem value="pending">Đang xử lí</MenuItem>
-                 <MenuItem value="waiting">Chờ xác nhận</MenuItem>
+                <MenuItem value="waiting">Chờ xác nhận</MenuItem>
                 <MenuItem value="confirmed">Đã xác nhận</MenuItem>
                 <MenuItem value="cancelled">Đã hủy</MenuItem>
-               
+
               </Select>
             </FormControl>
           </Grid>
@@ -367,7 +367,9 @@ const BookingHistory = () => {
                     </TableCell>
                     <TableCell>{b.totalPrice?.toLocaleString('vi-VN')}đ</TableCell>
                     <TableCell>
-                      {b.status === 'pending' ? (
+                      {b.status === 'cancelled' ? (
+                        <Chip label="Đã hủy" color="error" size="small" />
+                      ) : b.status === 'pending' ? (
                         <Button
                           size="small"
                           variant="contained"
@@ -381,31 +383,33 @@ const BookingHistory = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {b.participants && b.participants.length > 0
+                      {b.status === 'cancelled' ? (
+                        <Chip label="Đã hủy" color="error" size="small" />
+                      ) : b.participants && b.participants.length > 0
                         ? `Xé vé (${b.participants.length - 1})`
                         : b.matchmaking && b.matchmaking.length > 0
-                        ? (
-                          <Chip
-                            label={`Đã tạo (${b.matchmaking[0].status === 'open' ? 'Đang mở' : 'Đã đủ'})`}
-                            color={b.matchmaking[0].status === 'open' ? 'info' : 'success'}
-                            size="small"
-                          />
-                        )
-                        : 'Không'}
+                          ? (
+                            <Chip
+                              label={`Đã tạo (${b.matchmaking[0].status === 'open' ? 'Đang mở' : 'Đã đủ'})`}
+                              color={b.matchmaking[0].status === 'open' ? 'info' : 'success'}
+                              size="small"
+                            />
+                          )
+                          : 'Không'}
                     </TableCell>
                     <TableCell>
                       {b.feedbacks && b.feedbacks.length > 0
                         ? 'Đã đánh giá'
                         : b.status === 'confirmed' ? (
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              color="primary"
-                              onClick={() => handleOpenFeedback(b)}
-                            >
-                              Đánh giá
-                            </Button>
-                          ) : 'Hạn chế'
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => handleOpenFeedback(b)}
+                          >
+                            Đánh giá
+                          </Button>
+                        ) : 'Hạn chế'
                       }
                     </TableCell>
                     <TableCell>
@@ -464,7 +468,7 @@ const BookingHistory = () => {
                 </Box>
               )}
               <Divider sx={{ my: 2 }} />
-               {/* Hiển thị đồ tiêu thụ */}
+              {/* Hiển thị đồ tiêu thụ */}
               {selectedBooking.consumablePurchases && (
                 <Box sx={{ my: 2 }}>
                   <Divider sx={{ mb: 1 }} />
@@ -472,88 +476,88 @@ const BookingHistory = () => {
                   {/* Nếu là mảng thì map, nếu là object thì hiển thị 1 lần */}
                   {Array.isArray(selectedBooking.consumablePurchases)
                     ? selectedBooking.consumablePurchases.map((cp, idx) => (
-                        <Box key={cp._id || idx} sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-                          <Typography><b>Tổng tiền:</b> {cp.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
-                          {cp.consumables && cp.consumables.length > 0 && (
-                            <Box sx={{ mt: 1 }}>
-                              <Typography><b>Chi tiết:</b></Typography>
-                              {cp.consumables.map((item, i) => {
-                                const name = selectedBooking.consumableDetails?.find(d => d._id === item.consumableId)?.name || '';
-                                return (
-                                  <Typography key={item._id || i} sx={{ ml: 2 }}>
-                                    {name ? `${name} - ` : ''}Số lượng: {item.quantity}
-                                  </Typography>
-                                );
-                              })}
-                            </Box>
-                          )}
-                        </Box>
-                      ))
+                      <Box key={cp._id || idx} sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
+                        <Typography><b>Tổng tiền:</b> {cp.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
+                        {cp.consumables && cp.consumables.length > 0 && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography><b>Chi tiết:</b></Typography>
+                            {cp.consumables.map((item, i) => {
+                              const name = selectedBooking.consumableDetails?.find(d => d._id === item.consumableId)?.name || '';
+                              return (
+                                <Typography key={item._id || i} sx={{ ml: 2 }}>
+                                  {name ? `${name} - ` : ''}Số lượng: {item.quantity}
+                                </Typography>
+                              );
+                            })}
+                          </Box>
+                        )}
+                      </Box>
+                    ))
                     : (
-                        <Box key={selectedBooking.consumablePurchases._id} sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
-                          <Typography><b>Tổng tiền:</b> {selectedBooking.consumablePurchases.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
-                          {selectedBooking.consumablePurchases.consumables && selectedBooking.consumablePurchases.consumables.length > 0 && (
-                            <Box sx={{ mt: 1 }}>
-                              <Typography><b>Chi tiết:</b></Typography>
-                              {selectedBooking.consumablePurchases.consumables.map((item, i) => {
-                                const name = selectedBooking.consumableDetails?.find(d => d._id === item.consumableId)?.name || '';
-                                return (
-                                  <Typography key={item._id || i} sx={{ ml: 2 }}>
-                                    {name ? `${name} - ` : ''}Số lượng: {item.quantity}
-                                  </Typography>
-                                );
-                              })}
-                            </Box>
-                          )}
-                        </Box>
-                      )}
+                      <Box key={selectedBooking.consumablePurchases._id} sx={{ mb: 2, p: 2, bgcolor: '#e3f2fd', borderRadius: 2 }}>
+                        <Typography><b>Tổng tiền:</b> {selectedBooking.consumablePurchases.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
+                        {selectedBooking.consumablePurchases.consumables && selectedBooking.consumablePurchases.consumables.length > 0 && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography><b>Chi tiết:</b></Typography>
+                            {selectedBooking.consumablePurchases.consumables.map((item, i) => {
+                              const name = selectedBooking.consumableDetails?.find(d => d._id === item.consumableId)?.name || '';
+                              return (
+                                <Typography key={item._id || i} sx={{ ml: 2 }}>
+                                  {name ? `${name} - ` : ''}Số lượng: {item.quantity}
+                                </Typography>
+                              );
+                            })}
+                          </Box>
+                        )}
+                      </Box>
+                    )}
                 </Box>
               )}
 
               {/* Hiển thị thiết bị thuê */}
-                {selectedBooking.equipmentRentals && (
-                  <Box sx={{ my: 2 }}>
-                    <Divider sx={{ mb: 1 }} />
-                    <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>Thiết bị thuê:</Typography>
-                    {Array.isArray(selectedBooking.equipmentRentals)
-                      ? selectedBooking.equipmentRentals.map((eq, idx) => (
-                          <Box key={eq._id || idx} sx={{ mb: 2, p: 2, bgcolor: '#fffde7', borderRadius: 2 }}>
-                            <Typography><b>Tổng tiền:</b> {eq.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
-                            {eq.equipments && eq.equipments.length > 0 && (
-                              <Box sx={{ mt: 1 }}>
-                                <Typography><b>Chi tiết:</b></Typography>
-                                {eq.equipments.map((item, i) => {
-                                  const name = selectedBooking.equipmentDetails?.find(d => d._id === item.equipmentId)?.name || '';
-                                  return (
-                                    <Typography key={item._id || i} sx={{ ml: 2 }}>
-                                      {name ? `${name} - ` : ''}Số lượng: {item.quantity}
-                                    </Typography>
-                                  );
-                                })}
-                              </Box>
-                            )}
-                          </Box>
-                        ))
-                      : (
-                          <Box key={selectedBooking.equipmentRentals._id} sx={{ mb: 2, p: 2, bgcolor: '#fffde7', borderRadius: 2 }}>
-                            <Typography><b>Tổng tiền:</b> {selectedBooking.equipmentRentals.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
-                            {selectedBooking.equipmentRentals.equipments && selectedBooking.equipmentRentals.equipments.length > 0 && (
-                              <Box sx={{ mt: 1 }}>
-                                <Typography><b>Chi tiết:</b></Typography>
-                                {selectedBooking.equipmentRentals.equipments.map((item, i) => {
-                                  const name = selectedBooking.equipmentDetails?.find(d => d._id === item.equipmentId)?.name || '';
-                                  return (
-                                    <Typography key={item._id || i} sx={{ ml: 2 }}>
-                                      {name ? `${name} - ` : ''}Số lượng: {item.quantity}
-                                    </Typography>
-                                  );
-                                })}
-                              </Box>
-                            )}
+              {selectedBooking.equipmentRentals && (
+                <Box sx={{ my: 2 }}>
+                  <Divider sx={{ mb: 1 }} />
+                  <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>Thiết bị thuê:</Typography>
+                  {Array.isArray(selectedBooking.equipmentRentals)
+                    ? selectedBooking.equipmentRentals.map((eq, idx) => (
+                      <Box key={eq._id || idx} sx={{ mb: 2, p: 2, bgcolor: '#fffde7', borderRadius: 2 }}>
+                        <Typography><b>Tổng tiền:</b> {eq.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
+                        {eq.equipments && eq.equipments.length > 0 && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography><b>Chi tiết:</b></Typography>
+                            {eq.equipments.map((item, i) => {
+                              const name = selectedBooking.equipmentDetails?.find(d => d._id === item.equipmentId)?.name || '';
+                              return (
+                                <Typography key={item._id || i} sx={{ ml: 2 }}>
+                                  {name ? `${name} - ` : ''}Số lượng: {item.quantity}
+                                </Typography>
+                              );
+                            })}
                           </Box>
                         )}
-                  </Box>
-                )}
+                      </Box>
+                    ))
+                    : (
+                      <Box key={selectedBooking.equipmentRentals._id} sx={{ mb: 2, p: 2, bgcolor: '#fffde7', borderRadius: 2 }}>
+                        <Typography><b>Tổng tiền:</b> {selectedBooking.equipmentRentals.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
+                        {selectedBooking.equipmentRentals.equipments && selectedBooking.equipmentRentals.equipments.length > 0 && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography><b>Chi tiết:</b></Typography>
+                            {selectedBooking.equipmentRentals.equipments.map((item, i) => {
+                              const name = selectedBooking.equipmentDetails?.find(d => d._id === item.equipmentId)?.name || '';
+                              return (
+                                <Typography key={item._id || i} sx={{ ml: 2 }}>
+                                  {name ? `${name} - ` : ''}Số lượng: {item.quantity}
+                                </Typography>
+                              );
+                            })}
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                </Box>
+              )}
               <Typography>Thời gian: {dayjs.utc(selectedBooking.startTime).format('HH:mm DD/MM/YYYY')} - {dayjs.utc(selectedBooking.endTime).format('HH:mm DD/MM/YYYY')}</Typography>
               <Typography>Trạng thái booking: <Chip label={statusMap[selectedBooking.status]?.label || selectedBooking.status} color={statusMap[selectedBooking.status]?.color || 'default'} size="small" /></Typography>
               <Typography>Tổng tiền: {selectedBooking.totalPrice?.toLocaleString('vi-VN')}đ</Typography>
@@ -590,7 +594,7 @@ const BookingHistory = () => {
                 </Box>
               )}
               <Divider sx={{ my: 2 }} />
-             
+
               <Typography variant="subtitle2" fontWeight="bold">{selectedBooking.participants && selectedBooking.participants.length > 0 ? 'Xé vé:' : 'Ghép trận:'}</Typography>
               {selectedBooking.participants && selectedBooking.participants.length > 0 ? (
                 <Box>
