@@ -137,18 +137,26 @@ const Yard = () => {
 
                 <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3">Cụm Sân</h3>
-                    <select
-                        value={selectedFieldComplex}
-                        onChange={(e) => setSelectedFieldComplex(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg"
-                    >
-                        <option value="all">Tất cả</option>
-                        {fieldComplexes.map((complex) => (
-                            <option key={complex._id} value={complex._id}>
-                                {complex.name}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={selectedFieldComplex}
+                            onChange={(e) => setSelectedFieldComplex(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                        >
+                            <option value="all" className="font-semibold">Tất cả cụm sân</option>
+                            {fieldComplexes.length === 0 && (
+                                <option disabled>Không có dữ liệu cụm sân</option>
+                            )}
+                            {fieldComplexes.map((complex) => (
+                                <option key={complex._id} value={complex._id}>
+                                    {complex.name} {complex.sportFields ? `(${complex.sportFields.length})` : ""}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                            <MdOutlineLocalParking size={20} />
+                        </span>
+                    </div>
                 </div>
 
                 <div className="mb-6">
