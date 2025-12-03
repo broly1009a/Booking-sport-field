@@ -37,7 +37,18 @@ const Yard = () => {
             }
         };
 
+        const fetchFieldComplexes = async () => {
+            try {
+                const res = await fieldComplexService.getAll();
+                console.log("Fetched field complexes:", res);
+                setFieldComplexes(res || []);
+            } catch (err) {
+                console.error("Lỗi khi tải danh sách cụm sân:", err);
+            }
+        };
+
         fetchFavorites();
+        fetchFieldComplexes();
     }, [currentUser]);
 
     const categories = [
@@ -52,6 +63,7 @@ const Yard = () => {
     const filteredFields = sportFields
         .filter(field =>
             (selectedCategory === "all" || field.type?.name?.toLowerCase() === selectedCategory) &&
+            (selectedFieldComplex === "all" || field.fieldComplex?._id === selectedFieldComplex) &&
             field.pricePerHour >= priceRange[0] &&
             field.pricePerHour <= priceRange[1]
         );
@@ -121,6 +133,22 @@ const Yard = () => {
                             <span>{category.name}</span>
                         </button>
                     ))}
+                </div>
+
+                <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-3">Cụm Sân</h3>
+                    <select
+                        value={selectedFieldComplex}
+                        onChange={(e) => setSelectedFieldComplex(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                    >
+                        <option value="all">Tất cả</option>
+                        {fieldComplexes.map((complex) => (
+                            <option key={complex._id} value={complex._id}>
+                                {complex.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="mb-6">

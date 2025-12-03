@@ -85,7 +85,7 @@ const ListFavorite = () => {
         <p className="text-gray-600 mb-4">Hãy khám phá các sân và thêm vào danh sách của bạn!</p>
         <button
           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-          onClick={() => navigate("/sportfields")}
+          onClick={() => navigate("/yard")}
         >
           Khám phá sân
         </button>
