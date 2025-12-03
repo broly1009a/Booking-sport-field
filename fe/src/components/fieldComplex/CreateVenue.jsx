@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -51,6 +51,12 @@ const STATUSES = [
 export default function CreateVenue({ open, onClose, onCreate, types, fieldComplexes}) {
   const [venueData, setVenueData] = useState(initialState);
   const [imagePreviews, setImagePreviews] = useState([]);
+  
+  useEffect(() => {
+    if (fieldComplexes && fieldComplexes.length === 1) {
+      setVenueData(v => ({ ...v, complex: fieldComplexes[0]._id }));
+    }
+  }, [fieldComplexes]);
   
 
 
@@ -174,15 +180,14 @@ export default function CreateVenue({ open, onClose, onCreate, types, fieldCompl
             sx={{ mb: 2 }}
           />
         ) : (
-          <Select name="complex" fullWidth value={venueData.fieldComplex || ''} onChange={handleChange}>
+          <Select name="complex" fullWidth value={venueData.complex || ''} onChange={handleChange}>
             {fieldComplexes.map((fc) => (
               <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
             ))}
           </Select>
         )}
 
-        {/* Ensure fieldComplex is set if only one option */}
-        {fieldComplexes.length === 1 && venueData.fieldComplex !== fieldComplexes[0]._id && setVenueData(v => ({ ...v, fieldComplex: fieldComplexes[0]._id }))}
+        {/* Ensure complex is set if only one option */}
         <TextField margin="dense" label="Địa chỉ cụ thể" name="location" fullWidth value={venueData.location} onChange={handleChange} />
         <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity} onChange={handleChange} />
         <InputLabel sx={{ mt: 2 }}>Trạng thái</InputLabel>

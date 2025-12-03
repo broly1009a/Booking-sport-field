@@ -16,7 +16,7 @@ const RegisterUser = () => {
         setDob(currentDate);
     }, []);
     const validateEmail = (email) => {
-        return email.endsWith('@fpt.edu.vn');
+     return true;
     };
 
     const handleSubmit = async (e) => {

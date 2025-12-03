@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { favoriteService } from "../../services/api/favoriteService";
 import { useAuth } from "../../contexts/authContext";
 import { useEffect } from "react";
+import { fieldComplexService } from "../../services/api/fieldComplexService";
 const Yard = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
@@ -19,6 +20,8 @@ const Yard = () => {
     const [selectedField, setSelectedField] = useState(null);
     const [priceRange, setPriceRange] = useState([0, 300000]);
     const [currentPage, setCurrentPage] = useState(0);
+    const [fieldComplexes, setFieldComplexes] = useState([]);
+    const [selectedFieldComplex, setSelectedFieldComplex] = useState("all");
     const { types, sportFields } = useContext(PublicContext);
     const itemsPerPage = 8;
 

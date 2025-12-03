@@ -22,7 +22,8 @@ const initialState = {
   status: "available",
   pricePerHour: "",
   amenities: [],
-  images: []
+  images: [],
+  complex: ""
 };
 
 const AMENITIES = [
@@ -55,9 +56,9 @@ export default function CreateVenue({ open, onClose, onCreate, types, fieldCompl
       const params = new URLSearchParams(window.location.search);
       const complexId = params.get('complex');
       if (complexId && fieldComplexes && fieldComplexes.some(fc => fc._id === complexId)) {
-        setVenueData(v => ({ ...v, fieldComplex: complexId }));
+        setVenueData(v => ({ ...v, complex: complexId }));
       } else if (fieldComplexes && fieldComplexes.length === 1) {
-        setVenueData(v => ({ ...v, fieldComplex: fieldComplexes[0]._id }));
+        setVenueData(v => ({ ...v, complex: fieldComplexes[0]._id }));
       }
     }
   }, [open, fieldComplexes]);
@@ -175,16 +176,12 @@ export default function CreateVenue({ open, onClose, onCreate, types, fieldCompl
           </Select>
         )} */}
         
-        {fieldComplexes.length !== 1 && (
-          <>
-            <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
-            <Select name="complex" fullWidth value={venueData.fieldComplex || ''} onChange={handleChange}>
-              {fieldComplexes.map((fc) => (
-                <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
-              ))}
-            </Select>
-          </>
-        )}
+        <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
+        <Select name="complex" fullWidth value={venueData.complex || ''} onChange={handleChange}>
+          {fieldComplexes.map((fc) => (
+            <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
+          ))}
+        </Select>
         <TextField margin="dense" label="Địa chỉ cụ thể" name="location" fullWidth value={venueData.location} onChange={handleChange} />
         <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity} onChange={handleChange} />
         <InputLabel sx={{ mt: 2 }}>Trạng thái</InputLabel>
