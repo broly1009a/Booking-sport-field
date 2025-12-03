@@ -24,6 +24,7 @@ class FavoriteService {
     async getFavoritesByUser(userId) {
         return await Favorite.find({ userId })
             .populate({ path: 'fieldId', select: 'name location type capacity status pricePerHour imageUrl' })
+            .populate({ path: 'fieldId', populate: { path: 'complex', select: 'name location images isActive' } })
             .sort({ createdAt: -1 });
     }
 }

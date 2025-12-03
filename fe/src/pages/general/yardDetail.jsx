@@ -130,19 +130,43 @@ const YardDetail = () => {
                         <div className="bg-white rounded-xl shadow-md p-6">
                             <h3 className="text-xl font-semibold mb-4">Vị trí</h3>
                             <p className="text-gray-600">{fieldData?.location}</p>
-                                                        <div className="mt-4 h-48 rounded-lg overflow-hidden">
-                                                            <iframe
-                                                                title="FPT University Hanoi Map"
-                                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.5062169040193!2d105.52271427476879!3d21.012421688340503!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135abc60e7d3f19%3A0x2be9d7d0b5abcbf4!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBGUFQgSMOgIE7hu5lp!5e0!3m2!1svi!2sus!4v1758140210104!5m2!1svi!2sus"
-                                                                width="100%"
-                                                                height="100%"
-                                                                style={{ border: 0 }}
-                                                                allowFullScreen=""
-                                                                loading="lazy"
-                                                                referrerPolicy="no-referrer-when-downgrade"
-                                                            ></iframe>
-                                                        </div>
+                            <div className="mt-4 h-48 rounded-lg overflow-hidden">
+                                <iframe
+                                    title="FPT University Hanoi Map"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.5062169040193!2d105.52271427476879!3d21.012421688340503!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135abc60e7d3f19%3A0x2be9d7d0b5abcbf4!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBGUFQgSMOgIE7hu5lp!5e0!3m2!1svi!2sus!4v1758140210104!5m2!1svi!2sus"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen=""
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                ></iframe>
+                            </div>
                         </div>
+
+                        {fieldData?.complex && (
+                            <div className="bg-white rounded-xl shadow-md p-6">
+                                <h3 className="text-xl font-semibold mb-4">Thông tin cụm sân</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        {fieldData.complex.images && fieldData.complex.images.length > 0 ? (
+                                            <img src={fieldData.complex.images[0]} alt={fieldData.complex.name} className="w-12 h-12 rounded object-cover border" />
+                                        ) : (
+                                            <span className="w-12 h-12 rounded bg-gray-200 flex items-center justify-center text-gray-400">🏟️</span>
+                                        )}
+                                        <div>
+                                            <p className="font-semibold text-gray-900">{fieldData.complex.name}</p>
+                                            <p className="text-sm text-gray-600">{fieldData.complex.location}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${fieldData.complex.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
+                                            {fieldData.complex.isActive ? 'Hoạt động' : 'Ẩn'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="bg-white rounded-xl shadow-md p-6">
                             <h3 className="text-xl font-semibold mb-4">Sức chứa & Giá cả</h3>

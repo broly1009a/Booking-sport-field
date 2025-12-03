@@ -123,7 +123,10 @@ const ListFavorite = () => {
             </div>
             <div className="p-4">
               <h3 className="text-lg font-bold mb-1">{field.name}</h3>
-              <p className="text-sm text-gray-600 mb-2">{field.location}</p>
+              <p className="text-sm text-gray-600 mb-1">{field.location}</p>
+              {field.complex && (
+                <p className="text-sm text-blue-600 mb-2">Cụm sân: {field.complex.name}</p>
+              )}
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-600">Capacity: {field.capacity}</span>
                 <span className="text-blue-600 font-semibold">${field.pricePerHour || 0}/hr</span>

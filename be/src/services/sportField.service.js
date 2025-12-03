@@ -32,11 +32,11 @@ class SportFieldService {
     }
 
     async getAllSportFields() {
-        return await sportFieldModel.find().populate('type');
+        return await sportFieldModel.find().populate('type').populate('complex', 'name location images isActive');
     }
 
     async getSportFieldById(sportFieldId) {
-        const sportField = await sportFieldModel.findById(sportFieldId).populate('type');
+        const sportField = await sportFieldModel.findById(sportFieldId).populate('type').populate('complex', 'name location images isActive');
         if (!sportField) return null;
 
        
