@@ -29,9 +29,9 @@ class EventService {
         }
 
         const events = await Event.find(query)
-            .populate('createdBy', 'name email avatar')
+            .populate('createdBy', 'fname lname email avatar')
             .populate('fieldId', 'name location pricePerHour')
-            .populate('interestedPlayers.userId', 'name email avatar')
+            .populate('interestedPlayers.userId', 'fname lname email avatar')
             .sort({ startTime: 1 });
 
         return {
@@ -49,9 +49,9 @@ class EventService {
             availableSlots: { $gt: 0 },
             deadline: { $gt: new Date() }
         })
-            .populate('createdBy', 'name email avatar')
+            .populate('createdBy', 'fname lname email avatar')
             .populate('fieldId', 'name location pricePerHour')
-            .populate('interestedPlayers.userId', 'name email avatar')
+            .populate('interestedPlayers.userId', 'fname lname email avatar')
             .sort({ startTime: 1 });
 
         return {
@@ -65,9 +65,9 @@ class EventService {
     // Lấy event của user (tạo hoặc tham gia)
     async getMyEvent(userId) {
         const created = await Event.find({ createdBy: userId })
-            .populate('createdBy', 'name email avatar')
+            .populate('createdBy', 'fname lname email avatar')
             .populate('fieldId', 'name location pricePerHour')
-            .populate('interestedPlayers.userId', 'name email avatar')
+            .populate('interestedPlayers.userId', 'fname lname email avatar')
             .sort({ startTime: -1 });
 
         const participated = await Event.find({

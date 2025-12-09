@@ -10,7 +10,9 @@ import {
   DialogActions,
   InputLabel,
   Autocomplete,
-  IconButton
+  IconButton,
+  FormControl,
+  FormHelperText
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -59,6 +61,7 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
     return selectedVenue || {};
   });
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (selectedVenue && selectedVenue.fieldComplex && !selectedVenue.complex) {
@@ -81,6 +84,9 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
 
   const handleChange = (e) => {
     setVenueData({ ...venueData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: undefined });
+    }
   };
 
   const handleImagesChange = (e) => {
@@ -98,8 +104,35 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
     setImagePreviews(newPreviews);
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!venueData.name || venueData.name.trim() === "") {
+      newErrors.name = "Tên sân là bắt buộc";
+    }
+    if (!venueData.type) {
+      newErrors.type = "Loại sân là bắt buộc";
+    }
+    if (!venueData.complex) {
+      newErrors.complex = "Cụm sân là bắt buộc";
+    }
+    if (!venueData.location || venueData.location.trim() === "") {
+      newErrors.location = "Địa chỉ là bắt buộc";
+    }
+    if (!venueData.capacity || venueData.capacity <= 0) {
+      newErrors.capacity = "Sức chứa phải là số dương";
+    }
+    if (!venueData.status) {
+      newErrors.status = "Trạng thái là bắt buộc";
+    }
+    if (!venueData.pricePerHour || venueData.pricePerHour <= 0) {
+      newErrors.pricePerHour = "Giá thuê mỗi giờ phải là số dương";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
 const handleSubmit = () => {
+  if (!validate()) return;
   const dataToSend = {
     ...venueData,
     type: typeof venueData.type === "object" ? venueData.type._id : venueData.type,
@@ -174,25 +207,29 @@ const handleSubmit = () => {
           ))}
         </div>
 
-        <TextField margin="dense" label="Tên sân" name="name" fullWidth value={venueData.name || ""} onChange={handleChange} />
-        <InputLabel sx={{ mt: 2 }}>Loại sân</InputLabel>
-        <Select
-          name="type"
-          fullWidth
-          value={typeof venueData.type === "object" ? venueData.type._id : venueData.type || ""}
-          onChange={(e) =>
-            setVenueData({
-              ...venueData,
-              type: e.target.value
-            })
-          }
-        >
-          {types.map((t) => (
-            <MenuItem key={t._id} value={t._id}>
-              {t.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <TextField margin="dense" label="Tên sân" name="name" fullWidth value={venueData.name || ""} onChange={handleChange} error={!!errors.name} helperText={errors.name} />
+        <FormControl fullWidth error={!!errors.type} sx={{ mt: 2 }}>
+          <InputLabel>Loại sân</InputLabel>
+          <Select
+            name="type"
+            value={typeof venueData.type === "object" ? venueData.type._id : venueData.type || ""}
+            onChange={(e) => {
+              setVenueData({
+                ...venueData,
+                type: e.target.value
+              });
+              if (errors.type) setErrors({ ...errors, type: undefined });
+            }}
+            label="Loại sân"
+          >
+            {types.map((t) => (
+              <MenuItem key={t._id} value={t._id}>
+                {t.name}
+              </MenuItem>
+            ))}
+          </Select>
+          {errors.type && <FormHelperText>{errors.type}</FormHelperText>}
+        </FormControl>
 
 
         <InputLabel sx={{ mt: 2 }}>Cụm sân</InputLabel>
@@ -204,39 +241,49 @@ const handleSubmit = () => {
             sx={{ mb: 2 }}
           />
         ) : (
-          <Select
-            name="complex"
-            fullWidth
-            value={
-              typeof venueData.complex === "object"
-                ? venueData.complex._id
-                : venueData.complex || ""
-            }
-            onChange={(e) =>
-              setVenueData({
-                ...venueData,
-                complex: e.target.value
-              })
-            }
-          >
-            {fieldComplexes && fieldComplexes.map((fc) => (
-              <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth error={!!errors.complex} sx={{ mt: 1 }}>
+            <InputLabel>Cụm sân</InputLabel>
+            <Select
+              name="complex"
+              value={
+                typeof venueData.complex === "object"
+                  ? venueData.complex._id
+                  : venueData.complex || ""
+              }
+              onChange={(e) => {
+                setVenueData({
+                  ...venueData,
+                  complex: e.target.value
+                });
+                if (errors.complex) setErrors({ ...errors, complex: undefined });
+              }}
+              label="Cụm sân"
+            >
+              {fieldComplexes && fieldComplexes.map((fc) => (
+                <MenuItem key={fc._id} value={fc._id}>{fc.name}</MenuItem>
+              ))}
+            </Select>
+            {errors.complex && <FormHelperText>{errors.complex}</FormHelperText>}
+          </FormControl>
         )}
 
         {/* Ensure complex is set if only one option */}
         {fieldComplexes && fieldComplexes.length === 1 && venueData.complex !== fieldComplexes[0]._id && setVenueData(v => ({ ...v, complex: fieldComplexes[0]._id }))}
 
-        <TextField margin="dense" label="Địa chỉ" name="location" fullWidth value={venueData.location || ""} onChange={handleChange} />
-        <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity || ""} onChange={handleChange} />
-        <InputLabel sx={{ mt: 2 }}>Trạng thái</InputLabel>
-        <Select name="status" fullWidth value={venueData.status || ""} onChange={handleChange}>
-          {STATUSES.map((s) => (
-            <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
-          ))}
-        </Select>
-        <TextField margin="dense" label="Giá thuê mỗi giờ" name="pricePerHour" fullWidth type="number" value={venueData.pricePerHour || ""} onChange={handleChange} />
+        <TextField margin="dense" label="Địa chỉ" name="location" fullWidth value={venueData.location || ""} onChange={handleChange} error={!!errors.location} helperText={errors.location} />
+        <TextField margin="dense" label="Sức chứa" name="capacity" fullWidth type="number" value={venueData.capacity || ""} onChange={handleChange} error={!!errors.capacity} helperText={errors.capacity} />
+        <FormControl fullWidth error={!!errors.status} sx={{ mt: 2 }}>
+          <InputLabel>Trạng thái</InputLabel>
+          <Select name="status" value={venueData.status || ""} onChange={(e) => {
+            handleChange(e);
+          }} label="Trạng thái">
+            {STATUSES.map((s) => (
+              <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>
+            ))}
+          </Select>
+          {errors.status && <FormHelperText>{errors.status}</FormHelperText>}
+        </FormControl>
+        <TextField margin="dense" label="Giá thuê mỗi giờ" name="pricePerHour" fullWidth type="number" value={venueData.pricePerHour || ""} onChange={handleChange} error={!!errors.pricePerHour} helperText={errors.pricePerHour} />
         <InputLabel sx={{ mt: 2 }}>Tiện ích</InputLabel>
         <Autocomplete
           multiple

@@ -150,7 +150,13 @@ const EquipmentDashboardStaff = () => {
           </TableHead>
           <TableBody>
             {(() => {
-              const filtered = equipments.filter(item => item.name.toLowerCase().includes(search.toLowerCase()));
+           
+              const removeDiacritics = str => str.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+              const searchText = removeDiacritics(search.toLowerCase());
+              const filtered = equipments.filter(item => {
+                const itemName = removeDiacritics(item.name.toLowerCase());
+                return itemName.includes(searchText);
+              });
               const paginated = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
               return (
                 <>
@@ -226,7 +232,12 @@ const EquipmentDashboardStaff = () => {
       </TableContainer>
       <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
         <Pagination
-          count={Math.ceil(equipments.filter(item => item.name.toLowerCase().includes(search.toLowerCase())).length / itemsPerPage)}
+          count={Math.ceil(equipments.filter(item => {
+            const removeDiacritics = str => str.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+            const itemName = removeDiacritics(item.name.toLowerCase());
+            const searchText = removeDiacritics(search.toLowerCase());
+            return itemName.includes(searchText);
+          }).length / itemsPerPage)}
           page={page}
           onChange={(e, value) => setPage(value)}
           color="primary"
@@ -257,7 +268,12 @@ const EquipmentDashboardStaff = () => {
             sx={{ mb: 2 }}
           />
           {(() => {
-            const filtered = fieldModalList.filter(f => f.name.toLowerCase().includes(fieldSearch.toLowerCase()));
+            const removeDiacritics = str => str.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+            const searchText = removeDiacritics(fieldSearch.toLowerCase());
+            const filtered = fieldModalList.filter(f => {
+              const fieldName = removeDiacritics(f.name.toLowerCase());
+              return fieldName.includes(searchText);
+            });
             const paginated = filtered.slice((fieldPage - 1) * fieldsPerPage, fieldPage * fieldsPerPage);
             return (
               <>

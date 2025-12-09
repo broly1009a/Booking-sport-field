@@ -10,7 +10,9 @@ import {
   DialogActions,
   InputLabel,
   Autocomplete,
-  IconButton
+  IconButton,
+  FormControl,
+  FormHelperText
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -59,6 +61,7 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
     return selectedVenue || {};
   });
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (selectedVenue && selectedVenue.fieldComplex && !selectedVenue.complex) {
@@ -81,12 +84,23 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
 
   const handleChange = (e) => {
     setVenueData({ ...venueData, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: undefined });
+    }
   };
 
   const handleImagesChange = (e) => {
     const files = Array.from(e.target.files);
+    const invalidFiles = files.filter(file => !file.type.startsWith('image/'));
+    if (invalidFiles.length > 0) {
+      setErrors({ ...errors, images: "Chỉ chấp nhận file hình ảnh" });
+      return;
+    }
     setVenueData({ ...venueData, images: files });
     setImagePreviews(files.map(file => URL.createObjectURL(file)));
+    if (errors.images) {
+      setErrors({ ...errors, images: undefined });
+    }
   };
 
   const handleRemoveImage = (index) => {
@@ -98,8 +112,52 @@ export default function UpdateVenue({ open, onClose, onUpdate, selectedVenue, ty
     setImagePreviews(newPreviews);
   };
 
+  const validate = () => {
+    const newErrors = {};
+    const trimmedName = venueData.name?.trim();
+    if (!trimmedName || trimmedName === "") {
+      newErrors.name = "Tên sân là bắt buộc";
+    } else if (trimmedName.length < 3) {
+      newErrors.name = "Tên sân phải có ít nhất 3 ký tự";
+    } else if (trimmedName.length > 100) {
+      newErrors.name = "Tên sân không được vượt quá 100 ký tự";
+    }
+    if (!venueData.type) {
+      newErrors.type = "Loại sân là bắt buộc";
+    }
+    if (!venueData.complex) {
+      newErrors.complex = "Cụm sân là bắt buộc";
+    }
+    const trimmedLocation = venueData.location?.trim();
+    if (!trimmedLocation || trimmedLocation === "") {
+      newErrors.location = "Địa chỉ là bắt buộc";
+    } else if (trimmedLocation.length < 5) {
+      newErrors.location = "Địa chỉ phải có ít nhất 5 ký tự";
+    }
+    const capacity = parseInt(venueData.capacity);
+    if (!venueData.capacity || isNaN(capacity) || capacity <= 0) {
+      newErrors.capacity = "Sức chứa phải là số nguyên dương";
+    } else if (capacity > 10000) {
+      newErrors.capacity = "Sức chứa không được vượt quá 10000";
+    }
+    if (!venueData.status) {
+      newErrors.status = "Trạng thái là bắt buộc";
+    }
+    const price = parseFloat(venueData.pricePerHour);
+    if (!venueData.pricePerHour || isNaN(price) || price <= 0) {
+      newErrors.pricePerHour = "Giá thuê mỗi giờ phải là số dương";
+    } else if (price > 10000000) {
+      newErrors.pricePerHour = "Giá thuê mỗi giờ không được vượt quá 10,000,000";
+    }
+    if (!venueData.images || venueData.images.length === 0) {
+      newErrors.images = "Phải tải lên ít nhất một hình ảnh";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
 const handleSubmit = () => {
+  if (!validate()) return;
   const dataToSend = {
     ...venueData,
     type: typeof venueData.type === "object" ? venueData.type._id : venueData.type,
@@ -173,6 +231,7 @@ const handleSubmit = () => {
             </div>
           ))}
         </div>
+        {errors.images && <FormHelperText error sx={{ mt: 1 }}>{errors.images}</FormHelperText>}
 
         <TextField margin="dense" label="Tên sân" name="name" fullWidth value={venueData.name || ""} onChange={handleChange} />
         <InputLabel sx={{ mt: 2 }}>Loại sân</InputLabel>

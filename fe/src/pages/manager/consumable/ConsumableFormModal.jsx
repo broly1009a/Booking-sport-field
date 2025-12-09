@@ -30,6 +30,7 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
     status: "available",
     sportField: [],
   });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setForm(prev => ({
@@ -52,12 +53,21 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
     setForm((prev) => ({ ...prev, sportField: value.map(f => f._id || f) }));
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = "Tên vật tư không được để trống";
+    if (!form.type) newErrors.type = "Vui lòng chọn loại vật tư";
+    if (!form.pricePerUnit || isNaN(Number(form.pricePerUnit)) || Number(form.pricePerUnit) <= 0) newErrors.pricePerUnit = "Giá phải là số > 0";
+    if (!form.quantityInStock || isNaN(Number(form.quantityInStock)) || Number(form.quantityInStock) < 0) newErrors.quantityInStock = "Số lượng phải là số >= 0";
+    if (!form.sportField || form.sportField.length === 0) newErrors.sportField = "Vui lòng chọn ít nhất 1 sân áp dụng";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = () => {
-    if (!form.name || !form.type || form.sportField.length === 0) {
-      toast.error("Vui lòng nhập đầy đủ thông tin!");
-      return;
-    }
+    if (!validate()) return;
     onSubmit(form);
+    setErrors({});
     onClose();
   };
 
@@ -75,6 +85,8 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
           label="Tên vật tư"
           fullWidth
           margin="normal"
+          error={!!errors.name}
+          helperText={errors.name}
         />
         <TextField
           select
@@ -85,6 +97,8 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
           label="Loại vật tư"
           fullWidth
           margin="normal"
+          error={!!errors.type}
+          helperText={errors.type}
         >
           {CONSUMABLE_TYPES.map(option => (
             <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
@@ -99,6 +113,8 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
           label="Giá mỗi đơn vị"
           fullWidth
           margin="normal"
+          error={!!errors.pricePerUnit}
+          helperText={errors.pricePerUnit}
         />
         <TextField
           className="input"
@@ -109,6 +125,8 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
           label="Số lượng tồn kho"
           fullWidth
           margin="normal"
+          error={!!errors.quantityInStock}
+          helperText={errors.quantityInStock}
         />
         <TextField
           select
@@ -130,7 +148,7 @@ const ConsumableFormModal = ({ isOpen, onClose, onSubmit, initialData, sportFiel
           getOptionLabel={(option) => option.name}
           value={sportFields.filter(f => form.sportField.includes(f._id))}
           onChange={handleFieldChange}
-          renderInput={(params) => <TextField {...params} label="Sân áp dụng" margin="normal" />}
+          renderInput={(params) => <TextField {...params} label="Sân áp dụng" margin="normal" error={!!errors.sportField} helperText={errors.sportField} />}
           className="input"
         />
         <div className="text-sm text-gray-500 mt-2">
