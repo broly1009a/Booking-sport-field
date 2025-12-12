@@ -10,6 +10,7 @@ const RegisterUser = () => {
     const [email, setEmail] = useState('');
     const [gender, setGender] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [role, setRole] = useState('');
     useEffect(() => {
         const currentDate = new Date().toISOString().split('T')[0];
@@ -27,6 +28,11 @@ const RegisterUser = () => {
                 toast.error('Email phải có đuôi @fpt.edu.vn');
                 return;
             }
+            // Validate password confirmation
+            if (password !== confirmPassword) {
+                toast.error('Mật khẩu xác nhận không khớp!');
+                return;
+            }
             
             const filter = { fname, lname, dob, phoneNumber, email, gender, password, role };
             await UserService.registerAndVerifyAccount(filter);
@@ -39,6 +45,7 @@ const RegisterUser = () => {
             setEmail('');
             setGender('');
             setPassword('');
+            setConfirmPassword('');
             setRole('');
         } catch (error) {
             console.error('Error creating user:', error?.message);
@@ -70,11 +77,22 @@ const RegisterUser = () => {
                 </Select>
             </FormControl>
             <TextField label="Mật khẩu" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth margin="normal" />
+            <TextField 
+                label="Xác nhận mật khẩu" 
+                type="password" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                fullWidth 
+                margin="normal"
+                helperText={confirmPassword && password !== confirmPassword ? "Mật khẩu xác nhận không khớp" : ""}
+                error={confirmPassword && password !== confirmPassword}
+            />
             <FormControl fullWidth margin="normal">
                 <InputLabel>Vai trò</InputLabel>
                 <Select value={role} onChange={(e) => setRole(e.target.value)}>
                     <MenuItem value="ADMIN">Quản trị viên</MenuItem>
                     <MenuItem value="MANAGER">Chủ sân</MenuItem>
+                        <MenuItem value="STAFF">Nhân viên</MenuItem>
                     <MenuItem value="CUSTOMER">Khách hàng</MenuItem> 
                 </Select>
             </FormControl>

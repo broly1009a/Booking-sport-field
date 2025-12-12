@@ -45,7 +45,7 @@ const EquipmentDashboardStaff = () => {
   const { currentUser } = useAuth();
   const fetchData = async () => {
     try {
-      const equipmentData = await equipmentService.getAllEquipment();
+      const equipmentData = await equipmentService.getAllEquipmentByStaff(currentUser._id);
       setEquipments(equipmentData.data);
     } catch (error) {
       toast.error("Không thể tải danh sách thiết bị");

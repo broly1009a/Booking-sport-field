@@ -5,6 +5,7 @@ const { EquipmentController } = require('../../../controllers/index');
 router.get('/', EquipmentController.getAllEquipment);
 router.get('/sport-field/:sportFieldId', EquipmentController.getEquipmentBySportField);
 router.get('/sport-field/:sportFieldId/available', EquipmentController.getAvailableEquipmentBySportField);
+router.get('/staff/:staffId', EquipmentController.getAllEquipmentByStaff);
 router.get('/:id', EquipmentController.getEquipmentById);
 router.post('/', EquipmentController.createEquipment);
 router.put('/:id', EquipmentController.updateEquipment);

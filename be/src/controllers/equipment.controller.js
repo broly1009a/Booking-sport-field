@@ -81,5 +81,15 @@ class EquipmentController {
         }
     }
 
+    async getAllEquipmentByStaff(req, res) {
+        try {
+            const { staffId } = req.params;
+            const equipment = await EquipmentService.getAllEquipmentByStaff(staffId);
+            return res.status(200).json({ success: true, data: equipment });
+        } catch (error) {
+            return res.status(error.status || 500).json({ success: false, message: error.message });
+        }
+    }
+
 }
 module.exports = new EquipmentController();

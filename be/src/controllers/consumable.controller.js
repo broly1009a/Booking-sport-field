@@ -70,5 +70,14 @@ class ConsumableController {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
+    async getAllConsumablesByStaff(req, res) {
+        try {
+            const { staffId } = req.params;
+            const consumables = await ConsumableService.getAllConsumablesByStaff(staffId);
+            return res.status(200).json({ success: true, data: consumables });
+        } catch (error) {
+            return res.status(error.status || 500).json({ success: false, message: error.message });
+        }
+    }
 }
 module.exports = new ConsumableController();

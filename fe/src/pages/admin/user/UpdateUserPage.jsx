@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 export default function UpdateUserPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [complexes, setComplexes] = useState([]);
+  const [complexes, setComplexes] = useState({ owned: [], staffed: [] });
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingComplex, setLoadingComplex] = useState(false);
@@ -36,7 +36,8 @@ export default function UpdateUserPage() {
       try {
         const data = await fieldComplexService.getAll();
         const ownedComplexes = data.filter(fc => fc.owner._id === user._id);
-        setComplexes(ownedComplexes);
+        const staffedComplexes = data.filter(fc => fc.staffs.some(staff => staff._id === user._id));
+        setComplexes({ owned: ownedComplexes, staffed: staffedComplexes });
       } catch (error) {
         console.error('Lỗi khi lấy danh sách cụm sân:', error);
         toast.error('Không thể tải danh sách cụm sân!');
@@ -61,41 +62,85 @@ export default function UpdateUserPage() {
           <UpdateUser user={user} onClose={() => navigate(-1)} />
         ) : null}
         <Box mt={4}>
-          <Typography variant="h6" gutterBottom>
-            Các cụm sân do chủ sân này quản lý
-          </Typography>
+          {complexes.owned.length > 0 && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Các cụm sân do người dùng này quản lý (chủ sân)
+              </Typography>
 
-          {loadingComplex ? (
-            <Box display="flex" justifyContent="center" py={4}>
-              <CircularProgress size={24} />
-            </Box>
-          ) : complexes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {complexes.map((complex) => (
-                <div
-                  key={complex._id}
-                  className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <h3 className="font-semibold text-lg">{complex.name}</h3>
-                  <p className="text-gray-600 text-sm mb-1">
-                    <i className="fas fa-map-marker-alt mr-1"></i> {complex.location}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Trạng thái:{" "}
-                    <span
-                      className={`font-medium ${
-                        complex.isActive ? "text-green-600" : "text-red-600"
-                      }`}
+              {loadingComplex ? (
+                <Box display="flex" justifyContent="center" py={4}>
+                  <CircularProgress size={24} />
+                </Box>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {complexes.owned.map((complex) => (
+                    <div
+                      key={complex._id}
+                      className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
                     >
-                      {complex.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
-                    </span>
-                  </p>
+                      <h3 className="font-semibold text-lg">{complex.name}</h3>
+                      <p className="text-gray-600 text-sm mb-1">
+                        <i className="fas fa-map-marker-alt mr-1"></i> {complex.location}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Trạng thái:{" "}
+                        <span
+                          className={`font-medium ${
+                            complex.isActive ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {complex.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
+                        </span>
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
+              )}
+            </>
+          )}
+
+          {complexes.staffed.length > 0 && (
+            <>
+              <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+                Các cụm sân mà người dùng này làm việc (nhân viên)
+              </Typography>
+
+              {loadingComplex ? (
+                <Box display="flex" justifyContent="center" py={4}>
+                  <CircularProgress size={24} />
+                </Box>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {complexes.staffed.map((complex) => (
+                    <div
+                      key={complex._id}
+                      className="border rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <h3 className="font-semibold text-lg">{complex.name}</h3>
+                      <p className="text-gray-600 text-sm mb-1">
+                        <i className="fas fa-map-marker-alt mr-1"></i> {complex.location}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Trạng thái:{" "}
+                        <span
+                          className={`font-medium ${
+                            complex.isActive ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {complex.isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
+                        </span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {complexes.owned.length === 0 && complexes.staffed.length === 0 && !loadingComplex && (
             <Typography variant="body2" color="textSecondary">
-              Chủ sân này đang không quản lý cụm sân nào!
+              Người dùng này không quản lý hoặc làm việc tại bất kỳ cụm sân nào!
             </Typography>
           )}
         </Box>

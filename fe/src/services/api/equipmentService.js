@@ -28,6 +28,9 @@ export const equipmentService = {
 
     getAvailableEquipmentBySportField: async (sportFieldId) => {
         return handleApiCall(() => api.get(`/equipment/sport-field/${sportFieldId}/available`));
+    },
+    getAllEquipmentByStaff: async (staffId) => {
+        return handleApiCall(() => api.get(`/equipment/staff/${staffId}`));
     }
 };
 

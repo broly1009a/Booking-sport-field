@@ -1,4 +1,6 @@
 const equipmentModel = require('../models/equipment.model');
+const FieldComplex = require('../models/fieldComplex.model');
+const SportField = require('../models/sportField.model');
 
 class EquipmentService {
     async createEquipment(equipmentData) {
@@ -28,6 +30,20 @@ class EquipmentService {
             sportField: sportFieldId,
             status: 'available'
         }).populate('sportField');
+    }
+    async getAllEquipmentByStaff(staffId) {
+      
+        const complex = await FieldComplex.findOne({ staffs: staffId });
+        if (!complex) {
+            throw { status: 404, message: 'Không tìm thấy cụm sân cho nhân viên này.' };
+        }
+
+  
+        const sportFields = await SportField.find({ complex: complex._id }).select('_id');
+
+ 
+        const fieldIds = sportFields.map(f => f._id);
+        return await equipmentModel.find({ sportField: { $in: fieldIds } }).populate('sportField');
     }
 }
 module.exports = new EquipmentService();   

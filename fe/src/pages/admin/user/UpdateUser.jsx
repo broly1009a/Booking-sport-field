@@ -41,6 +41,7 @@ const UpdateUser = ({ user, onClose }) => {
                 <Select value={role} onChange={(e) => setRole(e.target.value)}>
                     <MenuItem value="ADMIN">Quản trị viên</MenuItem>
                     <MenuItem value="MANAGER">Chủ sân</MenuItem>
+                      <MenuItem value="STAFF">Nhân viên</MenuItem>
                     <MenuItem value="CUSTOMER">Khách hàng</MenuItem>               
                 </Select>
             </FormControl>

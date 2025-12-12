@@ -42,7 +42,7 @@ const ConsumableDashboardStaff = () => {
   const { currentUser } = useAuth();
   const fetchData = async () => {
     try {
-      const consumableData = await consumableService.getAllConsumables();
+      const consumableData = await consumableService.getAllConsumablesByStaff(currentUser?._id);
       setConsumables(consumableData.data);
     } catch (error) {
       toast.error("Không thể tải danh sách vật tư");

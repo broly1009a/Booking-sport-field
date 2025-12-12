@@ -24,6 +24,9 @@ export const consumableService = {
     // router.get('/sport-field/:sportFieldId', ConsumableController.getAvailableConsumablesBySportField);
     getAvailableConsumablesBySportField: async (sportFieldId) => {
         return handleApiCall(() => api.get(`/consumable/sport-field/${sportFieldId}/available`));
+    },
+    getAllConsumablesByStaff: async (staffId) => {
+        return handleApiCall(() => api.get(`/consumable/staff/${staffId}`));
     }
 };
 export default consumableService;
