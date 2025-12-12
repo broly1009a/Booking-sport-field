@@ -27,9 +27,10 @@ class FieldComplexService {
             imageUrls = results.map(r => r.secure_url);
         }
         
+        const { _id, ...fieldData } = data;
         const fieldComplex = new FieldComplex({
-            ...data,
-            images: imageUrls.length > 0 ? imageUrls : data.images || []
+            ...fieldData,
+            images: imageUrls.length > 0 ? imageUrls : fieldData.images || []
         });
         return await fieldComplex.save();
     }
@@ -148,11 +149,12 @@ class FieldComplexService {
             imageUrls = results.map(r => r.secure_url);
         }
 
+        const { _id, ...updateData } = data;
         if (imageUrls.length > 0) {
-            data.images = imageUrls;
+            updateData.images = imageUrls;
         }
         
-        return await FieldComplex.findByIdAndUpdate(id, data, { new: true });
+        return await FieldComplex.findByIdAndUpdate(id, updateData, { new: true });
     }
 
     async deleteFieldComplex(id) {
