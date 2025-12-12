@@ -42,8 +42,7 @@ const TYPES = [
 
 const STATUSES = [
   { label: "Sẵn sàng", value: "available" },
-  { label: "Bảo trì", value: "maintenance" },
-  { label: "Đã đặt", value: "booked" }
+  { label: "Không sẵn sàng", value: "unavailable" }
 ];
 
 export default function CreateVenue({ open, onClose, onCreate, types, fieldComplexes }) {

@@ -421,10 +421,10 @@ const EventMatching = () => {
             return (
               <Grid item xs={12} md={6} lg={4} key={event._id}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                  {event.discountPercent > 0 && (
+                  {event.fieldId.pricePerHour > 0 && (
                     <Chip
                       icon={<DiscountIcon />}
-                      label={`-${event.discountPercent}%`}
+                      label={`Giá sân ${event.fieldId.pricePerHour}đ/giờ`}
                       color="error"
                       size="small"
                       sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}
@@ -569,10 +569,10 @@ const EventMatching = () => {
             <DialogTitle sx={{ bgcolor: '#1976d2', color: 'white' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h6">{selectedEvent.name}</Typography>
-                {selectedEvent.discountPercent > 0 && (
+                {selectedEvent.fieldId.pricePerHour > 0 && (
                   <Chip
                     icon={<DiscountIcon />}
-                    label={`-${selectedEvent.discountPercent}%`}
+                    label={`Giá sân ${selectedEvent.fieldId.pricePerHour}đ/giờ`}
                     color="error"
                     size="small"
                   />
@@ -592,7 +592,7 @@ const EventMatching = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Giá ước tính:</strong> {selectedEvent.estimatedPrice?.toLocaleString()}đ/người
+                    <strong>Giá vé:</strong> {selectedEvent.estimatedPrice?.toLocaleString()}đ/người
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>

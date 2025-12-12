@@ -45,8 +45,8 @@ const BookingSchedule = () => {
       try {
         const res = await scheduleService.getSchedulesByComplexId(complexId, selectedDate.format('YYYY-MM-DD'));
         if (res && res.data) {
-          console.log('Fetched schedule data:', res.data.sportFields);
-          setSportFields(res.data.sportFields || []);
+          const readyFields = (res.data.sportFields || []).filter(f =>f.status === 'available');
+          setSportFields(readyFields);
           setTimeSlots(res.data.timeSlots || []);
           setSchedule(res.data.schedules || []);
         }

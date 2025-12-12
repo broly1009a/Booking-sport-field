@@ -364,7 +364,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
                 onChange={e => handleChange('discountPercent', parseInt(e.target.value))}
                 fullWidth
                 inputProps={{ min: 0, max: 50 }}
-                helperText={`Giá ước tính: ${calculateEstimatedPrice(formData.discountPercent, formData.maxPlayers).toLocaleString()}đ`}
+                helperText={`Giá vé: ${calculateEstimatedPrice(formData.discountPercent, formData.maxPlayers).toLocaleString()}đ`}
               />
             </Grid>
           )}
@@ -372,13 +372,13 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
           {mode === 'price' && (
             <Grid item xs={6}>
               <TextField
-                label="Giá ước tính (đ)"
+                label="Giá vé (đ)"
                 type="number"
                 value={formData.estimatedPrice}
                 onChange={e => handleChange('estimatedPrice', parseInt(e.target.value))}
                 fullWidth
                 inputProps={{ min: 0 }}
-                helperText={`Giảm giá: ${calculateDiscountPercent(formData.estimatedPrice, formData.maxPlayers)}%`}
+                helperText={`Lợi nhuận: ${calculateDiscountPercent(formData.estimatedPrice, formData.maxPlayers)}%`}
               />
             </Grid>
           )}

@@ -35,6 +35,9 @@ class BookingService {
         if (!field) {
             throw { status: 404, message: 'Sân không tồn tại.' };
         }
+        if (field.status !== 'available') {
+            throw { status: 400, message: 'Sân hiện tại không khả dụng. Vui lòng chọn sân khác.' };
+        }
         if (participants.length + 1 > field.capacity) {
             throw { status: 400, message: 'Số lượng người tham gia vượt quá sức chứa của sân.' };
         }

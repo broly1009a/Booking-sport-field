@@ -134,11 +134,17 @@ const EventManagement = () => {
     setLoading(false);
   };
 
-  const handleDeleteEvent = async (eventId) => {
+  const handleDeleteEvent = async (event) => {
+    // Kiểm tra xem có người đăng ký không
+    if (event.interestedPlayers && event.interestedPlayers.length > 0) {
+      toast.error('Không thể hủy sự kiện khi còn người đăng ký. Vui lòng từ chối hoặc xóa tất cả người chơi trước.');
+      return;
+    }
+
     if (!window.confirm('Xác nhận hủy event này?')) return;
     setLoading(true);
     try {
-      await eventService.deleteEvent(eventId);
+      await eventService.deleteEvent(event._id);
       toast.success('Đã hủy event');
       fetchMyEvents();
     } catch (error) {
@@ -310,7 +316,11 @@ const EventManagement = () => {
                       {pendingCount > 0 && (
                         <Chip label={`${pendingCount} chờ duyệt`} size="small" color="warning" />
                       )}
-                      <Chip label={`-${event.discountPercent}%`} size="small" color="error" />
+                      <Chip 
+                        label={`${event.discountPercent < 0 ? '+' : '-'}${Math.abs(event.discountPercent)}%`} 
+                        size="small" 
+                        color={event.discountPercent < 0 ? 'success' : 'error'} 
+                      />
                     </Box>
 
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -342,7 +352,7 @@ const EventManagement = () => {
                           variant="outlined"
                           color="error"
                           startIcon={<DeleteIcon />}
-                          onClick={() => handleDeleteEvent(event._id)}
+                          onClick={() => handleDeleteEvent(event)}
                           disabled={loading}
                         >
                           Hủy
@@ -401,7 +411,7 @@ const EventManagement = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Giá ước tính:</strong> {selectedEvent.estimatedPrice?.toLocaleString()}đ/người
+                    <strong>Giá vé:</strong> {selectedEvent.estimatedPrice?.toLocaleString()}đ/người
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -421,7 +431,10 @@ const EventManagement = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Giảm giá:</strong> {selectedEvent.discountPercent}%
+                    <strong>Lợi nhuận: </strong> 
+                    <span style={{ color: selectedEvent.discountPercent < 0 ? '#2e7d32' : '#d32f2f', fontWeight: 600 }}>
+                      {selectedEvent.discountPercent < 0 ? '+' : '-'}{Math.abs(selectedEvent.discountPercent)}%
+                    </span>
                   </Typography>
                 </Grid>
               </Grid>

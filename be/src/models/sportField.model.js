@@ -26,7 +26,7 @@ const sportFieldSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['available', 'maintenance', 'booked'],
+        enum: ['available', 'unavailable'],
         default: 'available'
     },
     pricePerHour: {
