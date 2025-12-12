@@ -115,8 +115,6 @@ const eventSchema = new Schema({
     },
     discountPercent: {
         type: Number,
-        min: 0,
-        max: 50,
         default: 20,
         required: true
     },

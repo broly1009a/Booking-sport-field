@@ -146,10 +146,11 @@ class EventService {
         // }
 
         // Tính giá ước tính (giảm theo discountPercent, mặc định 20%)
-        const discountPercent = data.discountPercent || 20;
+        // const discountPercent = data.discountPercent || 20;
         const duration = (endTime - startTime) / (1000 * 60 * 60); // giờ
-        const estimatedPrice = fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers;
-
+        // const estimatedPrice = fieldPrice * duration * (1 - discountPercent / 100) / maxPlayers;
+        
+      const discountPercent = Math.round(100 * (1 - (data.estimatedPrice * maxPlayers) / (fieldPrice * duration))); 
         // Tạo event mới
         const event = new Event({
             name: data.name,
@@ -168,7 +169,8 @@ class EventService {
             teamPreference: data.teamPreference || 'random',
             status: 'open',
             discountPercent,
-            estimatedPrice: Math.round(estimatedPrice),
+            // estimatedPrice: Math.round(estimatedPrice),
+            estimatedPrice: data.estimatedPrice,
             interestedPlayers: []
         });
         // Kiểm tra trùng lịch sự kiện

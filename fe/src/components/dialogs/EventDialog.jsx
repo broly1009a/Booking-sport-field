@@ -22,7 +22,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
     estimatedPrice: 0,
     deadline: ''
   });
-  const [mode, setMode] = useState('discount'); // 'discount' or 'price'
+  const [mode, setMode] = useState('price'); // 'discount' or 'price'
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -143,7 +143,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
         startTime,
         endTime,
         deadline: deadline.toISOString(),
-        ...(mode === 'price' ? { estimatedPrice: formData.estimatedPrice } : { discountPercent: formData.discountPercent })
+        estimatedPrice: formData.estimatedPrice
       };
       
       // console.log('=== EVENT DATA BEING SENT ===');
@@ -349,7 +349,7 @@ const EventDialog = ({ open, onClose, selectedSlots, sportField, onConfirm }) =>
                 value={mode}
                 onChange={(e) => setMode(e.target.value)}
               >
-                <FormControlLabel value="discount" control={<Radio />} label="Nhập % giảm giá" />
+                {/* <FormControlLabel value="discount" control={<Radio />} label="Nhập % giảm giá" /> */}
                 <FormControlLabel value="price" control={<Radio />} label="Nhập giá ước tính" />
               </RadioGroup>
             </FormControl>
