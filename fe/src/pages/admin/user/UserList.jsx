@@ -48,16 +48,16 @@ const UserList = () => {
 
     useEffect(() => {
         fetchUsers();
-        // eslint-disable-next-line
+  
     }, [page, limit, debouncedSearch, role]);
 
-    // Debounce search
+
     useEffect(() => {
         if (search.length === 0) {
             setDebouncedSearch('');
             return;
         }
-        if (search.length < 3) return; // Không debounce nếu ít hơn 3 ký tự
+        if (search.length < 3) return;
 
         const timer = setTimeout(() => {
             setDebouncedSearch(search);
